@@ -28,6 +28,7 @@
           <input type="radio" name="modus" id="m-reeks" value="reeks" data-k="modus"><label for="m-reeks">Reeks</label>
           <input type="radio" name="modus" id="m-lijst" value="lijst" data-k="modus"><label for="m-lijst">Lijst</label>
           <input type="radio" name="modus" id="m-vast" value="vast" data-k="modus"><label for="m-vast">Vast</label>
+          <input type="radio" name="modus" id="m-locaties" value="locaties" data-k="modus"><label for="m-locaties">Locaties</label>
         </div>
         <div data-modus="reeks" class="sectie plat">
           <div class="rij">
@@ -49,6 +50,22 @@
           <label>Waarde (optioneel) <input data-k="vasteWaarde" placeholder="bijv. een vaste barcode"></label>
           <p class="hint">Eén ontwerp, zo vaak als je wilt — ook zonder barcode.</p>
         </div>
+        <div data-modus="locaties" class="sectie plat" id="loc-paneel">
+          <span class="sublabel">Opbouw van de locatiecode</span>
+          <div class="segkop"><span>Segment</span><span>Van</span><span>T/m</span><span></span></div>
+          <div id="segmenten" class="segmenten"></div>
+          <button type="button" id="seg-plus">＋ Segment</button>
+          <p class="hint">Cijfers (<code>01</code> t/m <code>12</code>, ook aflopend <code>04</code> t/m <code>00</code>), letters (<code>AA</code> t/m <code>AD</code>) of een lijst met komma's (<code>A,B,D</code>).</p>
+          <label>Op één sticker <select id="loc-groep"></select></label>
+          <div class="rij">
+            <label>Scheiding in tekst <select id="loc-sch"></select></label>
+            <label>Scheiding in barcode <select id="loc-bcsch"></select></label>
+          </div>
+          <label>Kleur per <select id="loc-kleurseg"></select></label>
+          <div id="loc-kleuren" class="kleuren"></div>
+          <p class="hint" id="loc-samenvatting"></p>
+          <button type="button" id="loc-ontwerp" hidden>Locatie-ontwerp toevoegen</button>
+        </div>
         <label>Kopieën per sticker <input data-k="kopieen" type="number" min="1"></label>
         <p class="hint">De waarde komt op het label via <code>{waarde}</code> in een tekstvak of barcode.</p>
       </div>
@@ -66,6 +83,14 @@
         <p class="hint">Alle maten in mm. De rand gebruiken de knoppen “Plaats op label” en de hulplijnen.</p>
         <label class="check"><input type="checkbox" id="meeschalen" checked> Ontwerp meeschalen bij ander formaat</label>
         <button type="button" id="draai">↻ Label draaien</button>
+        <span class="sublabel">Voor de drukkerij</span>
+        <div class="rij">
+          <label>Afloop
+            <select data-k="afloop"><option value="0">geen</option><option value="2">2 mm</option><option value="3">3 mm</option><option value="5">5 mm</option></select>
+          </label>
+          <label class="check" style="align-self:end"><input type="checkbox" data-k="snijtekens"> Snijtekens</label>
+        </div>
+        <p class="hint">Met afloop lopen gekleurde vlakken die tegen de rand liggen door buiten het label, zodat er na het snijden geen witte randjes zijn. Voor een labelprinter: laat dit op “geen”.</p>
       </div>
     </details>
 
@@ -103,6 +128,7 @@
         <button type="button" data-nieuw="kader" title="Kader toevoegen">＋ Kader</button>
         <button type="button" data-nieuw="lijn" title="Lijn toevoegen">＋ Lijn</button>
         <button type="button" data-nieuw="afbeelding" title="Logo of afbeelding toevoegen">＋ Afbeelding</button>
+        <button type="button" data-nieuw="locaties" title="Locatievak voor magazijnlocaties toevoegen">＋ Locaties</button>
         <input type="file" id="afb-bestand" accept="image/*" hidden>
       </div>
       <div class="groep">
