@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barcodelabels</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f4f5; margin: 0;
+           display: grid; place-items: center; min-height: 100vh; }
+    main { background: #fff; padding: 2rem; border-radius: 12px; width: min(380px, 90vw);
+           box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+    h1 { margin: 0 0 .25rem; font-size: 1.4rem; }
+    p { color: #555; margin: 0 0 1.5rem; font-size: .9rem; }
+    label { display: block; font-weight: 600; margin-bottom: .3rem; }
+    input { width: 100%; box-sizing: border-box; padding: .6rem; font-size: 1.1rem;
+            border: 1px solid #ccc; border-radius: 8px; margin-bottom: 1rem; }
+    button { width: 100%; padding: .75rem; font-size: 1rem; font-weight: 600; border: 0;
+             border-radius: 8px; background: #111; color: #fff; cursor: pointer; }
+    .fout { background: #fee2e2; color: #991b1b; padding: .6rem; border-radius: 8px;
+            margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Barcodelabels</h1>
+  <p>PostNL-label 150×102 mm, Code 128 — één label per nummer (max {{ max_labels }}).</p>
+  {% if fout %}<div class="fout">{{ fout }}</div>{% endif %}
+  <form method="post" action="/labels.pdf" target="_blank">
+    <label for="start">Startnummer</label>
+    <input id="start" name="start" inputmode="numeric" pattern="[0-9]+" required value="{{ start or '' }}">
+    <label for="eind">Eindnummer</label>
+    <input id="eind" name="eind" inputmode="numeric" pattern="[0-9]+" required value="{{ eind or '' }}">
+    <button type="submit">Maak PDF</button>
+  </form>
+</main>
+</body>
+</html>
