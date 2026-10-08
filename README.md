@@ -16,7 +16,7 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   - *Vast*: één ontwerp, N keer — ook zonder barcode.
   - *Locaties*: magazijnlocaties opgebouwd uit segmenten (bijv. Gang `AA`, Stelling `01–05`, Niveau `00`, Positie `00–01`).
     Kies welk segment samen op één sticker komt (bijv. `AA 01 00 00` + `AA 01 00 01`, volgende sticker `AA 02 00 00` + `AA 02 00 01`),
-    of juist één locatie per sticker (bijv. alleen `07 LL 01 0`), de scheidingstekens in tekst en barcode,
+    of juist één locatie per sticker (bijv. alleen `07 LL 01 0`), het scheidingsteken in de tekst, de opbouw van de barcode (bijv. `{1}  {2}{3} {4}` → `07  LL01 0`, spaties tellen mee),
     en per waarde van een segment (bijv. per niveau) een kleur, pijlrichting (↑ ↓ ← →) en aantal pijlen (1–3).
     Segmenten kunnen cijfers (ook aflopend), letters (`AA–AD`) of een lijst (`A,B,D`) zijn.
 - **Locatievak**: verdeelt zich automatisch over de locaties van een sticker (naast of onder elkaar). Stijlen:

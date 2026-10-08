@@ -552,7 +552,7 @@
       sel.value = String(waarde);
     };
     opties($("loc-sch"), SCHEIDINGEN, l.scheiding);
-    opties($("loc-bcsch"), SCHEIDINGEN, l.bcScheiding);
+    if (document.activeElement !== $("loc-bcsjabloon")) $("loc-bcsjabloon").value = l.bcSjabloon;
     locAfgeleid();
   }
 
@@ -591,14 +591,21 @@
     }
     $("loc-kleuren").innerHTML = kleurHtml;
 
-    let samen = "";
+    // Knopjes om segmenten in de barcode-opbouw te zetten
+    $("loc-bc-chips").innerHTML = l.segmenten.map((s, i) => `<button type="button" data-bc-chip="{${i + 1}}" title="${esc(naam(s, i))} invoegen">{${i + 1}} ${esc(naam(s, i))}</button>`).join("")
+      + `<button type="button" data-bc-chip=" " title="Spatie invoegen">␣ spatie</button>`;
+
+    let samen = "", voorbeeld = "";
+    const zichtbaar = (s) => s.replace(/ /g, "␣");
     try {
       const items = L.waarden({ ...cfg, modus: "locaties", kopieen: 1 });
       const per = items[0].locaties.length;
       samen = `${items.length} sticker${items.length === 1 ? "" : "s"} met ${per} locatie${per === 1 ? "" : "s"} per sticker (${items.length * per} locaties). ` +
-        `Eerste: ${items[0].locaties.map((x) => x.code).join(" + ")}. Barcode: ${items[0].locaties[0].bc}.`;
+        `Eerste: ${items[0].locaties.map((x) => x.code).join(" + ")}.`;
+      voorbeeld = `Barcode wordt bijv. <code class="bc">${esc(zichtbaar(items[0].locaties[0].bc))}</code> <span>(␣ = spatie). Gebruik {1}, {2} … of de segmentnaam, bijv. {Niveau}.</span>`;
     } catch (e) { samen = e.message; }
     $("loc-samenvatting").textContent = samen;
+    $("loc-bc-voorbeeld").innerHTML = voorbeeld;
     $("loc-ontwerp").hidden = cfg.elementen.some((e) => e.type === "locaties");
   }
 
@@ -610,6 +617,9 @@
     } else if (t.dataset.kleur != null) {
       if (t.dataset.kleur === "*") l.kleur = t.value; else l.kleuren[t.dataset.kleur] = t.value;
       gewijzigd(); planTeken();
+    } else if (t.id === "loc-bcsjabloon") {
+      l.bcSjabloon = t.value;
+      gewijzigd(); locAfgeleid(); planTeken();
     }
   });
   locPaneel.addEventListener("change", (e) => {
@@ -617,7 +627,6 @@
     if (t.id === "loc-groep") l.groep = +t.value;
     else if (t.id === "loc-kleurseg") l.kleurSeg = +t.value;
     else if (t.id === "loc-sch") l.scheiding = t.value;
-    else if (t.id === "loc-bcsch") l.bcScheiding = t.value;
     else if (t.dataset.kleur != null) { clearTimeout(vastTimer); vastleggen(); locAfgeleid(); return; }
     else if (t.dataset.pijlR != null || t.dataset.pijlN != null) {
       const v = t.dataset.pijlR ?? t.dataset.pijlN;
@@ -633,6 +642,15 @@
   locPaneel.addEventListener("click", (e) => {
     const t = e.target.closest("button");
     if (!t) return;
+    if (t.dataset.bcChip != null) {
+      const veld = $("loc-bcsjabloon");
+      const a = veld.selectionStart ?? veld.value.length, b = veld.selectionEnd ?? a;
+      veld.value = veld.value.slice(0, a) + t.dataset.bcChip + veld.value.slice(b);
+      veld.focus();
+      veld.setSelectionRange(a + t.dataset.bcChip.length, a + t.dataset.bcChip.length);
+      veld.dispatchEvent(new Event("input", { bubbles: true }));
+      return;
+    }
     const l = cfg.locatie;
     if (t.id === "seg-plus") {
       l.segmenten.push({ naam: `Segment ${l.segmenten.length + 1}`, van: "01", tot: "01" });

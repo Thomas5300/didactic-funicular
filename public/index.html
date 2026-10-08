@@ -57,10 +57,10 @@
           <button type="button" id="seg-plus">＋ Segment</button>
           <p class="hint">Cijfers (<code>01</code> t/m <code>12</code>, ook aflopend <code>04</code> t/m <code>00</code>), letters (<code>AA</code> t/m <code>AD</code>) of een lijst met komma's (<code>A,B,D</code>).</p>
           <label>Op één sticker <select id="loc-groep"></select></label>
-          <div class="rij">
-            <label>Scheiding in tekst <select id="loc-sch"></select></label>
-            <label>Scheiding in barcode <select id="loc-bcsch"></select></label>
-          </div>
+          <label>Scheiding in de leesbare tekst <select id="loc-sch"></select></label>
+          <label>Opbouw van de barcode <input id="loc-bcsjabloon" class="mono" spellcheck="false" autocomplete="off" placeholder="leeg = alles aan elkaar"></label>
+          <div class="chips" id="loc-bc-chips"></div>
+          <p class="hint" id="loc-bc-voorbeeld"></p>
           <label>Kleur en pijlen per <select id="loc-kleurseg"></select></label>
           <div id="loc-kleuren" class="kleuren"></div>
           <p class="hint" id="loc-samenvatting"></p>

@@ -115,6 +115,8 @@ button:disabled { opacity: .45; cursor: default; }
 .segrij input { padding: .35rem .4rem; font-size: .85rem; text-transform: none; }
 .segrij input[data-veld="van"], .segrij input[data-veld="tot"] { text-transform: uppercase; font-family: ui-monospace, monospace; }
 .segrij button { padding: .3rem 0; font-size: .8rem; }
+input.mono { font-family: ui-monospace, monospace; white-space: pre; }
+code.bc { white-space: pre; font-size: .85rem; color: var(--tekst); }
 .kleuren { display: grid; gap: .3rem; }
 .kleuren:empty { display: none; }
 .kleurrij, .kleurkop { display: grid; grid-template-columns: 1.8rem 1fr 4.4rem 3.8rem; gap: .35rem; align-items: center; }

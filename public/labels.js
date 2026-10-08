@@ -53,7 +53,8 @@
     ],
     groep: 3,            // segment waarvan alle waarden op één sticker komen (-1 = één locatie per sticker)
     scheiding: " ",      // tussen segmenten in de leesbare code
-    bcScheiding: "",     // tussen segmenten in de barcode
+    bcScheiding: "",     // (oud) tussen segmenten in de barcode — vervangen door bcSjabloon
+    bcSjabloon: "",      // opbouw van de barcode, bijv. "{1}  {2}{3} {4}"; leeg = alle segmenten aan elkaar
     kleurSeg: 2,         // segment dat kleur en pijlen bepaalt (-1 = één kleur/pijl voor alles)
     kleur: "#1e88e5",
     kleuren: {},
@@ -68,6 +69,8 @@
     { naam: "Stelling", van: "01", tot: "10" },
     { naam: "Niveau", van: "0", tot: "2" },
   ];
+  // Barcode zoals in veel magazijnsystemen: magazijn, 2 spaties, gang+stelling, spatie, niveau → "07  LL01 0"
+  const BC_MAGAZIJN = "{1}  {2}{3} {4}";
 
   const INHOUD_STANDAARD = {
     modus: "reeks", start: "1000", eind: "1025", stap: 1, prefix: "", suffix: "",
@@ -116,14 +119,14 @@
     // ----- Magazijn -----
     diagonaal3: {
       groep: "magazijn", naam: "Diagonaal — 3 niveaus per ligger (210 × 70 mm)", breedte: 210, hoogte: 70, modus: "locaties",
-      locatie: { segmenten: SEGMENTEN_MAGAZIJN, groep: 3, kleurSeg: 3, scheiding: " ", bcScheiding: "" },
+      locatie: { segmenten: SEGMENTEN_MAGAZIJN, groep: 3, kleurSeg: 3, scheiding: " ", bcSjabloon: BC_MAGAZIJN },
       elementen: [
         { type: "locaties", naam: "Locaties", x: 0, y: 0, w: 210, h: 70, richting: "naast", tussenruimte: 0, stijl: "diagonaal", tekstKleur: "zwart", splits: 2 },
       ],
     },
     diagonaal1: {
       groep: "magazijn", naam: "Diagonaal — losse locatie (70 × 70 mm)", breedte: 70, hoogte: 70, modus: "locaties",
-      locatie: { segmenten: SEGMENTEN_MAGAZIJN, groep: -1, kleurSeg: 3, scheiding: " ", bcScheiding: "" },
+      locatie: { segmenten: SEGMENTEN_MAGAZIJN, groep: -1, kleurSeg: 3, scheiding: " ", bcSjabloon: BC_MAGAZIJN },
       elementen: [
         { type: "locaties", naam: "Locatie", x: 0, y: 0, w: 70, h: 70, tussenruimte: 0, stijl: "diagonaal", tekstKleur: "zwart", splits: 2 },
       ],
@@ -155,7 +158,7 @@
           { naam: "Magazijn", van: "07", tot: "07" }, { naam: "Gang", van: "LL", tot: "LL" },
           { naam: "Stelling", van: "01", tot: "10" }, { naam: "Niveau", van: "4", tot: "0" },
         ],
-        groep: 3, kleurSeg: 3,
+        groep: 3, kleurSeg: 3, bcSjabloon: BC_MAGAZIJN,
       },
       elementen: [
         { type: "locaties", naam: "Locaties", x: 2, y: 2, w: 76, h: 216, richting: "onder", tussenruimte: 2, stijl: "vol", barcodeDeel: 42 },
@@ -204,6 +207,8 @@
     uit.groep = Number.isInteger(+uit.groep) && +uit.groep < uit.segmenten.length ? +uit.groep : -1;
     uit.kleurSeg = Number.isInteger(+uit.kleurSeg) && +uit.kleurSeg < uit.segmenten.length ? +uit.kleurSeg : -1;
     uit.kleur = geldigeKleur(uit.kleur, LOCATIE_STANDAARD.kleur);
+    if (typeof l.bcSjabloon !== "string")   // oude instelling met één scheidingsteken omzetten
+      uit.bcSjabloon = l.bcScheiding ? uit.segmenten.map((_, i) => `{${i + 1}}`).join(l.bcScheiding) : "";
     uit.pijl = geldigePijl(uit.pijl, LOCATIE_STANDAARD.pijl);
     uit.pijlen = {};
     for (const [k, p] of Object.entries(l.pijlen || {})) { const g = geldigePijl(p, null); if (g) uit.pijlen[k] = g; }
@@ -315,6 +320,18 @@
     return uit;
   }
 
+  // Barcode volgens de opbouw: {1}..{n} of {Segmentnaam}; spaties en andere tekens blijven staan.
+  // Leeg = alle segmenten direct aan elkaar.
+  function barcodeTekst(l, segs) {
+    const sjabloon = l.bcSjabloon ?? "";
+    if (!sjabloon.trim()) return segs.join("");
+    return sjabloon.replace(/\{([^{}]+)\}/g, (m, k) => {
+      if (/^\d+$/.test(k)) return segs[+k - 1] ?? "";
+      const i = l.segmenten.findIndex((s) => String(s.naam || "").trim().toLowerCase() === k.trim().toLowerCase());
+      return i >= 0 ? segs[i] : m;
+    });
+  }
+
   function locatieStickers(cfg, kopieen) {
     const l = locatieInstellingen(cfg.locatie);
     if (!l.segmenten.length) throw new Error("Voeg minstens één segment toe.");
@@ -331,7 +348,7 @@
       const v = l.kleurSeg >= 0 ? segs[l.kleurSeg] : null;
       return {
         segs: segs.slice(), namen, scheiding: l.scheiding,
-        code: segs.join(l.scheiding), bc: segs.join(l.bcScheiding),
+        code: segs.join(l.scheiding), bc: barcodeTekst(l, segs),
         kleur: v == null ? l.kleur : geldigeKleur(l.kleuren[v], std[v]),
         pijl: v == null ? l.pijl : (l.pijlen[v] || stdPijl[v]),
       };
