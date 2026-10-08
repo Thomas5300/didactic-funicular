@@ -109,7 +109,9 @@
 
     let vellen = 0;
     try { vellen = r.totaal ? L.aantalVellen(cfg, r.totaal) : 0; } catch { vellen = 0; }
-    $("teller").textContent = r.totaal ? `Sticker ${index + 1} van ${r.totaal}${vellen ? ` · ${vellen} vel${vellen === 1 ? "" : "len"}` : ""}` : "–";
+    let print = r.totaal, printFout = null;
+    try { print = r.totaal ? L.afdrukAantal(cfg, r.totaal) : 0; } catch (err) { printFout = err.message; }
+    $("teller").textContent = r.totaal ? `Sticker ${index + 1} van ${r.totaal}${vellen && print === r.totaal ? ` · ${vellen} vel${vellen === 1 ? "" : "len"}` : ""}` : "–";
     $("vorige").disabled = index <= 0;
     $("volgende").disabled = !r.totaal || index >= r.totaal - 1;
     const m = $("meldingen");
@@ -119,7 +121,9 @@
     r.fouten.forEach((f) => melding("fout", f));
     r.waarschuwingen.forEach((w) => melding("let", w));
     if (losseMelding) { melding("let", losseMelding); losseMelding = null; }
-    $("download").disabled = $("print").disabled = !!(r.inhoudFout || r.fouten.length);
+    if (printFout) melding("fout", printFout);
+    else if (r.totaal && print < r.totaal) melding("let", `Let op: er ${print === 1 ? "wordt alleen 1 sticker" : `worden alleen ${print} stickers`} afgedrukt (van de ${r.totaal}). Zet Afdrukken op “Alle stickers” voor de hele reeks.`);
+    $("download").disabled = $("print").disabled = !!(r.inhoudFout || r.fouten.length || printFout);
   }
 
   let rafGepland = false;
@@ -379,6 +383,12 @@
       h += `<button type="button" data-actie="afbeelding">Andere afbeelding kiezen…</button>
         <p class="hint">De afbeelding blijft in verhouding binnen het vak. Een labelprinter drukt in zwart-wit: een zwart logo op een witte of transparante achtergrond werkt het best.</p>`;
     }
+    const vars = L.lijstKolommen(cfg);
+    if (vars.length || g.toonAls) {
+      const opties = [["", "Altijd"], ...vars.flatMap((v) => [[v, `Alleen als ${v} is ingevuld`], ["!" + v, `Alleen als ${v} leeg is`]])];
+      if (g.toonAls && !opties.some(([v]) => v === g.toonAls)) opties.push([g.toonAls, g.toonAls]);
+      h += `<label>Tonen ${keuze("toonAls", opties.map(([v, t]) => [esc(v), esc(t)]))}</label>`;
+    }
     h += `<div class="eig-acties">
         <button type="button" data-actie="voren">↑ Naar voren</button><button type="button" data-actie="achter">↓ Naar achteren</button>
         <button type="button" data-actie="dupliceer">⧉ Dupliceren</button><button type="button" data-actie="verwijder" class="gevaar">✕ Verwijderen</button>
@@ -589,6 +599,7 @@
     $("vel-info").textContent = info;
     $("raster").value = String(raster);
     $("kaders").checked = toonVakken;
+    $("afdruk-nrs").hidden = cfg.afdrukken !== "nummers";
     zendingInfo();
   }
 
@@ -601,7 +612,8 @@
     let uitleg = "";
     try {
       const items = L.waarden({ ...cfg, modus: "zending", kopieen: 1 }), k = items[0].kolommen, n = items.length;
-      uitleg = `${n} sticker${n === 1 ? "" : "s"}: ${[k.soort, k.colli].filter(Boolean).join(" ")}${n > 1 ? ` t/m ${items[n - 1].kolommen.colli}` : ""}${k.order ? ` · order ${k.order}` : ""}.`;
+      uitleg = `${n} sticker${n === 1 ? "" : "s"}: ${[k.soort, k.colli].filter(Boolean).join(" ")}${n > 1 ? ` t/m ${items[n - 1].kolommen.colli}` : ""}`
+        + `${k.order ? ` · order ${k.order}` : " · vul een ordernummer in"}${k.bestemming ? ` · ${k.bestemming}` : ""}.`;
     } catch (err) { uitleg = err.message; }
     $("colli-uitleg").textContent = uitleg;
     $("zending-ontwerp").hidden = cfg.elementen.some((x) => ZENDING_VAR.test(`${x.tekst || ""} ${x.inhoud || ""}`));
@@ -642,6 +654,7 @@
     document.querySelectorAll("[data-modus]").forEach((el) => (el.hidden = el.dataset.modus !== cfg.modus));
     if (k === "modus") bouwLocaties();
     if (k === "modus" || k.startsWith("colli")) zendingInfo();
+    if (k === "afdrukken") $("afdruk-nrs").hidden = cfg.afdrukken !== "nummers";
     if (k.startsWith("vel")) zetFormulier();
     if ((k === "modus" || k === "lijst" || k === "lijstKop") && sel()) bouwEigenschappen();   // invoegknopjes voor kolommen bijwerken
     planTeken();

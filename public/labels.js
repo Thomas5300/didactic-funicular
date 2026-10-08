@@ -236,12 +236,12 @@
     velLogo: "", velLogoB: 1, velLogoH: 1, velLogoPlek: "rechts", velLogoHoogte: 12,
     lijstKop: false,
     // Zending: pallet- en collistickers (1/10, 2/10 …)
-    colliOrder: "2026-001234", colliBestemming: "Bakker Logistiek BV\nIndustrieweg 12\n1234 AB  Amsterdam",
-    colliAantal: 10, colliSoort: "PALLET", colliSoortEigen: "",
+    colliOrder: "2026-001234", colliBestemming: "", colliAantal: 10, colliSoort: "PALLET", colliSoortEigen: "",
+    afdrukken: "alle", afdrukNummers: "",
   };
   const COLLI_SOORTEN = [["PALLET", "Pallet"], ["DOOS", "Doos"], ["CARTON", "Carton"], ["COLLI", "Colli"], ["ROLCONTAINER", "Rolcontainer"],
     ["KRAT", "Krat"], ["STUK", "Stuk"], ["ANDERS", "Anders…"]];
-  const COLLI_VELDEN = ["order", "bestemming", "soort", "colli", "aantal"];
+  const COLLI_VELDEN = ["order", "colli", "soort", "aantal", "bestemming"];
 
   const COMMANDO_LIJST = "Code;Omschrijving\nZ001;Crossdock zone (07)\n/;Stoppen / afsluiten\ne;Stoppen / terug\n07  X;\n07  JJ00 0;";
   const GEBRUIKERS_LIJST = "Naam;Username;Password\nJan Jansen;jan;11\nPiet de Vries;piet;11\nKees Bakker;kees;11\nAnna Smit;anna;11";
@@ -380,33 +380,36 @@
     },
     // ----- Pallets en verzending (modus Zending) -----
     palletsticker: {
-      groep: "zending", naam: "Palletsticker — order, bestemming en 1/10", breedte: 150, hoogte: 102, modus: "zending",
+      groep: "zending", naam: "Palletsticker — ordernummer en 1/10", sub: "150 × 102 mm · plaats optioneel", breedte: 150, hoogte: 102, modus: "zending",
       elementen: [
         { type: "kader", naam: "Rand", x: 2, y: 2, w: 146, h: 98, dikte: 0.8 },
-        { type: "kader", naam: "Lijn verticaal", x: 96, y: 2, w: 0.8, h: 50, gevuld: true },
-        { type: "kader", naam: "Lijn horizontaal", x: 2, y: 52, w: 146, h: 0.8, gevuld: true },
-        { type: "tekst", naam: "Kop order", x: 6, y: 5, w: 86, h: 4.5, tekst: "ORDERNUMMER", grootte: 8, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
-        { type: "tekst", naam: "Ordernummer", x: 6, y: 10, w: 86, h: 13, tekst: "{order}", grootte: 30, vet: true, uitlijning: "left", terugloop: false },
-        { type: "barcode", naam: "Barcode order", x: 6, y: 25, w: 86, h: 24, inhoud: "{order}", maxStreep: 0.6, bcUitlijning: "left" },
-        { type: "tekst", naam: "Soort", x: 98, y: 5, w: 48, h: 8, tekst: "{soort}", grootte: 16, vet: true, verticaal: "top", terugloop: false },
-        { type: "tekst", naam: "Colli", x: 98, y: 13, w: 48, h: 36, tekst: "{colli}", grootte: 58, vet: true, terugloop: false },
-        { type: "tekst", naam: "Kop bestemming", x: 6, y: 56, w: 136, h: 4.5, tekst: "BESTEMMING", grootte: 8, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
-        { type: "tekst", naam: "Bestemming", x: 6, y: 62, w: 136, h: 35, tekst: "{bestemming}", grootte: 22, vet: true, uitlijning: "left", verticaal: "top" },
+        { type: "tekst", naam: "Kop order", x: 6, y: 5, w: 138, h: 5, tekst: "ORDERNUMMER", grootte: 10, vet: true, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Ordernummer", x: 5, y: 11, w: 140, h: 36, tekst: "{order}", grootte: 72, vet: true, terugloop: false },
+        { type: "kader", naam: "Lijn", x: 2, y: 50, w: 146, h: 0.8, gevuld: true },
+        // zonder plaats: het palletnummer over de hele breedte
+        { type: "tekst", naam: "Soort", x: 6, y: 54, w: 138, h: 5, tekst: "{soort}", grootte: 10, vet: true, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false, toonAls: "!{bestemming}" },
+        { type: "tekst", naam: "Palletnummer", x: 5, y: 60, w: 140, h: 37, tekst: "{colli}", grootte: 80, vet: true, terugloop: false, toonAls: "!{bestemming}" },
+        // met plaats: palletnummer links, plaats rechts
+        { type: "kader", naam: "Lijn plaats", x: 74.6, y: 50.8, w: 0.8, h: 49.2, gevuld: true, toonAls: "{bestemming}" },
+        { type: "tekst", naam: "Soort (met plaats)", x: 6, y: 54, w: 66, h: 5, tekst: "{soort}", grootte: 10, vet: true, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false, toonAls: "{bestemming}" },
+        { type: "tekst", naam: "Palletnummer (met plaats)", x: 5, y: 60, w: 67, h: 37, tekst: "{colli}", grootte: 64, vet: true, terugloop: false, toonAls: "{bestemming}" },
+        { type: "tekst", naam: "Kop plaats", x: 79, y: 54, w: 66, h: 5, tekst: "PLAATS", grootte: 10, vet: true, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false, toonAls: "{bestemming}" },
+        { type: "tekst", naam: "Plaats", x: 78, y: 60, w: 67, h: 37, tekst: "{bestemming}", grootte: 34, vet: true, toonAls: "{bestemming}" },
       ],
     },
     palletA4: {
-      groep: "zending", naam: "Palletsticker A4 — groot 1/10", sub: "A4 staand · gewone printer", breedte: 210, hoogte: 297, modus: "zending",
+      groep: "zending", naam: "Palletsticker A4 — groot", sub: "A4 staand · gewone printer · plaats optioneel", breedte: 210, hoogte: 297, modus: "zending",
       elementen: [
         { type: "kader", naam: "Rand", x: 6, y: 6, w: 198, h: 285, dikte: 2 },
-        { type: "tekst", naam: "Kop order", x: 14, y: 13, w: 182, h: 7, tekst: "ORDERNUMMER", grootte: 14, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
-        { type: "tekst", naam: "Ordernummer", x: 14, y: 21, w: 182, h: 24, tekst: "{order}", grootte: 60, vet: true, uitlijning: "left", terugloop: false },
-        { type: "barcode", naam: "Barcode order", x: 14, y: 49, w: 182, h: 42, inhoud: "{order}", maxStreep: 1.2, bcUitlijning: "left" },
-        { type: "kader", naam: "Lijn 1", x: 6, y: 98, w: 198, h: 1.5, gevuld: true },
-        { type: "tekst", naam: "Soort", x: 14, y: 105, w: 182, h: 16, tekst: "{soort}", grootte: 40, vet: true, verticaal: "top", terugloop: false },
-        { type: "tekst", naam: "Colli", x: 14, y: 123, w: 182, h: 68, tekst: "{colli}", grootte: 200, vet: true, terugloop: false },
-        { type: "kader", naam: "Lijn 2", x: 6, y: 197, w: 198, h: 1.5, gevuld: true },
-        { type: "tekst", naam: "Kop bestemming", x: 14, y: 204, w: 182, h: 7, tekst: "BESTEMMING", grootte: 14, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
-        { type: "tekst", naam: "Bestemming", x: 14, y: 213, w: 182, h: 70, tekst: "{bestemming}", grootte: 40, vet: true, uitlijning: "left", verticaal: "top" },
+        { type: "tekst", naam: "Kop order", x: 14, y: 14, w: 182, h: 8, tekst: "ORDERNUMMER", grootte: 18, vet: true, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Ordernummer", x: 12, y: 24, w: 186, h: 62, tekst: "{order}", grootte: 120, vet: true, terugloop: false },
+        { type: "kader", naam: "Lijn", x: 6, y: 93, w: 198, h: 1.5, gevuld: true },
+        { type: "tekst", naam: "Soort", x: 14, y: 101, w: 182, h: 8, tekst: "{soort}", grootte: 18, vet: true, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Palletnummer", x: 12, y: 112, w: 186, h: 172, tekst: "{colli}", grootte: 250, vet: true, terugloop: false, toonAls: "!{bestemming}" },
+        { type: "tekst", naam: "Palletnummer (met plaats)", x: 12, y: 112, w: 186, h: 100, tekst: "{colli}", grootte: 220, vet: true, terugloop: false, toonAls: "{bestemming}" },
+        { type: "kader", naam: "Lijn plaats", x: 6, y: 219, w: 198, h: 1.5, gevuld: true, toonAls: "{bestemming}" },
+        { type: "tekst", naam: "Kop plaats", x: 14, y: 227, w: 182, h: 8, tekst: "PLAATS", grootte: 18, vet: true, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false, toonAls: "{bestemming}" },
+        { type: "tekst", naam: "Plaats", x: 12, y: 238, w: 186, h: 46, tekst: "{bestemming}", grootte: 90, vet: true, terugloop: false, toonAls: "{bestemming}" },
       ],
     },
 
@@ -575,6 +578,7 @@
     if (uit.kleur === "zwart") uit.kleur = "#000000";
     if (uit.kleur === "wit") uit.kleur = "#ffffff";
     if (type === "tekst" || type === "kader") uit.kleur = geldigeKleur(uit.kleur, "#000000");
+    uit.toonAls = typeof uit.toonAls === "string" ? uit.toonAls : "";
     if (type === "locaties" && !("pijlen" in e) && "pijl" in e) uit.pijlen = e.pijl !== "geen";   // vorige versie
     if (type === "symbool") {
       if (!PIC.PICTOGRAMMEN[uit.vorm]) uit.vorm = "letop";
@@ -618,6 +622,7 @@
     const uit = Object.assign({}, INHOUD_STANDAARD, { breedte: 150, hoogte: 102 }, cfg);
     uit.elementen = cfg.elementen.map(element);
     uit.locatie = locatieInstellingen(cfg.locatie);
+    if (uit.colliBestemming === "Bakker Logistiek BV\nIndustrieweg 12\n1234 AB  Amsterdam") uit.colliBestemming = "";   // oud voorbeeld
     return uit;
   }
 
@@ -799,11 +804,11 @@
       const n = Math.floor(Number(cfg.colliAantal));
       if (!(n >= 1)) throw new Error("Vul bij Aantal in hoeveel pallets of colli het zijn (minstens 1).");
       if (n * k > MAX_PAGINAS) throw new Error(`Maximaal ${MAX_PAGINAS} stickers per keer.`);
-      const order = String(cfg.colliOrder || "").trim(), bestemming = String(cfg.colliBestemming || "").trim();
+      const order = String(cfg.colliOrder || "").trim(), bestemming = String(cfg.colliBestemming || "").replace(/\s*\n\s*/g, " ").trim();
       const soort = (cfg.colliSoort === "ANDERS" ? String(cfg.colliSoortEigen || "") : String(cfg.colliSoort || "")).trim();
       lijst = [];
       for (let i = 1; i <= n; i++)
-        lijst.push({ waarde: order, nr: String(i), kolommen: { order, bestemming, soort, colli: `${i}/${n}`, aantal: String(n) } });
+        lijst.push({ waarde: order, nr: String(i), kolommen: { order, bestemming, plaats: bestemming, soort, colli: `${i}/${n}`, aantal: String(n) } });
     } else {
       const w = String(cfg.vasteWaarde || "").trim();
       lijst = [{ waarde: w, nr: w }];
@@ -1146,14 +1151,24 @@
 
   // ---------- Eén sticker naar tekenopdrachten ----------
 
+  // "Alleen tonen als": {bestemming} = alleen als die is ingevuld, !{bestemming} = alleen als die leeg is.
+  function zichtbaar(el, ctx) {
+    const t = String(el.toonAls || "").trim();
+    if (!t) return true;
+    const neg = t.startsWith("!"), sjabloon = neg ? t.slice(1).trim() : t, v = vulIn(sjabloon, ctx).trim();
+    const leeg = !v || v === sjabloon;   // een onbekende variabele blijft staan en telt als leeg
+    return neg ? leeg : !leeg;
+  }
+
   function render(cfg, item, ctx, libs, meet, cache) {
     const B = +cfg.breedte, H = +cfg.hoogte;
     const r = { ops: [], waarschuwingen: [], fouten: [] };
 
     // Eerst alle losse barcodes coderen, zodat {barcode} in teksten bekend is.
     const codes = new Map();
+    const zien = (el) => zichtbaar(el, ctx);
     for (const el of cfg.elementen) {
-      if (el.type !== "barcode") continue;
+      if (el.type !== "barcode" || !zien(el)) continue;
       const inhoud = vulIn(el.inhoud, ctx).trim();
       if (!inhoud) { codes.set(el.id, null); continue; }
       try { codes.set(el.id, codeer(el.symbologie, inhoud, libs)); }
@@ -1163,6 +1178,7 @@
     const ctx2 = Object.assign({}, ctx, { barcode: eerste ? eerste.tekst : ctx.waarde });
 
     for (const el of cfg.elementen) {
+      if (!zien(el)) continue;
       const x = +el.x, y = +el.y, w = +el.w, h = +el.h;
       if (x < -0.05 || y < -0.05 || x + w > B + 0.05 || y + h > H + 0.05) r.waarschuwingen.push(`“${el.naam}” valt (deels) buiten het label.`);
 
@@ -1276,26 +1292,27 @@
 
   function maakPdf(cfgIn, libs) {
     const cfg = normaliseer(cfgIn);
-    const items = waarden(cfg);
+    const items = waarden(cfg), totaal = items.length;
+    const lijst = afdrukLijst(cfg, items);   // alles, of alleen de gekozen stickers (met hun eigen nummer)
     const B = +cfg.breedte, H = +cfg.hoogte;
     if (!(B >= 10 && H >= 10)) throw new Error("Labelformaat moet minstens 10 × 10 mm zijn.");
-    if (cfg.vel === "vouw") return maakVouwPdf(cfg, items, libs);
+    if (cfg.vel === "vouw") return maakVouwPdf(cfg, lijst, totaal, libs);
     const vel = velIndeling(cfg);
-    if (vel) return maakVelPdf(cfg, items, vel, libs);
+    if (vel) return maakVelPdf(cfg, lijst, totaal, vel, libs);
     const a = Math.max(+cfg.afloop || 0, 0), rand = cfg.snijtekens ? 10 : 0, off = a + rand;
     const PB = B + 2 * off, PH = H + 2 * off;
     const liggend = PB >= PH, formaat = [Math.min(PB, PH), Math.max(PB, PH)];
     const doc = new libs.jsPDF({ orientation: liggend ? "landscape" : "portrait", unit: "mm", format: formaat });
     doc.setProperties({ title: "Stickers" });
     const meet = meetMet(doc), cache = new Map();
-    items.forEach((item, i) => {
-      if (i > 0) doc.addPage(formaat, liggend ? "landscape" : "portrait");
-      const r = render(cfg, item, context(item, i + 1, items.length), libs, meet, cache);
-      if (r.fouten.length) throw new Error(`Sticker ${i + 1}: ${r.fouten[0]}`);
+    lijst.forEach(({ item, n }, j) => {
+      if (j > 0) doc.addPage(formaat, liggend ? "landscape" : "portrait");
+      const r = render(cfg, item, context(item, n, totaal), libs, meet, cache);
+      if (r.fouten.length) throw new Error(`Sticker ${n}: ${r.fouten[0]}`);
       tekenPdf(doc, metAfloop(r.ops, B, H, a), off, off);
       if (rand) snijtekens(doc, B, H, off, a);
     });
-    return { doc, aantal: items.length };
+    return { doc, aantal: lijst.length };
   }
 
   // Omvang van alles wat er getekend wordt (voor centreren). Tekst inclusief onderstokken.
@@ -1315,7 +1332,8 @@
   }
 
   // Meerdere etiketten per A4-vel. Elk etiket wordt bijgesneden tot zijn eigen vak.
-  function maakVelPdf(cfg, items, vel, libs) {
+  function maakVelPdf(cfg, lijst, totaal, vel, libs) {
+    const items = lijst.map((x) => x.item);
     const P = vel.pagina, liggend = P.b > P.h, formaat = [Math.min(P.b, P.h), Math.max(P.b, P.h)];
     const doc = new libs.jsPDF({ orientation: liggend ? "landscape" : "portrait", unit: "mm", format: formaat });
     doc.setProperties({ title: vel.titel || "Stickers" });
@@ -1374,8 +1392,8 @@
 
     // Eerst alles opbouwen, zodat we per rij kunnen centreren.
     const getekend = items.map((item, i) => {
-      const r = render(ontwerpVoor(plekken[i].b), item, context(item, i + 1, items.length), libs, meet, cache);
-      if (r.fouten.length) throw new Error(`Sticker ${i + 1}: ${r.fouten[0]}`);
+      const r = render(ontwerpVoor(plekken[i].b), item, context(item, lijst[i].n, totaal), libs, meet, cache);
+      if (r.fouten.length) throw new Error(`Sticker ${lijst[i].n}: ${r.fouten[0]}`);
       return { ops: r.ops, o: vel.centreren ? omvang(r.ops, meet) : null };
     });
     // Verticaal centreren per rij (barcodes naast elkaar blijven op één lijn), horizontaal per vak.
@@ -1431,7 +1449,7 @@
   // Vouwkaart: per A4 twee keer hetzelfde label; de bovenste helft staat op z'n kop.
   // Dubbelgevouwen (over een ligger of als tentje) is de locatie aan beide kanten leesbaar.
   const VOUW_HELFT = 148.5;
-  function maakVouwPdf(cfg, items, libs) {
+  function maakVouwPdf(cfg, lijst, totaal, libs) {
     const B = +cfg.breedte, H = +cfg.hoogte;
     if (B > 210.01 || H > VOUW_HELFT + 0.01)
       throw new Error(`Voor een vouwkaart mag het label maximaal 210 × 148 mm zijn (nu ${B} × ${H} mm). Kies bijv. het formaat A5 liggend of 200 × 138 mm.`);
@@ -1445,10 +1463,10 @@
       tekenPdf(doc, ops, dx, y);
       doc.restoreGraphicsState();
     };
-    items.forEach((item, i) => {
-      if (i > 0) doc.addPage("a4", "portrait");
-      const r = render(cfg, item, context(item, i + 1, items.length), libs, meet, cache);
-      if (r.fouten.length) throw new Error(`Sticker ${i + 1}: ${r.fouten[0]}`);
+    lijst.forEach(({ item, n }, j) => {
+      if (j > 0) doc.addPage("a4", "portrait");
+      const r = render(cfg, item, context(item, n, totaal), libs, meet, cache);
+      if (r.fouten.length) throw new Error(`Sticker ${n}: ${r.fouten[0]}`);
       vak(r.ops, dyOnder);
       vak(draai180(r.ops, B, H, meet), dyBoven);
       // Vouwlijn
@@ -1457,8 +1475,32 @@
       doc.setTextColor(150, 150, 150); doc.setFont("helvetica", "normal"); doc.setFontSize(6);
       doc.text("vouwen", 3, VOUW_HELFT - 1.2, { baseline: "alphabetic" });
     });
-    return { doc, aantal: items.length, vellen: items.length };
+    return { doc, aantal: lijst.length, vellen: lijst.length };
   }
+
+  // Welke stickers worden afgedrukt: alles, alleen de eerste, of bepaalde nummers (bijv. "1" of "3-5, 8").
+  // De nummers gaan over de stickers zonder kopieën (bij Zending: het palletnummer); kopieën gaan mee.
+  function afdrukNummers(cfg, aantalItems) {
+    if (cfg.afdrukken === "eerste") return [1];
+    if (cfg.afdrukken !== "nummers") return null;
+    const nrs = new Set();
+    for (const deel of String(cfg.afdrukNummers || "").split(/[,;\s]+/).filter(Boolean)) {
+      const m = /^(\d+)(?:-(\d+))?$/.exec(deel);
+      if (!m) throw new Error(`Afdrukken: “${deel}” is geen nummer. Gebruik bijv. 1 of 3-5, 8.`);
+      const a = +m[1], b = m[2] ? +m[2] : a;
+      for (let i = Math.min(a, b); i <= Math.max(a, b) && i <= aantalItems; i++) if (i >= 1) nrs.add(i);
+    }
+    if (!nrs.size) throw new Error(`Afdrukken: vul nummers in tussen 1 en ${aantalItems}, bijv. 1 of 3-5.`);
+    return [...nrs].sort((x, y) => x - y);
+  }
+  function afdrukLijst(cfg, items) {
+    const k = kopieen(cfg), nrs = afdrukNummers(cfg, Math.ceil(items.length / k));
+    if (!nrs) return items.map((item, i) => ({ item, n: i + 1 }));
+    const uit = [];
+    for (const nr of nrs) for (let c = 0; c < k; c++) { const i = (nr - 1) * k + c; if (i < items.length) uit.push({ item: items[i], n: i + 1 }); }
+    return uit;
+  }
+  function afdrukAantal(cfg, totaal) { return afdrukLijst(cfg, new Array(totaal).fill(0)).length; }
 
   // Aantal A4-vellen voor een aantal etiketten (voor de teller in de editor).
   function aantalVellen(cfg, aantal) {
@@ -1491,7 +1533,7 @@
     }).join("");
   }
 
-  const api = { COLLI_SOORTEN, COLLI_VELDEN, BORD_FORMATEN, BORD_VELDEN, bordTeksten, bordOntwerp, PIC, VOORBEELD_LIJSTEN, PT, MAX_PAGINAS, FORMATEN, FORMAATGROEPEN, VELLEN, PAGINAS, velIndeling, aantalVellen, LETTERTYPEN, PALET, TYPE_STANDAARD, STARTERS, INHOUD_STANDAARD, LOCATIE_STANDAARD,
+  const api = { afdrukNummers, afdrukAantal, COLLI_SOORTEN, COLLI_VELDEN, BORD_FORMATEN, BORD_VELDEN, bordTeksten, bordOntwerp, PIC, VOORBEELD_LIJSTEN, PT, MAX_PAGINAS, FORMATEN, FORMAATGROEPEN, VELLEN, PAGINAS, velIndeling, aantalVellen, LETTERTYPEN, PALET, TYPE_STANDAARD, STARTERS, INHOUD_STANDAARD, LOCATIE_STANDAARD,
     lijstKolommen, nieuwId, element, standaard, normaliseer, migreer, locatieInstellingen, segmentWaarden, standaardKleuren, standaardPijlen, PIJLRICHTINGEN, waarden, context, render,
     meetMet, maakPdf, opsNaarSvg, esc, contrast };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

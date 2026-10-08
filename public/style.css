@@ -187,3 +187,4 @@ dialog.venster::backdrop { background: rgba(24,24,27,.5); }
 }
 [hidden] { display: none !important; }
 #zending-paneel textarea { font-family: inherit; font-size: .9rem; }
+#afdruk-rij:has(#afdruk-nrs[hidden]) { grid-template-columns: 1fr; }

@@ -16,10 +16,11 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
     Gebruik kolommen in tekst én barcodes als `{1}`, `{2}` of `{Kolomnaam}` — bijv. scannercommando's
     (`e;Stoppen / terug`, `/;Stoppen / afsluiten`, `Z001;Crossdock zone`) of gebruikers (`Naam;Gebruiker;Wachtwoord`).
   - *Vast*: één ontwerp, N keer — ook zonder barcode.
-  - *Zending*: pallet- en collistickers. Vul ordernummer, bestemming, aantal en soort in (pallet, doos, carton, colli,
-    rolcontainer, krat, stuk of een eigen soort) en je krijgt per stuk een sticker met `1/10`, `2/10` … Op het label:
-    `{order}`, `{bestemming}`, `{soort}`, `{colli}` en `{aantal}`. Ontwerpen: palletsticker 150 × 102 mm (labelprinter)
-    en een grote A4-versie.
+  - *Zending*: palletstickers. Vul het ordernummer, het aantal en de soort in (pallet, doos, carton, colli, rolcontainer,
+    krat, stuk of een eigen soort) en je krijgt per stuk een sticker met het ordernummer en `1/10`, `2/10` …
+    De plaats/bestemming is optioneel en komt er alleen op als je die invult. Ontwerpen: 150 × 102 mm (labelprinter) en A4.
+- **Afdrukken**: alle stickers, alleen de eerste (proefprint) of bepaalde nummers (bijv. `3-5, 8` om er een paar opnieuw te printen).
+- **Tonen als**: elk onderdeel kan alleen verschijnen als een veld is ingevuld (of juist leeg is), bijv. de plaats op de palletsticker.
   - *Locaties*: magazijnlocaties opgebouwd uit segmenten (bijv. Gang `AA`, Stelling `01–05`, Niveau `00`, Positie `00–01`).
     Kies welk segment samen op één sticker komt (bijv. `AA 01 00 00` + `AA 01 00 01`, volgende sticker `AA 02 00 00` + `AA 02 00 01`),
     of juist één locatie per sticker (bijv. alleen `07 LL 01 0`), het scheidingsteken in de tekst, de opbouw van de barcode (bijv. `{1}  {2}{3} {4}` → `07  LL01 0`, spaties tellen mee),
