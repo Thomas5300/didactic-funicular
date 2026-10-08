@@ -186,3 +186,4 @@ dialog.venster::backdrop { background: rgba(24,24,27,.5); }
   dialog.venster { width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
 }
 [hidden] { display: none !important; }
+#zending-paneel textarea { font-family: inherit; font-size: .9rem; }

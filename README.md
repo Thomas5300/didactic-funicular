@@ -10,12 +10,16 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   - Per onderdeel: positie en grootte in mm, uitlijnen op het label (links/midden/rechts, boven/midden/onder, volle breedte).
   - Tekst: lettertype, grootte, vet, wit-op-zwart, uitlijning in het vak, regels laten teruglopen, automatisch verkleinen.
   - Raster en hulplijnen (randen, midden, andere onderdelen), ongedaan maken/opnieuw, dupliceren, lagen.
-- **Vier modi voor de inhoud**
+- **Vijf modi voor de inhoud**
   - *Reeks*: oplopende nummers met voorvoegsel, achtervoegsel en stap. Voorloopnullen blijven behouden.
   - *Lijst*: één sticker per regel (ook te plakken uit Excel), met optioneel meerdere kolommen (tab of `;`) en een kopregel.
     Gebruik kolommen in tekst én barcodes als `{1}`, `{2}` of `{Kolomnaam}` — bijv. scannercommando's
     (`e;Stoppen / terug`, `/;Stoppen / afsluiten`, `Z001;Crossdock zone`) of gebruikers (`Naam;Gebruiker;Wachtwoord`).
   - *Vast*: één ontwerp, N keer — ook zonder barcode.
+  - *Zending*: pallet- en collistickers. Vul ordernummer, bestemming, aantal en soort in (pallet, doos, carton, colli,
+    rolcontainer, krat, stuk of een eigen soort) en je krijgt per stuk een sticker met `1/10`, `2/10` … Op het label:
+    `{order}`, `{bestemming}`, `{soort}`, `{colli}` en `{aantal}`. Ontwerpen: palletsticker 150 × 102 mm (labelprinter)
+    en een grote A4-versie.
   - *Locaties*: magazijnlocaties opgebouwd uit segmenten (bijv. Gang `AA`, Stelling `01–05`, Niveau `00`, Positie `00–01`).
     Kies welk segment samen op één sticker komt (bijv. `AA 01 00 00` + `AA 01 00 01`, volgende sticker `AA 02 00 00` + `AA 02 00 01`),
     of juist één locatie per sticker (bijv. alleen `07 LL 01 0`), het scheidingsteken in de tekst, de opbouw van de barcode (bijv. `{1}  {2}{3} {4}` → `07  LL01 0`, spaties tellen mee),
@@ -54,7 +58,7 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
 - **A4-vellen**: Avery (L7160, L7163, L7165, L7173, L7651 …) en Avery Zweckform (3474, 3475, 3424, 3425, 3427, 3483 …),
   of een eigen indeling (kolommen × rijen). Begin bij etiket nr. voor halfgebruikte vellen, randen tonen voor een proefprint;
   elk etiket wordt bijgesneden tot zijn eigen vak.
-- **Voorbeelden**: een galerij met plaatjes van alle kant-en-klare ontwerpen (algemeen, magazijnlocaties, borden, scanner en gebruikers),
+- **Voorbeelden**: een galerij met plaatjes van alle kant-en-klare ontwerpen (algemeen, pallets en verzending, magazijnlocaties, borden, scanner en gebruikers),
   of begin met een leeg label.
 - **Sjablonen**: eigen sjablonen opslaan in de browser, exporteren/importeren als `.json`.
 - Instellingen uit de vorige versie worden automatisch omgezet naar het nieuwe ontwerp.

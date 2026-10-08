@@ -589,7 +589,27 @@
     $("vel-info").textContent = info;
     $("raster").value = String(raster);
     $("kaders").checked = toonVakken;
+    zendingInfo();
   }
+
+  // ---------- Zending (pallet- en collistickers) ----------
+  for (const [v, t] of L.COLLI_SOORTEN) $("colli-soort").add(new Option(t, v));
+  const ZENDING_VAR = /\{(colli|order|bestemming|soort|aantal)\}/i;
+  function zendingInfo() {
+    $("colli-soort").value = L.COLLI_SOORTEN.some(([v]) => v === cfg.colliSoort) ? cfg.colliSoort : "ANDERS";
+    $("colli-eigen").hidden = $("colli-soort").value !== "ANDERS";
+    let uitleg = "";
+    try {
+      const items = L.waarden({ ...cfg, modus: "zending", kopieen: 1 }), k = items[0].kolommen, n = items.length;
+      uitleg = `${n} sticker${n === 1 ? "" : "s"}: ${[k.soort, k.colli].filter(Boolean).join(" ")}${n > 1 ? ` t/m ${items[n - 1].kolommen.colli}` : ""}${k.order ? ` · order ${k.order}` : ""}.`;
+    } catch (err) { uitleg = err.message; }
+    $("colli-uitleg").textContent = uitleg;
+    $("zending-ontwerp").hidden = cfg.elementen.some((x) => ZENDING_VAR.test(`${x.tekst || ""} ${x.inhoud || ""}`));
+  }
+  $("zending-ontwerp").addEventListener("click", () => {
+    const s = L.STARTERS.palletsticker;
+    vervangOntwerp(s.naam, starterCfg(s));
+  });
 
   function schaal(B2, H2) {
     const B1 = +cfg.breedte, H1 = +cfg.hoogte;
@@ -621,6 +641,7 @@
     gewijzigd(t.type === "radio" || t.type === "checkbox" || t.tagName === "SELECT");
     document.querySelectorAll("[data-modus]").forEach((el) => (el.hidden = el.dataset.modus !== cfg.modus));
     if (k === "modus") bouwLocaties();
+    if (k === "modus" || k.startsWith("colli")) zendingInfo();
     if (k.startsWith("vel")) zetFormulier();
     if ((k === "modus" || k === "lijst" || k === "lijstKop") && sel()) bouwEigenschappen();   // invoegknopjes voor kolommen bijwerken
     planTeken();
@@ -875,7 +896,7 @@
   }
 
   // ---------- Voorbeelden (galerij) ----------
-  const GALERIJ = [["algemeen", "Algemeen", "Algemeen"], ["magazijn", "Magazijnlocaties", "Magazijn"], ["borden", "Borden en waarschuwingen", "Borden"], ["wms", "Scanner en gebruikers", "Scanner"]];
+  const GALERIJ = [["algemeen", "Algemeen", "Algemeen"], ["zending", "Pallets en verzending", "Verzending"], ["magazijn", "Magazijnlocaties", "Magazijn"], ["borden", "Borden en waarschuwingen", "Borden"], ["wms", "Scanner en gebruikers", "Scanner"]];
   const mm = (v) => String(Math.round(v * 10) / 10).replace(".", ",");
   let galerijTab = "alles", galerijGebouwd = false;
   function bouwGalerij() {

@@ -31,6 +31,7 @@
           <input type="radio" name="modus" id="m-lijst" value="lijst" data-k="modus"><label for="m-lijst">Lijst</label>
           <input type="radio" name="modus" id="m-vast" value="vast" data-k="modus"><label for="m-vast">Vast</label>
           <input type="radio" name="modus" id="m-locaties" value="locaties" data-k="modus"><label for="m-locaties">Locaties</label>
+          <input type="radio" name="modus" id="m-zending" value="zending" data-k="modus"><label for="m-zending" title="Pallet- en collistickers: 1/10, 2/10 …">Zending</label>
         </div>
         <div data-modus="reeks" class="sectie plat">
           <div class="rij">
@@ -52,6 +53,19 @@
         <div data-modus="vast" class="sectie plat">
           <label>Waarde (optioneel) <input data-k="vasteWaarde" placeholder="bijv. een vaste barcode"></label>
           <p class="hint">Eén ontwerp, zo vaak als je wilt — ook zonder barcode.</p>
+        </div>
+        <div data-modus="zending" class="sectie plat" id="zending-paneel">
+          <label>Ordernummer <input data-k="colliOrder" placeholder="bijv. 2026-001234" autocomplete="off"></label>
+          <label>Bestemming <textarea data-k="colliBestemming" rows="3" placeholder="Naam&#10;Straat en huisnummer&#10;Postcode en plaats"></textarea></label>
+          <div class="rij">
+            <label>Aantal <input data-k="colliAantal" type="number" min="1" max="5000" inputmode="numeric"></label>
+            <label>Soort <select data-k="colliSoort" id="colli-soort"></select></label>
+          </div>
+          <label id="colli-eigen">Eigen soort <input data-k="colliSoortEigen" placeholder="bijv. GITTERBOX"></label>
+          <p class="hint" id="colli-uitleg"></p>
+          <p class="hint">Per pallet of doos één sticker. Op het label: <code>{order}</code>, <code>{bestemming}</code>, <code>{soort}</code>,
+            <code>{colli}</code> (1/10) en <code>{aantal}</code>. Twee stickers per pallet? Zet Kopieën per sticker op 2.</p>
+          <button type="button" id="zending-ontwerp" hidden>Palletsticker-ontwerp gebruiken</button>
         </div>
         <div data-modus="locaties" class="sectie plat" id="loc-paneel">
           <span class="sublabel">Opbouw van de locatiecode</span>
