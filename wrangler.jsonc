@@ -1,0 +1,6 @@
+{
+  // Statische site via Cloudflare Workers (static assets). Deploy met: npx wrangler deploy
+  "name": "barcodelabels",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./public" }
+}
