@@ -163,7 +163,8 @@
       throw new Error(`${v.kol} × ${v.rij} labels van ${v.b} × ${v.h} mm passen niet op ${pagina.naam} (${pagina.b} × ${pagina.h} mm)${tb ? " met titel" : ""}.`);
     const perVel = v.kol * v.rij;
     const start = Math.min(Math.max(Math.round(+cfg.velStart || 1), 1), perVel);
-    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, tb), perVel, start, pagina, titel };
+    const uitvullen = cfg.vel === "eigen" && cfg.velUitvullen !== false;   // Avery-vellen liggen vast
+    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, tb), perVel, start, pagina, titel, uitvullen };
   }
 
   const LETTERTYPEN = {
@@ -221,7 +222,7 @@
     modus: "reeks", start: "1000", eind: "1025", stap: 1, prefix: "", suffix: "",
     lijst: "", vasteWaarde: "", kopieen: 1, marge: 4, afloop: 0, snijtekens: false,
     vel: "", velStart: 1, velKaders: false, velKol: 2, velRij: 7, velGx: 0, velGy: 0,
-    velPagina: "a4", velPB: 210, velPH: 297, velTitel: "",
+    velPagina: "a4", velPB: 210, velPH: 297, velTitel: "", velUitvullen: true,
     lijstKop: false,
   };
 
@@ -1117,25 +1118,53 @@
         doc.text(`${nr} / ${totaalVellen}`, vel.links + breed, y, { align: "right", baseline: "alphabetic" });
       }
     };
-    let pos = vel.start - 1, vel_nr = 1;
+    // Posities vooraf bepalen, zodat een onvolledige laatste rij kan worden uitgevuld.
+    const plekken = [];
+    let pos = vel.start - 1, pagina = 0;
+    for (let i = 0; i < items.length; i++) {
+      if (pos >= vel.perVel) { pagina++; pos = 0; }
+      plekken.push({ pagina, kol: pos % vel.kol, rij: Math.floor(pos / vel.kol), b: vel.b, dxExtra: 0 });
+      pos++;
+    }
+    const rijBreedte = vel.kol * vel.b + (vel.kol - 1) * vel.gx;
+    if (vel.uitvullen && plekken.length) {
+      const laatste = plekken[plekken.length - 1];
+      const opRij = plekken.filter((p) => p.pagina === laatste.pagina && p.rij === laatste.rij);
+      // Alleen als de rij links begint (geen overgeslagen etiketten) en niet al vol is
+      if (opRij.length < vel.kol && opRij[0].kol === 0) {
+        const n = opRij.length, b = (rijBreedte - (n - 1) * vel.gx) / n;
+        opRij.forEach((p, j) => { p.b = b; p.vrijX = vel.links + j * (b + vel.gx); });
+      }
+    }
+    // Ontwerp horizontaal uitrekken naar een bredere cel (lettergroottes blijven gelijk)
+    const breder = new Map();
+    const ontwerpVoor = (b) => {
+      if (Math.abs(b - vel.b) < 0.01) return cfg;
+      if (!breder.has(b)) {
+        const sx = b / vel.b;
+        breder.set(b, { ...cfg, breedte: b, elementen: cfg.elementen.map((e) => ({ ...e, x: e.x * sx, w: e.w * sx })) });
+      }
+      return breder.get(b);
+    };
+
+    let huidigePagina = 0;
     titel(1);
     items.forEach((item, i) => {
-      if (pos >= vel.perVel) { doc.addPage(formaat, liggend ? "landscape" : "portrait"); pos = 0; titel(++vel_nr); }
-      const kol = pos % vel.kol, rij = Math.floor(pos / vel.kol);
-      const dx = vel.links + kol * (vel.b + vel.gx), dy = vel.boven + rij * (vel.h + vel.gy);
-      const r = render(cfg, item, context(item, i + 1, items.length), libs, meet, cache);
+      const p = plekken[i];
+      if (p.pagina > huidigePagina) { doc.addPage(formaat, liggend ? "landscape" : "portrait"); huidigePagina = p.pagina; titel(p.pagina + 1); }
+      const dx = p.vrijX ?? vel.links + p.kol * (vel.b + vel.gx), dy = vel.boven + p.rij * (vel.h + vel.gy);
+      const r = render(ontwerpVoor(p.b), item, context(item, i + 1, items.length), libs, meet, cache);
       if (r.fouten.length) throw new Error(`Sticker ${i + 1}: ${r.fouten[0]}`);
       doc.saveGraphicsState();
-      doc.rect(dx, dy, vel.b, vel.h, null);
+      doc.rect(dx, dy, p.b, vel.h, null);
       doc.clip();
       doc.discardPath();
       tekenPdf(doc, r.ops, dx, dy);
       doc.restoreGraphicsState();
       if (cfg.velKaders) {
         doc.setDrawColor(170, 170, 170); doc.setLineWidth(0.15);
-        doc.roundedRect(dx, dy, vel.b, vel.h, 1.5, 1.5, "S");
+        doc.roundedRect(dx, dy, p.b, vel.h, 1.5, 1.5, "S");
       }
-      pos++;
     });
     return { doc, aantal: items.length, vellen: doc.getNumberOfPages() };
   }
