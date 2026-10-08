@@ -273,11 +273,11 @@
     const t = bordTeksten(vorm);
     for (const k of BORD_VELDEN) if (typeof o[k] === "string") t[k] = o[k];
     const F = BORD_FORMATEN[o.formaat] || BORD_FORMATEN.a4l, liggend = F.b >= F.h;
-    const driehoek = def.groep === "waarschuwing";
+    const driehoek = def.groep === "waarschuwing" && def.kader !== "paneel", paneel = def.kader === "paneel";
     const L = liggend
-      ? { B: 297, H: 210, balk: 42, kop: 64, picto: driehoek ? [10, 62, 98, 90] : [15, 63, 88, 88],
+      ? { B: 297, H: 210, balk: 42, kop: 64, picto: paneel ? [12, 56, 97, 97] : driehoek ? [10, 62, 98, 90] : [15, 63, 88, 88],
           tx: 112, tw: 172, midden: 109, uitl: "left", uitleg: 20, sep: [112, 172], onder: [14, 185, 12, 14] }
-      : { B: 210, H: 297, balk: 40, kop: 48, picto: driehoek ? [50, 56, 110, 96] : [57, 56, 96, 96],
+      : { B: 210, H: 297, balk: 40, kop: 48, picto: paneel ? [46, 52, 118, 118] : driehoek ? [50, 56, 110, 96] : [57, 56, 96, 96],
           tx: 14, tw: 182, midden: 209, uitl: "center", uitleg: 17, sep: [45, 120], onder: [16, 276, 10, 12] };
     const k = Math.min(F.b / L.B, F.h / L.H), ox = (F.b - L.B * k) / 2, oy = (F.h - L.H * k) / 2;
     const m = (v) => Math.round(v * k * 10) / 10, X = (v) => Math.round((ox + v * k) * 10) / 10, Y = (v) => Math.round((oy + v * k) * 10) / 10;
@@ -289,7 +289,7 @@
     const vak = (naam, x, y, w, h, extra) => el.push(Object.assign({ type: "kader", naam, x, y, w, h }, extra));
 
     const r6 = m(6);
-    vak("Rand", r6, r6, F.b - 2 * r6, F.h - 2 * r6, { dikte: m(3), kleur: !zw && driehoek ? "#000000" : accent });
+    vak("Rand", r6, r6, F.b - 2 * r6, F.h - 2 * r6, { dikte: m(3), kleur: !zw && def.groep === "waarschuwing" ? "#000000" : accent });
     vak("Balk", r6, r6, F.b - 2 * r6, m(L.balk), { gevuld: true, kleur: accent });
     tekst("Kop", m(10), r6, F.b - m(20), m(L.balk), t.kop, L.kop, { vet: true, kleur: contrast(accent) });
     const [px, py, pw, ph] = L.picto;
@@ -492,6 +492,8 @@
     letopStaand: losseGoederen("letop", "a4", "uitroepteken"),
     vallenStaand: losseGoederen("vallen", "a4", "vallende doos"),
     losseStaand: losseGoederen("losse", "a4", "losse dozen naast pallet"),
+    containerLiggend: losseGoederen("container", "a4l", "container"),
+    containerStaand: losseGoederen("container", "a4", "container"),
     heftruckBord: bordOntwerp({ vorm: "heftruck", formaat: "a4l", kleurstijl: "kleur" }),
     voetgangersBord: bordOntwerp({ vorm: "geenVoetgangers", formaat: "a4l", kleurstijl: "kleur" }),
     schoenenBord: bordOntwerp({ vorm: "schoenen", formaat: "a4", kleurstijl: "kleur" }),

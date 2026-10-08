@@ -36,8 +36,8 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   Op grote labels komt de code automatisch op twee regels (bijv. `07 AA` / `01 0`) zodat hij zo groot mogelijk is.
   Het locatievak heeft een zwart-witstand voor zwart-witprinters. In Locaties-modus kun je ook `{code}`, `{bc}` en
   de segmentnamen (bijv. `{Gang}`) in tekstvakken gebruiken.
-- **Pictogrammen** (39, als vectorvorm, kies ze met plaatjes):
-  - *Waarschuwing*: algemeen gevaar, vallende goederen, losse dozen naast pallet, heftrucks, struikelgevaar, gladde vloer,
+- **Pictogrammen** (40, als vectorvorm, kies ze met plaatjes):
+  - *Waarschuwing*: algemeen gevaar, vallende goederen, losse dozen naast pallet, container met losse goederen achter de pallet, heftrucks, struikelgevaar, gladde vloer,
     elektrische spanning, hangende last, lage temperatuur, valgevaar laadperron, brandbare stoffen.
   - *Verbod*: algemeen, niet roken, geen open vuur, voetgangers, heftrucks, mobiele telefoon, vrijhouden.
   - *Gebod*: algemeen, veiligheidsschoenen, veiligheidsvest, helm, gehoorbescherming, handschoenen, veiligheidsbril, looppad.
@@ -46,7 +46,7 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   - Normkleuren (geel, rood, blauw, groen), zwart-wit voor een zwart-witprinter, of eigen kleuren.
 - **Bord maken**: kies een pictogram en de kop en teksten (Nederlands en Engels) vullen zich vanzelf in; pas ze aan,
   kies A3, A4 of A5 (liggend of staand) of een label van 150 × 102 mm, kleur of zwart-wit, en zie direct het resultaat.
-  Kant-en-klaar: "LET OP! — CAUTION! Losse goederen achter deze pallet" met uitroepteken, vallende doos of losse dozen,
+  Kant-en-klaar: "LET OP! — CAUTION! Losse goederen achter deze pallet" met uitroepteken, vallende doos, losse dozen of de container,
   heftrucks, verboden voor voetgangers, veiligheidsschoenen, valgevaar laadperron, nooduitgang, verzamelplaats en niet roken.
 - **Scanner en gebruikers**: commandokaart (raster op A5, zoals op de heftruck), commandoblad A4, commandosticker,
   gebruikerslijst A4 (Naam | RF username | RF password, barcode met tekst eronder) en gebruikerspasje (85,6 × 54 mm).

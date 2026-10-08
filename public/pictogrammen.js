@@ -224,6 +224,10 @@
       return { p, vak: [28, 35, 43] };
     }
     const z = Math.min(w, h), p = pen(r, x + (w - z) / 2, y + (h - z) / 2, z, c.teken, c.gat);
+    if (groep === "paneel") {   // vierkant waarschuwingspaneel: zwarte rand, gele of witte binnenkant
+      p.rrect(0, 0, 100, 100, 7, c.rand).rrect(6, 6, 88, 88, 3, c.binnen);
+      return { p, vak: [9, 9, 82] };
+    }
     if (groep === "verbod") {
       p.cirkel(50, 50, 50, c.rand).cirkel(50, 50, 40, c.binnen);
       const a = Math.SQRT1_2, L = 40.4, W = 4.6;
@@ -396,6 +400,29 @@
       figuur(37, 27, 0.82); figuur(63, 27, 0.82);
       figuur(50, 33, 1, q.gat); figuur(50, 33, 1);
     },
+    container(q) {   // zeecontainer schuin van achteren, deur open: pallet in de deuropening, losse dozen erachter, een doos valt eruit
+      const g = q.gat, boven = (u) => 10 + ((u - 4) * 12) / 28, onder = (u) => 82 + ((u - 4) * 12) / 28;
+      q.vlak([[4, 10], [32, 22], [32, 94], [4, 82]]);                       // zijwand
+      q.vlak([[4, 10], [56, 10], [84, 22], [32, 22]]);                      // dak
+      for (let u = 8; u <= 28; u += 4) q.vlak([[u, boven(u) + 2.6], [u + 1.5, boven(u + 1.5) + 2.6], [u + 1.5, onder(u + 1.5) - 2.6], [u, onder(u) - 2.6]], g);   // golfplaat
+      q.lijn([[5, 10.6], [31.4, 22]], 1.5, g);                               // naad dak / zijwand
+      q.rect(32, 22, 52, 72);                                               // achterkant met deuropening
+      q.rect(32, 22, 1.4, 72, g);
+      q.rect(38, 28.5, 40.5, 61.5, g);
+      q.vlak([[84, 24], [96, 29], [96, 97], [84, 92]]);                     // open deur met sluitstangen
+      for (const u of [87.6, 91.6]) q.vlak([[u, 24 + (u - 84) * 5 / 12 + 3], [u + 1.5, 24 + (u + 1.5 - 84) * 5 / 12 + 3],
+        [u + 1.5, 92 + (u + 1.5 - 84) * 5 / 12 - 3], [u, 92 + (u - 84) * 5 / 12 - 3]], g);
+      // pallet in de deuropening
+      q.rrect(40.5, 57, 35.5, 24, 2);
+      for (const v of [64, 72]) q.rect(40.5, v, 35.5, 1.3, g);
+      q.rect(40.5, 81, 35.5, 3.2);
+      for (const u of [40.5, 55.5, 70.5]) q.rect(u, 84.2, 5.5, 5.8);
+      // losse dozen erachter, scheef gestapeld tot aan het dak
+      q.vierkant(46.5, 49.5, 5.2, -5).vierkant(58, 49, 5.5, 4).vierkant(70, 49.5, 5, -3);
+      q.vierkant(51.5, 38, 5, 7).vierkant(63.5, 37.5, 5, -6).vierkant(73.3, 38.5, 3.8, 5);
+      // doos valt de container uit
+      q.vierkant(88, 68, 8.6, 26, g).vierkant(88, 68, 6.5, 26);
+    },
     hart(q) {
       q.pad("M50,92 C30,76 4,58 4,34 C4,17 17,6 31,6 C40,6 46,11 50,19 C54,11 60,6 69,6 C83,6 96,17 96,34 C96,58 70,76 50,92 Z");
       q.pad("M55,22 L36,54 L49,54 L41,80 L64,44 L51,44 L60,22 Z", q.gat);
@@ -539,6 +566,13 @@
       naam: "Valgevaar laadperron", groep: "waarschuwing", vak: [27, 34, 44],
       nl: ["Valgevaar laadperron", "Blijf uit de buurt van de rand"], en: ["Fall hazard: loading dock", "Keep away from the edge"],
       teken: (q) => VORM.laadperron(q),
+    },
+    container: {
+      naam: "Container: losse goederen achter pallet", groep: "waarschuwing", kader: "paneel",
+      nl: ["Losse goederen achter deze pallet", "Pallet voorzichtig wegnemen: er kunnen goederen vallen!"],
+      en: ["Loose goods behind this pallet", "Remove the pallet carefully: items may fall!"],
+      onder: "Losse goederen eerst zekeren of weghalen  ·  Secure or remove loose goods first",
+      teken: (q) => VORM.container(q),
     },
     brandbaar: {
       naam: "Brandbare stoffen", groep: "waarschuwing", vak: [30, 33, 40],
@@ -707,7 +741,7 @@
       const richting = PIJLRICHTINGEN.includes(el.richting) && el.richting !== "geen" ? el.richting : "omhoog";
       return pijlen(r, { r: richting, n: Math.min(Math.max(+el.aantal || 1, 1), 3) }, x, y, w, h, c.teken);
     }
-    const k = kader(r, def.groep, x, y, w, h, c);
+    const k = kader(r, def.kader || def.groep, x, y, w, h, c);
     const vak = def.vak === "kader" ? null : def.vak || k.vak;
     def.teken(vak ? k.p.sub(vak[0], vak[1], vak[2]) : k.p, el);
     if (k.na) k.na();
