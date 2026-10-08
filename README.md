@@ -6,7 +6,7 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
 ## Mogelijkheden
 
 - **Zelf ontwerpen**: zet onderdelen vrij op het label, versleep ze en verander de grootte met de muis (of touch).
-  - Tekstvakken (meerdere), barcodes (Code 128, Code 39, EAN-13), QR-codes, kaders, lijnen en afbeeldingen/logo's.
+  - Tekstvakken (meerdere), barcodes (Code 128, Code 39, EAN-13), QR-codes, kaders, lijnen, afbeeldingen/logo's en pictogrammen.
   - Per onderdeel: positie en grootte in mm, uitlijnen op het label (links/midden/rechts, boven/midden/onder, volle breedte).
   - Tekst: lettertype, grootte, vet, wit-op-zwart, uitlijning in het vak, regels laten teruglopen, automatisch verkleinen.
   - Raster en hulplijnen (randen, midden, andere onderdelen), ongedaan maken/opnieuw, dupliceren, lagen.
@@ -31,9 +31,18 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   Op grote labels komt de code automatisch op twee regels (bijv. `07 AA` / `01 0`) zodat hij zo groot mogelijk is.
   Het locatievak heeft een zwart-witstand voor zwart-witprinters. In Locaties-modus kun je ook `{code}`, `{bc}` en
   de segmentnamen (bijv. `{Gang}`) in tekstvakken gebruiken.
-- **Borden en waarschuwingen**: A4 "LET OP! — CAUTION!" voor losse goederen achter een pallet (NL/EN, liggend en staand, zwart-wit),
-  met een uitroepteken, een vallende doos of losse dozen naast een pallet als pictogram.
-  Onderdeel *Symbool*: waarschuwingsdriehoek (uitroepteken, vallende doos, losse dozen) of 1–3 pijlen in elke richting, als vectorvorm.
+- **Pictogrammen** (37, als vectorvorm, kies ze met plaatjes):
+  - *Waarschuwing*: algemeen gevaar, vallende goederen, losse dozen naast pallet, heftrucks, struikelgevaar, gladde vloer,
+    elektrische spanning, hangende last, lage temperatuur, brandbare stoffen.
+  - *Verbod*: algemeen, niet roken, geen open vuur, voetgangers, heftrucks, mobiele telefoon, vrijhouden.
+  - *Gebod*: algemeen, veiligheidsschoenen, veiligheidsvest, helm, gehoorbescherming, handschoenen, veiligheidsbril, looppad.
+  - *Nood en brand*: EHBO, nooduitgang, AED, vluchtroute (pijl), brandblusser, brandslang.
+  - *Verzending*: deze kant boven, breekbaar, droog houden, niet stapelen, zwaartepunt — en 1–3 pijlen in elke richting.
+  - Normkleuren (geel, rood, blauw, groen), zwart-wit voor een zwart-witprinter, of eigen kleuren.
+- **Bord maken**: kies een pictogram en de kop en teksten (Nederlands en Engels) vullen zich vanzelf in; pas ze aan,
+  kies A3, A4 of A5 (liggend of staand) of een label van 150 × 102 mm, kleur of zwart-wit, en zie direct het resultaat.
+  Kant-en-klaar: "LET OP! — CAUTION! Losse goederen achter deze pallet" met uitroepteken, vallende doos of losse dozen,
+  heftrucks, verboden voor voetgangers, veiligheidsschoenen, nooduitgang en niet roken.
 - **Scanner en gebruikers**: commandokaart (raster op A5, zoals op de heftruck), commandoblad A4, commandosticker,
   gebruikerslijst A4 (Naam | RF username | RF password, barcode met tekst eronder) en gebruikerspasje (85,6 × 54 mm).
 - **Barcodes**: optioneel de waarde als tekst eronder, en een maximale streepdikte zodat korte codes (`e`, `11`) niet worden uitgerekt.
@@ -45,7 +54,9 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
 - **A4-vellen**: Avery (L7160, L7163, L7165, L7173, L7651 …) en Avery Zweckform (3474, 3475, 3424, 3425, 3427, 3483 …),
   of een eigen indeling (kolommen × rijen). Begin bij etiket nr. voor halfgebruikte vellen, randen tonen voor een proefprint;
   elk etiket wordt bijgesneden tot zijn eigen vak.
-- **Sjablonen**: voorbeeldontwerpen (algemeen en magazijn), eigen sjablonen opslaan in de browser, exporteren/importeren als `.json`.
+- **Voorbeelden**: een galerij met plaatjes van alle kant-en-klare ontwerpen (algemeen, magazijnlocaties, borden, scanner en gebruikers),
+  of begin met een leeg label.
+- **Sjablonen**: eigen sjablonen opslaan in de browser, exporteren/importeren als `.json`.
 - Instellingen uit de vorige versie worden automatisch omgezet naar het nieuwe ontwerp.
 
 ## Hosten op Cloudflare
@@ -75,3 +86,9 @@ python labels.py 1000 1050
 Druk af op **werkelijke grootte / 100%** (niet "passend maken"), met het papierformaat van je label.
 
 Bibliotheken (in `public/vendor`): jsPDF, JsBarcode, qrcode-generator — alle MIT-licentie.
+
+## Bestanden
+
+- `public/labels.js` — de engine: formaten, inhoud, locaties, tekenen naar PDF en SVG, borden.
+- `public/pictogrammen.js` — alle pictogrammen en pijlen als vectorvormen.
+- `public/editor.js` — het werkvlak, de eigenschappen, de voorbeelden en het venster "Bord maken".

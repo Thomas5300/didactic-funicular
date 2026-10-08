@@ -13,6 +13,8 @@
     <span>Ontwerp je eigen (barcode)stickers voor je labelprinter — alles gebeurt in je browser</span>
   </div>
   <div class="kop-acties">
+    <button type="button" id="open-galerij" title="Kies een kant-en-klaar ontwerp">▦ Voorbeelden</button>
+    <button type="button" id="open-bord" title="Maak een A4-bord met pictogram en tekst">⚠ Bord maken</button>
     <button type="button" id="print">Open om te printen</button>
     <button type="button" class="primair" id="download">Download PDF</button>
   </div>
@@ -126,8 +128,9 @@
           <p class="hint" id="vel-info"></p>
         </div>
 
-        <div id="drukkerij" class="sectie plat">
-          <span class="sublabel">Voor de drukkerij</span>
+        <details id="drukkerij" class="sub">
+          <summary>Voor de drukkerij (afloop en snijtekens)</summary>
+          <div class="sectie plat">
           <div class="rij">
             <label>Afloop
               <select data-k="afloop"><option value="0">geen</option><option value="2">2 mm</option><option value="3">3 mm</option><option value="5">5 mm</option></select>
@@ -135,16 +138,15 @@
             <label class="check" style="align-self:end"><input type="checkbox" data-k="snijtekens"> Snijtekens</label>
           </div>
           <p class="hint">Met afloop lopen gekleurde vlakken die tegen de rand liggen door buiten het label, zodat er na het snijden geen witte randjes zijn. Voor een labelprinter: laat dit op “geen”.</p>
-        </div>
+          </div>
+        </details>
       </div>
     </details>
 
     <details open>
-      <summary>Sjablonen</summary>
+      <summary>Mijn sjablonen</summary>
       <div class="sectie">
-        <span class="sublabel">Begin met een voorbeeld</span>
-        <div class="starters" id="starters"></div>
-        <span class="sublabel">Mijn sjablonen</span>
+        <button type="button" id="open-galerij2">▦ Voorbeelden bekijken…</button>
         <div class="knoprij">
           <select id="sjabloon"><option value="">— kies sjabloon —</option></select>
           <button type="button" id="sj-laad">Laden</button>
@@ -174,7 +176,7 @@
         <button type="button" data-nieuw="lijn" title="Lijn toevoegen">＋ Lijn</button>
         <button type="button" data-nieuw="afbeelding" title="Logo of afbeelding toevoegen">＋ Afbeelding</button>
         <button type="button" data-nieuw="locaties" title="Locatievak voor magazijnlocaties toevoegen">＋ Locaties</button>
-        <button type="button" data-nieuw="symbool" title="Waarschuwingsdriehoek of pijl toevoegen">＋ Symbool</button>
+        <button type="button" data-nieuw="symbool" title="Waarschuwings-, verbods- of gebodsteken, nood- of verzendsymbool of pijl">＋ Pictogram</button>
         <input type="file" id="afb-bestand" accept="image/*" hidden>
       </div>
       <div class="groep">
@@ -217,6 +219,56 @@
   </aside>
 </div>
 
+<!-- Voorbeelden -->
+<dialog id="galerij" class="venster" aria-labelledby="galerij-titel">
+  <div class="venster-kop">
+    <h2 id="galerij-titel">Kies een voorbeeld</h2>
+    <button type="button" class="sluit" data-sluit aria-label="Sluiten">✕</button>
+  </div>
+  <div class="seg tabs" id="galerij-tabs"></div>
+  <div class="venster-body" id="galerij-inhoud"></div>
+</dialog>
+
+<!-- Bord maken -->
+<dialog id="bord" class="venster" aria-labelledby="bord-titel">
+  <div class="venster-kop">
+    <h2 id="bord-titel">Bord maken</h2>
+    <button type="button" class="sluit" data-sluit aria-label="Sluiten">✕</button>
+  </div>
+  <div class="venster-body bord-raster">
+    <div class="bord-links">
+      <div class="bord-voorbeeld"><svg id="bord-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Voorbeeld van het bord"></svg></div>
+      <div class="rij">
+        <label>Formaat <select id="bord-formaat"></select></label>
+        <label>Kleuren
+          <span class="seg" id="bord-kleur">
+            <button type="button" data-kleurstijl="kleur">Kleur</button><button type="button" data-kleurstijl="zw">Zwart-wit</button>
+          </span>
+        </label>
+      </div>
+    </div>
+    <div class="bord-rechts">
+      <span class="sublabel">Pictogram: <b id="bord-picto-naam"></b></span>
+      <div class="picto-kiezer" id="bord-picto"></div>
+      <label>Kop <input id="bord-kop" data-bord="kop"></label>
+      <div class="rij">
+        <label>Nederlands <input data-bord="nl1" placeholder="Titel"></label>
+        <label>Uitleg <input data-bord="nl2" placeholder="(optioneel)"></label>
+      </div>
+      <div class="rij">
+        <label>Engels <input data-bord="en1" placeholder="Titel (leeg = alleen Nederlands)"></label>
+        <label>Uitleg <input data-bord="en2" placeholder="(optioneel)"></label>
+      </div>
+      <label>Onderregel <input data-bord="onder" placeholder="(optioneel)"></label>
+      <p class="hint">De teksten vullen zich in bij het pictogram; pas ze gerust aan. Na het maken kun je alles nog verplaatsen en wijzigen op het werkvlak.</p>
+      <div class="knoprij">
+        <button type="button" id="bord-reset">Standaardteksten</button>
+        <button type="button" class="primair" id="bord-maak">Bord maken</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
 <footer class="voet">
   <p><strong>Stickerbouwer</strong> is onderdeel van <strong>Thomas-IT</strong> en is een gratis service.</p>
   <p>Vragen of opmerkingen? Neem contact op via <a href="mailto:info@thomas-it.nl">info@thomas-it.nl</a>.</p>
@@ -225,6 +277,7 @@
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/JsBarcode.all.min.js"></script>
 <script src="vendor/qrcode.js"></script>
+<script src="pictogrammen.js"></script>
 <script src="labels.js"></script>
 <script src="editor.js"></script>
 </body>

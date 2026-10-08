@@ -1,6 +1,7 @@
 // Stickerbouwer — editor (werkvlak, onderdelen, eigenschappen, sjablonen).
 (() => {
   const L = window.Labels;
+  const PIC = window.Pictogrammen;
   const libs = { jsPDF: window.jspdf.jsPDF, JsBarcode: window.JsBarcode, qrcode: window.qrcode };
   const meet = L.meetMet(new libs.jsPDF());
   const $ = (id) => document.getElementById(id);
@@ -21,7 +22,9 @@
   let gidsen = [];
   let losseMelding = null;
 
-  const TYPENAAM = { tekst: "tekstvak", barcode: "barcode", kader: "kader", afbeelding: "afbeelding", locaties: "locatievak", symbool: "symbool" };
+  const TYPENAAM = { tekst: "tekstvak", barcode: "barcode", kader: "kader", afbeelding: "afbeelding", locaties: "locatievak", symbool: "pictogram" };
+  const STIJLNAAM = { kleur: "kleur", zw: "zwart-wit", eigen: "eigen kleuren" };
+  const RICHTING = { omhoog: "↑", omlaag: "↓", links: "←", rechts: "→" };
   const sel = () => cfg.elementen.find((e) => e.id === geselecteerd) || null;
 
   // ---------- Opslaan en ongedaan maken ----------
@@ -224,7 +227,7 @@
   document.addEventListener("keydown", (e) => {
     const inVeld = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
     const mod = e.ctrlKey || e.metaKey;
-    if (inVeld) return;
+    if (inVeld || document.querySelector("dialog[open]")) return;   // niet typen of wissen achter een open venster
     if (mod && e.key.toLowerCase() === "z") { e.preventDefault(); e.shiftKey ? opnieuw() : ongedaan(); return; }
     if (mod && e.key.toLowerCase() === "y") { e.preventDefault(); opnieuw(); return; }
     const g = sel();
@@ -244,8 +247,11 @@
     if (e.type === "tekst") return String(e.tekst).split("\n")[0];
     if (e.type === "barcode") return ({ CODE128: "Code 128", CODE39: "Code 39", EAN13: "EAN-13", QR: "QR" }[e.symbologie] || "") + " · " + e.inhoud;
     if (e.type === "kader") return e.gevuld ? "gevuld vlak / lijn" : `rand ${e.dikte} mm`;
-    if (e.type === "symbool") return e.vorm === "pijl" ? `pijl ${{ omhoog: "↑", omlaag: "↓", links: "←", rechts: "→" }[e.richting] || ""} × ${e.aantal}`
-      : { vallen: "waarschuwing: vallende doos", losse: "waarschuwing: losse dozen naast pallet" }[e.vorm] || "waarschuwingsdriehoek";
+    if (e.type === "symbool") {
+      const d = PIC.PICTOGRAMMEN[e.vorm] || PIC.PICTOGRAMMEN.letop;
+      if (e.vorm === "pijl") return `pijl ${RICHTING[e.richting] || ""} × ${e.aantal}`;
+      return d.naam + (d.groep === "verzending" ? "" : ` · ${STIJLNAAM[e.kleurstijl] || ""}`);
+    }
     if (e.type === "locaties") return `${e.richting === "onder" ? "onder elkaar" : "naast elkaar"} · ${{ diagonaal: "diagonaal", balk: "kleurbalk", vol: "vol gekleurd", streep: "kleurstreep" }[e.stijl] || ""}`;
     return e.data ? `${e.imgB} × ${e.imgH} px` : "geen afbeelding";
   }
@@ -319,17 +325,25 @@
       h += `${num("dikte", "Lijndikte (mm)", 0.1, 0.1)}${chk("gevuld", "Gevuld (vlak — dun = lijn)")}
         <span class="sublabel">Kleur</span>${kleur("kleur")}`;
     } else if (g.type === "symbool") {
-      h += `<span class="sublabel">Vorm</span>
-        ${seg("vorm", [["letop", "△ !"], ["vallen", "Vallende doos"], ["losse", "Losse dozen"], ["pijl", "↑ Pijl"]])}
-        ${g.vorm === "pijl"
+      const d = PIC.PICTOGRAMMEN[g.vorm] || PIC.PICTOGRAMMEN.letop, vrij = d.groep === "verzending" || d.groep === "pijl";
+      if (!kiezerGroep || kiezerVoor !== g.id) { kiezerGroep = d.groep; kiezerVoor = g.id; }
+      const binnen = { waarschuwing: "Binnenkant", verbod: "Binnenkant", gebod: "Teken", nood: "Teken", brand: "Teken" }[d.groep];
+      h += `<span class="sublabel">Pictogram: <b>${esc(d.naam)}</b></span>
+        <div class="picto-kiezer">${kiezerHtml(g.vorm, kiezerGroep, g)}</div>
+        ${d.richting || d.aantal
           ? `<div class="rij">
                <label>Richting ${keuze("richting", [["omhoog", "↑ Omhoog"], ["omlaag", "↓ Omlaag"], ["links", "← Links"], ["rechts", "→ Rechts"]])}</label>
-               <label>Aantal ${keuze("aantal", [["1", "1 pijl"], ["2", "2 pijlen"], ["3", "3 pijlen"]])}</label>
+               ${d.aantal ? `<label>Aantal ${keuze("aantal", [["1", "1 pijl"], ["2", "2 pijlen"], ["3", "3 pijlen"]])}</label>` : ""}
              </div>`
           : ""}
-        <span class="sublabel">Kleur</span>${kleur("kleur")}
-        ${g.vorm === "pijl" ? "" : `<span class="sublabel">Binnenkant</span>${kleur("vulling")}
-          <p class="hint">Wit is het best op een zwart-witprinter; geel (<code>#fdd835</code>) is de klassieke waarschuwingskleur.</p>`}`;
+        ${vrij
+          ? `<span class="sublabel">Kleur</span>${kleur("kleur")}`
+          : `<span class="sublabel">Kleuren</span>
+             ${seg("kleurstijl", [["kleur", "Normkleuren"], ["zw", "Zwart-wit"], ["eigen", "Eigen"]])}
+             ${g.kleurstijl === "eigen" ? `<span class="sublabel">${d.groep === "waarschuwing" ? "Rand en teken" : d.groep === "verbod" ? "Rand en balk" : "Vlak"}</span>${kleur("kleur")}
+               <span class="sublabel">${binnen}</span>${kleur("vulling")}` : ""}
+             <p class="hint">${{ zw: "Zwart-wit is het best voor een zwart-witprinter of labelprinter.", kleur: "Normkleuren: geel (waarschuwing), rood (verbod en brand), blauw (gebod) en groen (nood en EHBO).", eigen: "Kies zelf de kleuren, bijv. in je huisstijl." }[g.kleurstijl]}</p>`}
+        <button type="button" data-actie="bord">⚠ Maak er een bord van (A4 met tekst)…</button>`;
     } else if (g.type === "locaties") {
       h += `<span class="sublabel">Locaties op de sticker</span>
         ${seg("richting", [["naast", "Naast elkaar"], ["onder", "Onder elkaar"]])}
@@ -395,6 +409,8 @@
       if (k === "splits") v = Math.min(Math.max(Math.round(v), 0), 10);
     }
     g[k] = v;
+    if (k === "kleurstijl" && v === "eigen" && g.kleur === "#000000" && g.vulling === "#ffffff")
+      Object.assign(g, PIC.eigenStart((PIC.PICTOGRAMMEN[g.vorm] || {}).groep));
     if (k === "symbologie" && v === "QR") { const z = Math.min(g.w, g.h); g.x = afr(g.x + (g.w - z) / 2); g.w = g.h = afr(z); }
     const typen = ["tekst", "naam", "inhoud", "kleur", ...GETALLEN];   // tijdens typen/slepen: niet elke toets apart in de historie
     gewijzigd(!typen.includes(k));
@@ -412,7 +428,9 @@
   eig.addEventListener("click", (e) => {
     const t = e.target.closest("button");
     if (!t) return;
-    if (t.dataset.waarde != null) { zetProp(t.dataset.prop, t.dataset.waarde); bouwEigenschappen(); }
+    if (t.dataset.vorm) { zetProp("vorm", t.dataset.vorm); bouwEigenschappen(); }
+    else if (t.dataset.pgroep) { kiezerGroep = t.dataset.pgroep; bouwEigenschappen(); }
+    else if (t.dataset.waarde != null) { zetProp(t.dataset.prop, t.dataset.waarde); bouwEigenschappen(); }
     else if (t.dataset.uitlijn) uitlijnen(t.dataset.uitlijn);
     else if (t.dataset.actie) actieUitvoeren(t.dataset.actie);
     else if (t.dataset.chip) {
@@ -455,6 +473,7 @@
     else if (a === "afbeelding") { afbModus = "vervang"; $("afb-bestand").click(); return; }
     else if (a === "locatielogo") { afbModus = "locatielogo"; $("afb-bestand").click(); return; }
     else if (a === "locatielogo-weg") { g.logo = ""; }
+    else if (a === "bord") { openBord(g.vorm, g.kleurstijl === "kleur" ? "kleur" : "zw"); return; }
     gewijzigd(true); bouwLijst(); bouwEigenschappen(); teken();
   }
 
@@ -488,7 +507,7 @@
     if (soort === "qr") { const z = Math.min(30, vb, vh); plaatsNieuw({ type: "barcode", naam: "QR-code", symbologie: "QR", w: z, h: z }); }
     if (soort === "kader") plaatsNieuw({ type: "kader", w: Math.min(60, vb), h: Math.min(30, vh) });
     if (soort === "lijn") plaatsNieuw({ type: "kader", naam: "Lijn", gevuld: true, w: vb, h: 0.6 });
-    if (soort === "symbool") { const z = Math.min(40, vb, vh); plaatsNieuw({ type: "symbool", w: z, h: Math.round(z * 0.9 * 10) / 10 }); }
+    if (soort === "symbool") { const z = Math.min(40, vb, vh); plaatsNieuw({ type: "symbool", kleurstijl: "kleur", w: z, h: Math.round(z * 0.9 * 10) / 10 }); }
     if (soort === "locaties") plaatsNieuw({ type: "locaties", w: vb, h: vh, richting: B >= H ? "naast" : "onder" });
   }));
 
@@ -802,33 +821,163 @@
     gewijzigd(true); alles();
   }
 
-  const starters = $("starters");
-  for (const [groep, titel] of [["algemeen", "Algemeen"], ["magazijn", "Magazijnlocaties"], ["borden", "Borden en waarschuwingen"], ["wms", "Scanner en gebruikers"]]) {
-    const kop = document.createElement("span");
-    kop.className = "starterkop"; kop.textContent = titel;
-    starters.append(kop);
-    for (const [k, s] of Object.entries(L.STARTERS)) {
-      if ((s.groep || "algemeen") !== groep) continue;
-      const b = document.createElement("button");
-      b.type = "button"; b.textContent = s.naam; b.dataset.starter = k;
-      starters.append(b);
-    }
-  }
-  starters.addEventListener("click", (e) => {
-    const s = L.STARTERS[e.target.dataset.starter];
-    if (!s) return;
-    if (cfg.elementen.length && !confirm(`Huidig ontwerp vervangen door “${s.naam}”?\n(Ongedaan maken kan met ↶.)`)) return;
+  // Ontwerp van een voorbeeld; heb je al een eigen lijst met dezelfde kolommen (bijv. je gebruikers), dan blijft die staan.
+  function starterCfg(s) {
     const nieuw = { ...cfg, breedte: s.breedte, hoogte: s.hoogte, elementen: s.elementen.map((x) => ({ ...x })), vel: "" };
     if (s.modus) nieuw.modus = s.modus;
-    if (s.inhoud) {   // bijv. voorbeeldlijst en vel-indeling
+    if (s.inhoud) {
       Object.assign(nieuw, s.inhoud);
-      // Heb je al een eigen lijst met dezelfde kolommen (bijv. je gebruikers)? Dan blijft die staan.
       const kop = (t) => String(t || "").split(/\r?\n/)[0].trim().toLowerCase().replace(/\t/g, ";");
       const eigen = cfg.modus === "lijst" && String(cfg.lijst || "").trim() && !L.VOORBEELD_LIJSTEN.includes(cfg.lijst);
       if (s.inhoud.lijst && eigen && cfg.lijstKop && kop(cfg.lijst) === kop(s.inhoud.lijst)) nieuw.lijst = cfg.lijst;
     }
     if (s.locatie) nieuw.locatie = { ...cfg.locatie, ...JSON.parse(JSON.stringify(s.locatie)) };
+    return nieuw;
+  }
+  function vervangOntwerp(naam, nieuw) {
+    if (cfg.elementen.length && !confirm(`Huidig ontwerp vervangen door “${naam}”?\n(Ongedaan maken kan met ↶.)`)) return false;
     laadOntwerp(nieuw);
+    return true;
+  }
+
+  // ---------- Miniaturen ----------
+  const pictoCache = new Map();
+  function pictoSvg(vorm, el = {}) {
+    const sleutel = [vorm, el.kleurstijl, el.kleur, el.vulling, el.richting].join("|");
+    if (!pictoCache.has(sleutel)) {
+      const r = { ops: [] };
+      PIC.tekenPictogram(r, { vorm, kleurstijl: el.kleurstijl || "kleur", kleur: el.kleur, vulling: el.vulling, richting: el.richting, aantal: 1 }, 1, 1, 38, 38);
+      pictoCache.set(sleutel, `<svg viewBox="0 0 40 40" aria-hidden="true">${L.opsNaarSvg(r.ops)}</svg>`);
+    }
+    return pictoCache.get(sleutel);
+  }
+  // Eerste sticker van een ontwerp als SVG-inhoud (voor miniaturen en het bordvoorbeeld).
+  function ontwerpOps(s) {
+    const c = L.normaliseer({ ...L.INHOUD_STANDAARD, breedte: s.breedte, hoogte: s.hoogte, elementen: s.elementen,
+      modus: s.modus || "reeks", ...(s.inhoud || {}), locatie: s.locatie });
+    let item;
+    try { item = L.waarden(c)[0]; } catch { item = { waarde: "", nr: "" }; }
+    const r = L.render(c, item, L.context(item, 1, 1), libs, meet);
+    return `<rect width="${c.breedte}" height="${c.hoogte}" fill="#fff"/>${L.opsNaarSvg(r.ops)}`;
+  }
+  const miniatuur = (s) => `<svg viewBox="0 0 ${s.breedte} ${s.hoogte}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${ontwerpOps(s)}</svg>`;
+
+  // Pictogramkiezer: groepen als tabbladen, daaronder de pictogrammen van die groep.
+  const GROEP_ICOON = { waarschuwing: "letop", verbod: "verboden", gebod: "gebod", nood: "ehbo", brand: "blusser", verzending: "breekbaar", pijl: "pijl" };
+  let kiezerGroep = null, kiezerVoor = null;
+  function kiezerHtml(huidig, groep, el) {
+    const naam = Object.fromEntries(PIC.GROEPEN);
+    return `<div class="seg pgroepen" role="tablist">${PIC.GROEPEN.map(([gr, t]) => `<button type="button" role="tab" data-pgroep="${gr}"
+        class="${gr === groep ? "actief" : ""}" title="${t}" aria-label="${t}" aria-selected="${gr === groep}">${pictoSvg(GROEP_ICOON[gr], { kleurstijl: "kleur" })}</button>`).join("")}</div>
+      <span class="groepnaam">${naam[groep] || ""}</span>
+      <div class="picto-raster">${Object.entries(PIC.PICTOGRAMMEN).filter(([, d]) => d.groep === groep).map(([k, d]) =>
+        `<button type="button" data-vorm="${k}" class="${k === huidig ? "actief" : ""}" title="${esc(d.naam)}" aria-label="${esc(d.naam)}">${pictoSvg(k, el)}</button>`).join("")}</div>`;
+  }
+
+  // ---------- Voorbeelden (galerij) ----------
+  const GALERIJ = [["algemeen", "Algemeen", "Algemeen"], ["magazijn", "Magazijnlocaties", "Magazijn"], ["borden", "Borden en waarschuwingen", "Borden"], ["wms", "Scanner en gebruikers", "Scanner"]];
+  const mm = (v) => String(Math.round(v * 10) / 10).replace(".", ",");
+  let galerijTab = "alles", galerijGebouwd = false;
+  function bouwGalerij() {
+    $("galerij-tabs").innerHTML = [["alles", "", "Alles"], ...GALERIJ].map(([g, , kort]) =>
+      `<button type="button" data-tab="${g}" class="${g === galerijTab ? "actief" : ""}">${kort}</button>`).join("");
+    if (galerijGebouwd) return;
+    galerijGebouwd = true;
+    const kaart = (attr, duim, naam, sub) => `<button type="button" class="kaartje" ${attr}><span class="duim">${duim}</span>
+      <span class="nm">${esc(naam)}</span><span class="sub">${esc(sub)}</span></button>`;
+    $("galerij-inhoud").innerHTML = GALERIJ.map(([groep, titel]) => {
+      let kaarten = "";
+      if (groep === "algemeen") kaarten += kaart('data-speciaal="leeg"', `<span class="plus">＋</span>`, "Leeg ontwerp", "begin met een leeg label");
+      if (groep === "borden") kaarten += kaart('data-speciaal="bord"', `<span class="plus picto">${pictoSvg("letop")}${pictoSvg("verboden")}${pictoSvg("gebod")}</span>`,
+        "Zelf een bord maken…", "kies pictogram, tekst en formaat");
+      for (const [k, s] of Object.entries(L.STARTERS)) {
+        if ((s.groep || "algemeen") !== groep) continue;
+        let duim;
+        try { duim = miniatuur(s); } catch { duim = ""; }
+        kaarten += kaart(`data-starter="${k}"`, duim, s.naam, s.sub || `${mm(s.breedte)} × ${mm(s.hoogte)} mm`);
+      }
+      return `<section class="galerij-groep" data-groep="${groep}"><h3>${titel}</h3><div class="kaarten">${kaarten}</div></section>`;
+    }).join("");
+  }
+  function toonGalerijTab() {
+    $("galerij-tabs").querySelectorAll("[data-tab]").forEach((b) => b.classList.toggle("actief", b.dataset.tab === galerijTab));
+    $("galerij-inhoud").querySelectorAll(".galerij-groep").forEach((s) => (s.hidden = galerijTab !== "alles" && s.dataset.groep !== galerijTab));
+  }
+  function openGalerij() { bouwGalerij(); toonGalerijTab(); $("galerij").showModal(); }
+  $("open-galerij").addEventListener("click", openGalerij);
+  $("open-galerij2").addEventListener("click", openGalerij);
+  $("galerij-tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) { galerijTab = b.dataset.tab; toonGalerijTab(); } });
+  $("galerij-inhoud").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.speciaal === "bord") { $("galerij").close(); openBord(); return; }
+    if (b.dataset.speciaal === "leeg") {
+      if (vervangOntwerp("een leeg ontwerp", { ...cfg, elementen: [], vel: "" })) $("galerij").close();
+      return;
+    }
+    const s = L.STARTERS[b.dataset.starter];
+    if (s && vervangOntwerp(s.naam, starterCfg(s))) $("galerij").close();
+  });
+  // Vensters sluiten met ✕ of door naast het venster te klikken
+  document.querySelectorAll("dialog.venster").forEach((d) => {
+    d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-sluit]")) d.close(); });
+  });
+
+  // ---------- Bord maken ----------
+  const bord = Object.assign({ vorm: "letop", formaat: "a4l", kleurstijl: "zw" }, opslag.lees("stickers.bord", {}));
+  if (!PIC.PICTOGRAMMEN[bord.vorm]) bord.vorm = "letop";
+  let bordGroep = PIC.PICTOGRAMMEN[bord.vorm].groep;
+  const bordVelden = [...document.querySelectorAll("[data-bord]")];
+  for (const [k, f] of Object.entries(L.BORD_FORMATEN)) $("bord-formaat").add(new Option(f.naam, k));
+
+  function bordVulTeksten(alles) {
+    const t = L.bordTeksten(bord.vorm);
+    for (const v of bordVelden) if (alles || v.dataset.auto !== "0") { v.value = t[v.dataset.bord]; v.dataset.auto = "1"; }
+  }
+  function bordOpties() { const o = { ...bord }; for (const v of bordVelden) o[v.dataset.bord] = v.value; return o; }
+  function bordKiezer() {
+    $("bord-picto").innerHTML = kiezerHtml(bord.vorm, bordGroep, { kleurstijl: bord.kleurstijl === "kleur" ? "kleur" : "zw" });
+    $("bord-picto-naam").textContent = PIC.PICTOGRAMMEN[bord.vorm].naam;
+  }
+  let bordRaf = false;
+  function bordTeken() {
+    if (bordRaf) return;
+    bordRaf = true;
+    requestAnimationFrame(() => {
+      bordRaf = false;
+      const s = L.bordOntwerp(bordOpties());
+      $("bord-svg").setAttribute("viewBox", `0 0 ${s.breedte} ${s.hoogte}`);
+      $("bord-svg").innerHTML = ontwerpOps(s);
+      $("bord-formaat").value = bord.formaat;
+      $("bord-kleur").querySelectorAll("[data-kleurstijl]").forEach((b) => b.classList.toggle("actief", b.dataset.kleurstijl === bord.kleurstijl));
+    });
+  }
+  function openBord(vorm, kleurstijl) {
+    if (vorm && PIC.PICTOGRAMMEN[vorm]) bord.vorm = vorm;
+    if (kleurstijl) bord.kleurstijl = kleurstijl;
+    bordGroep = PIC.PICTOGRAMMEN[bord.vorm].groep;
+    bordVulTeksten(true); bordKiezer(); bordTeken();
+    $("bord").showModal();
+  }
+  $("open-bord").addEventListener("click", () => openBord());
+  $("bord-picto").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.pgroep) bordGroep = b.dataset.pgroep;
+    else if (b.dataset.vorm) { bord.vorm = b.dataset.vorm; bordVulTeksten(false); bordTeken(); }
+    bordKiezer();
+  });
+  bordVelden.forEach((v) => v.addEventListener("input", () => { v.dataset.auto = "0"; bordTeken(); }));
+  $("bord-formaat").addEventListener("change", (e) => { bord.formaat = e.target.value; bordTeken(); });
+  $("bord-kleur").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-kleurstijl]");
+    if (b) { bord.kleurstijl = b.dataset.kleurstijl; bordKiezer(); bordTeken(); }
+  });
+  $("bord-reset").addEventListener("click", () => { bordVulTeksten(true); bordTeken(); });
+  $("bord-maak").addEventListener("click", () => {
+    const s = L.bordOntwerp(bordOpties());
+    opslag.schrijf("stickers.bord", { vorm: bord.vorm, formaat: bord.formaat, kleurstijl: bord.kleurstijl });
+    if (vervangOntwerp(s.naam, { ...cfg, breedte: s.breedte, hoogte: s.hoogte, elementen: s.elementen, vel: "", modus: "vast", ...s.inhoud })) $("bord").close();
   });
 
   const sjSelect = $("sjabloon");
