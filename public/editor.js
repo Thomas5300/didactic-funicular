@@ -21,7 +21,7 @@
   let gidsen = [];
   let losseMelding = null;
 
-  const TYPENAAM = { tekst: "tekstvak", barcode: "barcode", kader: "kader", afbeelding: "afbeelding" };
+  const TYPENAAM = { tekst: "tekstvak", barcode: "barcode", kader: "kader", afbeelding: "afbeelding", locaties: "locatievak" };
   const sel = () => cfg.elementen.find((e) => e.id === geselecteerd) || null;
 
   // ---------- Opslaan en ongedaan maken ----------
@@ -242,15 +242,17 @@
     if (e.type === "tekst") return String(e.tekst).split("\n")[0];
     if (e.type === "barcode") return ({ CODE128: "Code 128", CODE39: "Code 39", EAN13: "EAN-13", QR: "QR" }[e.symbologie] || "") + " · " + e.inhoud;
     if (e.type === "kader") return e.gevuld ? "gevuld vlak / lijn" : `rand ${e.dikte} mm`;
+    if (e.type === "locaties") return `${e.richting === "onder" ? "onder elkaar" : "naast elkaar"} · ${{ diagonaal: "diagonaal", balk: "kleurbalk", vol: "vol gekleurd", streep: "kleurstreep" }[e.stijl] || ""}`;
     return e.data ? `${e.imgB} × ${e.imgH} px` : "geen afbeelding";
   }
   function bouwLijst() {
-    const ICON = { tekst: "T", barcode: "▥", kader: "▢", afbeelding: "▣" };
+    const ICON = { tekst: "T", barcode: "▥", kader: "▢", afbeelding: "▣", locaties: "⌖" };
     const lijst = [...cfg.elementen].reverse();
     $("lagen").innerHTML = lijst.length ? lijst.map((e) => `<li><button type="button" data-kies="${e.id}" class="${e.id === geselecteerd ? "actief" : ""}">
       <span class="ico">${e.type === "barcode" && e.symbologie === "QR" ? "▦" : ICON[e.type]}</span><span class="nm">${esc(e.naam)}</span>
       <span class="sub">${esc(omschrijving(e))}</span></button></li>`).join("")
       : `<li class="leeg">Nog geen onderdelen. Voeg ze toe met de knoppen boven het label.</li>`;
+    $("loc-ontwerp").hidden = cfg.elementen.some((e) => e.type === "locaties");
   }
   $("lagen").addEventListener("click", (e) => {
     const b = e.target.closest("[data-kies]");
@@ -271,6 +273,8 @@
     const seg = (k, opties) => `<div class="seg">${opties.map(([v, t]) => `<button type="button" data-prop="${k}" data-waarde="${v}" class="${g[k] === v ? "actief" : ""}">${t}</button>`).join("")}</div>`;
     const keuze = (k, opties) => `<select data-prop="${k}">${opties.map(([v, t]) => `<option value="${v}" ${g[k] === v ? "selected" : ""}>${t}</option>`).join("")}</select>`;
     const chips = (doel) => `<div class="chips">${CHIPS.map((c) => `<button type="button" data-chip="${c}" data-doel="${doel}" title="Invoegen">${c}</button>`).join("")}</div>`;
+    const kleur = (k) => `<div class="kleurkeuze"><input type="color" data-prop="${k}" value="${g[k]}" title="Eigen kleur">
+      ${["#000000", "#ffffff", ...L.PALET.slice(0, 7)].map((c) => `<button type="button" class="swatch ${g[k] === c ? "actief" : ""}" data-prop="${k}" data-waarde="${c}" style="background:${c}" title="${c}"></button>`).join("")}</div>`;
 
     let h = `<label>Naam <input data-prop="naam" value="${esc(g.naam)}"></label>
       <div class="rij4">${num("x", "X")}${num("y", "Y")}${num("w", "Breedte", 0.5, 0.2)}${num("h", "Hoogte", 0.5, 0.2)}</div>
@@ -289,7 +293,7 @@
         ${seg("uitlijning", [["left", "Links"], ["center", "Midden"], ["right", "Rechts"]])}
         ${seg("verticaal", [["top", "Boven"], ["middle", "Midden"], ["bottom", "Onder"]])}
         <span class="sublabel">Kleur</span>
-        ${seg("kleur", [["zwart", "Zwart"], ["wit", "Wit (op zwart vlak)"]])}
+        ${kleur("kleur")}
         ${chk("vet", "Vet")}
         ${chk("terugloop", "Lange regels laten teruglopen")}
         ${chk("passend", "Automatisch verkleinen tot het past")}`;
@@ -300,7 +304,28 @@
         ${chk("stilleZones", "Stille zones binnen het vak houden (aanbevolen)")}
         <p class="hint">Wil je het nummer als leesbare tekst? Voeg een tekstvak toe met <code>{waarde}</code> (of <code>{barcode}</code> voor EAN-13 met controlecijfer).</p>`;
     } else if (g.type === "kader") {
-      h += `${num("dikte", "Lijndikte (mm)", 0.1, 0.1)}${chk("gevuld", "Gevuld (zwart vlak — dun = lijn)")}`;
+      h += `${num("dikte", "Lijndikte (mm)", 0.1, 0.1)}${chk("gevuld", "Gevuld (vlak — dun = lijn)")}
+        <span class="sublabel">Kleur</span>${kleur("kleur")}`;
+    } else if (g.type === "locaties") {
+      h += `<span class="sublabel">Locaties op de sticker</span>
+        ${seg("richting", [["naast", "Naast elkaar"], ["onder", "Onder elkaar"]])}
+        ${num("tussenruimte", "Ruimte tussen de vakken (mm)", 0.5, 0)}
+        <span class="sublabel">Stijl</span>
+        ${seg("stijl", [["diagonaal", "Diagonaal"], ["balk", "Kleurbalk"], ["vol", "Vol"], ["streep", "Streep"]])}
+        <span class="sublabel">Tekstkleur</span>
+        ${seg("tekstKleur", [["auto", "Automatisch"], ["zwart", "Zwart"], ["wit", "Wit"]])}
+        ${g.stijl === "diagonaal"
+          ? `${num("splits", "Aantal segmenten linksboven", 1, 0)}
+             <p class="hint">Bijv. 2: <code>07 LL</code> linksboven en <code>01 0</code> rechtsonder.</p>
+             <label>Barcode ${keuze("barcode", [["CODE128", "Code 128"], ["CODE39", "Code 39"], ["QR", "QR-code"], ["GEEN", "Geen"]])}</label>`
+          : `<div class="rij">
+               <label>Barcode ${keuze("barcode", [["CODE128", "Code 128"], ["CODE39", "Code 39"], ["QR", "QR-code"], ["GEEN", "Geen"]])}</label>
+               ${num("barcodeDeel", "Barcode (% hoogte)", 5, 15)}
+             </div>
+             ${chk("koppen", "Segmentnamen boven de code (GANG, STELLING …)")}`}
+        ${chk("pijlen", "Pijlen tonen")}
+        ${chk("rand", "Dunne rand om elk vak")}
+        <p class="hint">Het vak wordt automatisch verdeeld over de locaties van elke sticker. Locaties, kleuren, pijlrichting en aantal pijlen stel je in bij <b>Inhoud → Locaties</b>.</p>`;
     } else {
       h += `<button type="button" data-actie="afbeelding">Andere afbeelding kiezen…</button>
         <p class="hint">De afbeelding blijft in verhouding binnen het vak. Een labelprinter drukt in zwart-wit: een zwart logo op een witte of transparante achtergrond werkt het best.</p>`;
@@ -321,7 +346,7 @@
     }
   }
 
-  const GETALLEN = ["x", "y", "w", "h", "grootte", "dikte"];
+  const GETALLEN = ["x", "y", "w", "h", "grootte", "dikte", "tussenruimte", "barcodeDeel", "splits"];
   function zetProp(k, v) {
     const g = sel();
     if (!g) return;
@@ -330,10 +355,14 @@
       if (!isFinite(v)) return;
       if ((k === "w" || k === "h") && v < 0.2) v = 0.2;
       if (k === "grootte" && v < 1) v = 1;
+      if (k === "tussenruimte" && v < 0) v = 0;
+      if (k === "barcodeDeel") v = Math.min(Math.max(v, 15), 75);
+      if (k === "splits") v = Math.min(Math.max(Math.round(v), 0), 10);
     }
     g[k] = v;
     if (k === "symbologie" && v === "QR") { const z = Math.min(g.w, g.h); g.x = afr(g.x + (g.w - z) / 2); g.w = g.h = afr(z); }
-    gewijzigd(k !== "tekst" && k !== "naam" && k !== "inhoud" && !GETALLEN.includes(k) ? true : false);
+    const typen = ["tekst", "naam", "inhoud", "kleur", ...GETALLEN];   // tijdens typen/slepen: niet elke toets apart in de historie
+    gewijzigd(!typen.includes(k));
     bouwLijst();
     planTeken();
   }
@@ -422,6 +451,7 @@
     if (soort === "qr") { const z = Math.min(30, vb, vh); plaatsNieuw({ type: "barcode", naam: "QR-code", symbologie: "QR", w: z, h: z }); }
     if (soort === "kader") plaatsNieuw({ type: "kader", w: Math.min(60, vb), h: Math.min(30, vh) });
     if (soort === "lijn") plaatsNieuw({ type: "kader", naam: "Lijn", gevuld: true, w: vb, h: 0.6 });
+    if (soort === "locaties") plaatsNieuw({ type: "locaties", w: vb, h: vh, richting: B >= H ? "naast" : "onder" });
   }));
 
   let afbModus = "nieuw";
@@ -496,11 +526,133 @@
     const t = e.target, k = t.dataset.k;
     if (!k || k === "breedte" || k === "hoogte") return;
     if (t.type === "radio") { if (t.checked) { cfg[k] = t.value; index = 0; } }
-    else if (t.type === "number") cfg[k] = t.value === "" ? "" : Number(t.value);
+    else if (t.type === "checkbox") cfg[k] = t.checked;
+    else if (t.type === "number" || k === "afloop") cfg[k] = t.value === "" ? "" : Number(t.value);
     else cfg[k] = t.value;
-    gewijzigd(t.type === "radio");
+    gewijzigd(t.type === "radio" || t.type === "checkbox" || t.tagName === "SELECT");
     document.querySelectorAll("[data-modus]").forEach((el) => (el.hidden = el.dataset.modus !== cfg.modus));
+    if (k === "modus") bouwLocaties();
     planTeken();
+  });
+
+  // ---------- Locaties ----------
+  const SCHEIDINGEN = [[" ", "spatie"], ["-", "streepje -"], [".", "punt ."], ["/", "slash /"], ["", "geen"]];
+  const locPaneel = $("loc-paneel");
+
+  function bouwLocaties() {
+    const l = cfg.locatie;
+    $("segmenten").innerHTML = l.segmenten.map((s, i) => `<div class="segrij">
+        <input data-seg="${i}" data-veld="naam" value="${esc(s.naam)}" placeholder="Naam" aria-label="Naam segment ${i + 1}">
+        <input data-seg="${i}" data-veld="van" value="${esc(s.van)}" placeholder="01" aria-label="Van">
+        <input data-seg="${i}" data-veld="tot" value="${esc(s.tot)}" placeholder="—" aria-label="Tot en met">
+        <button type="button" data-seg-weg="${i}" title="Segment verwijderen" ${l.segmenten.length < 2 ? "disabled" : ""}>✕</button>
+      </div>`).join("");
+    const opties = (sel, lijst, waarde) => {
+      sel.innerHTML = lijst.map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join("");
+      sel.value = String(waarde);
+    };
+    opties($("loc-sch"), SCHEIDINGEN, l.scheiding);
+    opties($("loc-bcsch"), SCHEIDINGEN, l.bcScheiding);
+    locAfgeleid();
+  }
+
+  // Delen die afhangen van de segmenten, zonder de invoervelden opnieuw op te bouwen.
+  function locAfgeleid() {
+    const l = cfg.locatie;
+    const naam = (s, i) => s.naam || `Segment ${i + 1}`;
+    const groep = $("loc-groep"), ks = $("loc-kleurseg");
+    groep.innerHTML = `<option value="-1">Eén locatie per sticker</option>` +
+      l.segmenten.map((s, i) => `<option value="${i}">Alle ${esc(naam(s, i).toLowerCase())}-waarden samen</option>`).join("");
+    groep.value = String(l.groep);
+    ks.innerHTML = `<option value="-1">Eén kleur voor alles</option>` +
+      l.segmenten.map((s, i) => `<option value="${i}">${esc(naam(s, i))}</option>`).join("");
+    ks.value = String(l.kleurSeg);
+
+    // Per waarde: kleur, pijlrichting en aantal pijlen
+    const PIJL = [["geen", "geen"], ["omhoog", "↑"], ["omlaag", "↓"], ["links", "←"], ["rechts", "→"]];
+    const rij = (v, label, kleur, p) => `<div class="kleurrij">
+        <input type="color" data-kleur="${esc(v)}" value="${kleur}" aria-label="Kleur ${esc(label)}">
+        <span class="waarde">${esc(label)}</span>
+        <select data-pijl-r="${esc(v)}" aria-label="Pijl ${esc(label)}">${PIJL.map(([k, t]) => `<option value="${k}" ${p.r === k ? "selected" : ""}>${t}</option>`).join("")}</select>
+        <select data-pijl-n="${esc(v)}" aria-label="Aantal pijlen ${esc(label)}" ${p.r === "geen" ? "disabled" : ""}>${[1, 2, 3].map((n) => `<option value="${n}" ${p.n === n ? "selected" : ""}>× ${n}</option>`).join("")}</select>
+      </div>`;
+    let kleurHtml = "";
+    if (l.kleurSeg < 0) {
+      kleurHtml = rij("*", "alle locaties", l.kleur, l.pijl);
+    } else {
+      try {
+        const vals = [...new Set(L.segmentWaarden(l.segmenten[l.kleurSeg]))].sort();
+        const std = L.standaardKleuren(vals), stdPijl = L.standaardPijlen(vals);
+        kleurHtml = `<div class="kleurkop"><span></span><span>${esc(naam(l.segmenten[l.kleurSeg], l.kleurSeg))}</span><span>Pijl</span><span>Aantal</span></div>`
+          + vals.slice(0, 40).map((v) => rij(v, v, l.kleuren[v] || std[v], l.pijlen[v] || stdPijl[v])).join("")
+          + (vals.length > 40 ? `<span class="hint">… en ${vals.length - 40} meer (kleuren herhalen)</span>` : "")
+          + (Object.keys(l.kleuren).length || Object.keys(l.pijlen).length ? `<button type="button" id="loc-kleur-reset">Standaardkleuren en -pijlen</button>` : "");
+      } catch { kleurHtml = ""; }
+    }
+    $("loc-kleuren").innerHTML = kleurHtml;
+
+    let samen = "";
+    try {
+      const items = L.waarden({ ...cfg, modus: "locaties", kopieen: 1 });
+      const per = items[0].locaties.length;
+      samen = `${items.length} sticker${items.length === 1 ? "" : "s"} met ${per} locatie${per === 1 ? "" : "s"} per sticker (${items.length * per} locaties). ` +
+        `Eerste: ${items[0].locaties.map((x) => x.code).join(" + ")}. Barcode: ${items[0].locaties[0].bc}.`;
+    } catch (e) { samen = e.message; }
+    $("loc-samenvatting").textContent = samen;
+    $("loc-ontwerp").hidden = cfg.elementen.some((e) => e.type === "locaties");
+  }
+
+  locPaneel.addEventListener("input", (e) => {
+    const t = e.target, l = cfg.locatie;
+    if (t.dataset.seg != null) {
+      l.segmenten[+t.dataset.seg][t.dataset.veld] = t.dataset.veld === "naam" ? t.value : t.value.toUpperCase();
+      gewijzigd(); locAfgeleid(); planTeken();
+    } else if (t.dataset.kleur != null) {
+      if (t.dataset.kleur === "*") l.kleur = t.value; else l.kleuren[t.dataset.kleur] = t.value;
+      gewijzigd(); planTeken();
+    }
+  });
+  locPaneel.addEventListener("change", (e) => {
+    const t = e.target, l = cfg.locatie;
+    if (t.id === "loc-groep") l.groep = +t.value;
+    else if (t.id === "loc-kleurseg") l.kleurSeg = +t.value;
+    else if (t.id === "loc-sch") l.scheiding = t.value;
+    else if (t.id === "loc-bcsch") l.bcScheiding = t.value;
+    else if (t.dataset.kleur != null) { clearTimeout(vastTimer); vastleggen(); locAfgeleid(); return; }
+    else if (t.dataset.pijlR != null || t.dataset.pijlN != null) {
+      const v = t.dataset.pijlR ?? t.dataset.pijlN;
+      const rijEl = t.closest(".kleurrij");
+      const p = { r: rijEl.querySelector("[data-pijl-r]").value, n: +rijEl.querySelector("[data-pijl-n]").value || 1 };
+      if (v === "*") l.pijl = p; else l.pijlen[v] = p;
+      gewijzigd(true); locAfgeleid(); teken(); return;
+    }
+    else return;
+    index = 0;
+    gewijzigd(true); locAfgeleid(); teken();
+  });
+  locPaneel.addEventListener("click", (e) => {
+    const t = e.target.closest("button");
+    if (!t) return;
+    const l = cfg.locatie;
+    if (t.id === "seg-plus") {
+      l.segmenten.push({ naam: `Segment ${l.segmenten.length + 1}`, van: "01", tot: "01" });
+    } else if (t.dataset.segWeg != null) {
+      const i = +t.dataset.segWeg;
+      l.segmenten.splice(i, 1);
+      const schuif = (v) => (v === i ? -1 : v > i ? v - 1 : v);
+      l.groep = schuif(l.groep); l.kleurSeg = schuif(l.kleurSeg);
+    } else if (t.id === "loc-kleur-reset") {
+      l.kleuren = {}; l.pijlen = {};
+    } else if (t.id === "loc-ontwerp") {
+      const s = L.STARTERS.magazijn;
+      if (cfg.elementen.length && !confirm("Een locatie-ontwerp toevoegen? Het huidige ontwerp wordt vervangen (ongedaan maken kan met ↶).")) return;
+      cfg.breedte = s.breedte; cfg.hoogte = s.hoogte;
+      cfg.elementen = s.elementen.map((x) => L.element({ ...x }));
+      geselecteerd = null;
+      gewijzigd(true); alles(); return;
+    } else return;
+    index = 0;
+    gewijzigd(true); bouwLocaties(); teken();
   });
   instellingen.addEventListener("change", (e) => {
     const k = e.target.dataset.k;
@@ -529,10 +681,16 @@
   }
 
   const starters = $("starters");
-  for (const [k, s] of Object.entries(L.STARTERS)) {
-    const b = document.createElement("button");
-    b.type = "button"; b.textContent = s.naam; b.dataset.starter = k;
-    starters.append(b);
+  for (const [groep, titel] of [["algemeen", "Algemeen"], ["magazijn", "Magazijnlocaties"]]) {
+    const kop = document.createElement("span");
+    kop.className = "starterkop"; kop.textContent = titel;
+    starters.append(kop);
+    for (const [k, s] of Object.entries(L.STARTERS)) {
+      if ((s.groep || "algemeen") !== groep) continue;
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = s.naam; b.dataset.starter = k;
+      starters.append(b);
+    }
   }
   starters.addEventListener("click", (e) => {
     const s = L.STARTERS[e.target.dataset.starter];
@@ -540,6 +698,7 @@
     if (cfg.elementen.length && !confirm(`Huidig ontwerp vervangen door “${s.naam}”?\n(Ongedaan maken kan met ↶.)`)) return;
     const nieuw = { ...cfg, breedte: s.breedte, hoogte: s.hoogte, elementen: s.elementen.map((x) => ({ ...x })) };
     if (s.modus) nieuw.modus = s.modus;
+    if (s.locatie) nieuw.locatie = { ...cfg.locatie, ...JSON.parse(JSON.stringify(s.locatie)) };
     laadOntwerp(nieuw);
   });
 
@@ -602,7 +761,7 @@
   $("print").addEventListener("click", () => maak("print"));
 
   // ---------- Start ----------
-  function alles() { zetFormulier(); bouwLijst(); bouwEigenschappen(); teken(); }
+  function alles() { zetFormulier(); bouwLocaties(); bouwLijst(); bouwEigenschappen(); teken(); }
   vulSjablonen();
   alles();
   vastleggen();
