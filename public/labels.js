@@ -164,7 +164,8 @@
     const perVel = v.kol * v.rij;
     const start = Math.min(Math.max(Math.round(+cfg.velStart || 1), 1), perVel);
     const uitvullen = cfg.vel === "eigen" && cfg.velUitvullen !== false;   // Avery-vellen liggen vast
-    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, tb), perVel, start, pagina, titel, uitvullen };
+    const centreren = cfg.vel === "eigen" && cfg.velCentreren !== false;
+    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, tb), perVel, start, pagina, titel, uitvullen, centreren };
   }
 
   const LETTERTYPEN = {
@@ -222,7 +223,7 @@
     modus: "reeks", start: "1000", eind: "1025", stap: 1, prefix: "", suffix: "",
     lijst: "", vasteWaarde: "", kopieen: 1, marge: 4, afloop: 0, snijtekens: false,
     vel: "", velStart: 1, velKaders: false, velKol: 2, velRij: 7, velGx: 0, velGy: 0,
-    velPagina: "a4", velPB: 210, velPH: 297, velTitel: "", velUitvullen: true,
+    velPagina: "a4", velPB: 210, velPH: 297, velTitel: "", velUitvullen: true, velCentreren: true,
     lijstKop: false,
   };
 
@@ -1100,6 +1101,22 @@
     return { doc, aantal: items.length };
   }
 
+  // Omvang van alles wat er getekend wordt (voor centreren). Tekst inclusief onderstokken.
+  function omvang(ops, meet) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    const neem = (a, b, c, d) => { x0 = Math.min(x0, a); y0 = Math.min(y0, b); x1 = Math.max(x1, c); y1 = Math.max(y1, d); };
+    for (const o of ops) {
+      if (o.t === "rect" || o.t === "kader" || o.t === "img" || o.t === "fout") neem(o.x, o.y, o.x + o.w, o.y + o.h);
+      else if (o.t === "poly") o.pts.forEach(([x, y]) => neem(x, y, x, y));
+      else if (o.t === "tekst") {
+        const b = meet(o.tekst, o.s, { vet: o.vet, lettertype: o.lettertype });
+        const lx = o.uitlijning === "left" ? o.x : o.uitlijning === "right" ? o.x - b : o.x - b / 2;
+        neem(lx, o.y - CAP * o.s * PT, lx + b, o.y + DESC * o.s * PT);
+      }
+    }
+    return isFinite(x0) ? { x0, y0, x1, y1 } : null;
+  }
+
   // Meerdere etiketten per A4-vel. Elk etiket wordt bijgesneden tot zijn eigen vak.
   function maakVelPdf(cfg, items, vel, libs) {
     const P = vel.pagina, liggend = P.b > P.h, formaat = [Math.min(P.b, P.h), Math.max(P.b, P.h)];
@@ -1147,19 +1164,38 @@
       return breder.get(b);
     };
 
+    // Eerst alles opbouwen, zodat we per rij kunnen centreren.
+    const getekend = items.map((item, i) => {
+      const r = render(ontwerpVoor(plekken[i].b), item, context(item, i + 1, items.length), libs, meet, cache);
+      if (r.fouten.length) throw new Error(`Sticker ${i + 1}: ${r.fouten[0]}`);
+      return { ops: r.ops, o: vel.centreren ? omvang(r.ops, meet) : null };
+    });
+    // Verticaal centreren per rij (barcodes naast elkaar blijven op één lijn), horizontaal per vak.
+    const rijOmvang = new Map();
+    getekend.forEach(({ o }, i) => {
+      if (!o) return;
+      const k = plekken[i].pagina + ":" + plekken[i].rij, v = rijOmvang.get(k);
+      rijOmvang.set(k, v ? { y0: Math.min(v.y0, o.y0), y1: Math.max(v.y1, o.y1) } : { y0: o.y0, y1: o.y1 });
+    });
+
     let huidigePagina = 0;
     titel(1);
     items.forEach((item, i) => {
-      const p = plekken[i];
+      const p = plekken[i], { ops, o } = getekend[i];
       if (p.pagina > huidigePagina) { doc.addPage(formaat, liggend ? "landscape" : "portrait"); huidigePagina = p.pagina; titel(p.pagina + 1); }
       const dx = p.vrijX ?? vel.links + p.kol * (vel.b + vel.gx), dy = vel.boven + p.rij * (vel.h + vel.gy);
-      const r = render(ontwerpVoor(p.b), item, context(item, i + 1, items.length), libs, meet, cache);
-      if (r.fouten.length) throw new Error(`Sticker ${i + 1}: ${r.fouten[0]}`);
+      let sx = 0, sy = 0;
+      if (o) {
+        const ry = rijOmvang.get(p.pagina + ":" + p.rij);
+        sx = (p.b - (o.x1 - o.x0)) / 2 - o.x0;
+        sy = (vel.h - (ry.y1 - ry.y0)) / 2 - ry.y0;
+      }
+      const r = { ops };
       doc.saveGraphicsState();
       doc.rect(dx, dy, p.b, vel.h, null);
       doc.clip();
       doc.discardPath();
-      tekenPdf(doc, r.ops, dx, dy);
+      tekenPdf(doc, r.ops, dx + sx, dy + sy);
       doc.restoreGraphicsState();
       if (cfg.velKaders) {
         doc.setDrawColor(170, 170, 170); doc.setLineWidth(0.15);
