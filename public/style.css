@@ -107,23 +107,6 @@ button:disabled { opacity: .45; cursor: default; }
 .lagen .sub { font-size: .74rem; color: var(--zacht); overflow: hidden; text-overflow: ellipsis; }
 .leeg { color: var(--zacht); font-size: .85rem; padding: .3rem .5rem; margin: 0; }
 
-/* Locaties */
-.segkop, .segrij { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1.9rem; gap: .3rem; align-items: center; }
-.segkop span { font-size: .72rem; font-weight: 600; color: var(--zacht); }
-.segmenten { display: grid; gap: .3rem; margin-top: -.4rem; }
-.segrij input { padding: .35rem .4rem; font-size: .85rem; text-transform: none; }
-.segrij input[data-veld="van"], .segrij input[data-veld="tot"] { text-transform: uppercase; font-family: ui-monospace, monospace; }
-.segrij button { padding: .3rem 0; font-size: .8rem; }
-.kleuren { display: flex; flex-wrap: wrap; gap: .3rem; }
-.kleuren:empty { display: none; }
-.kleurchip { display: flex; align-items: center; gap: .3rem; padding: .15rem .45rem .15rem .2rem; border: 1px solid var(--rand);
-  border-radius: 8px; font: 600 .78rem ui-monospace, monospace; }
-.kleurchip input, .kleurkeuze input { width: 1.6rem; height: 1.6rem; padding: 0; border: 0; border-radius: 5px; cursor: pointer; background: none; }
-.kleurkeuze { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; }
-.swatch { width: 1.4rem; height: 1.4rem; padding: 0; border-radius: 50%; border: 1px solid #d4d4d8; }
-.swatch.actief { outline: 2px solid var(--blauw); outline-offset: 1px; }
-.modus label { font-size: .78rem; }
-
 .chips { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: -.3rem; }
 .chips button { padding: .15rem .45rem; font-size: .74rem; font-weight: 500; font-family: ui-monospace, monospace; border-radius: 6px; }
 .eig-acties { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; padding-top: .3rem; border-top: 1px solid var(--rand); margin-top: .2rem; }
