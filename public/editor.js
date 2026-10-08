@@ -106,7 +106,7 @@
 
     let vellen = 0;
     try { vellen = r.totaal ? L.aantalVellen(cfg, r.totaal) : 0; } catch { vellen = 0; }
-    $("teller").textContent = r.totaal ? `Sticker ${index + 1} van ${r.totaal}${vellen ? ` · ${vellen} A4-vel${vellen === 1 ? "" : "len"}` : ""}` : "–";
+    $("teller").textContent = r.totaal ? `Sticker ${index + 1} van ${r.totaal}${vellen ? ` · ${vellen} vel${vellen === 1 ? "" : "len"}` : ""}` : "–";
     $("vorige").disabled = index <= 0;
     $("volgende").disabled = !r.totaal || index >= r.totaal - 1;
     const m = $("meldingen");
@@ -305,6 +305,13 @@
         <label>Inhoud <input data-prop="inhoud" value="${esc(g.inhoud)}"></label>${chips("inhoud")}
         <p class="hint">Meestal <code>{waarde}</code>. Combineren kan ook, bijv. <code>LOC-{nr}</code> of een vaste URL.</p>
         ${chk("stilleZones", "Stille zones binnen het vak houden (aanbevolen)")}
+        ${chk("toonTekst", "Waarde als tekst onder de barcode")}
+        ${g.toonTekst ? num("tekstGrootte", "Tekstgrootte onder barcode (pt)", 1, 3) : ""}
+        <div class="rij">
+          ${num("maxStreep", "Max. streepdikte (mm)", 0.05, 0)}
+          <label>Uitlijning ${keuze("bcUitlijning", [["left", "Links"], ["center", "Midden"], ["right", "Rechts"]])}</label>
+        </div>
+        <p class="hint">Max. streepdikte <code>0</code> = barcode vult het hele vak. Bijv. <code>0,5</code>: korte codes zoals <code>e</code> of <code>11</code> worden niet uitgerekt.</p>
         <p class="hint">Wil je het nummer als leesbare tekst? Voeg een tekstvak toe met <code>{waarde}</code> (of <code>{barcode}</code> voor EAN-13 met controlecijfer).</p>`;
     } else if (g.type === "kader") {
       h += `${num("dikte", "Lijndikte (mm)", 0.1, 0.1)}${chk("gevuld", "Gevuld (vlak — dun = lijn)")}
@@ -357,7 +364,7 @@
     }
   }
 
-  const GETALLEN = ["x", "y", "w", "h", "grootte", "dikte", "tussenruimte", "barcodeDeel", "splits", "logoGrootte"];
+  const GETALLEN = ["x", "y", "w", "h", "grootte", "dikte", "tussenruimte", "barcodeDeel", "splits", "logoGrootte", "tekstGrootte", "maxStreep"];
   function zetProp(k, v) {
     const g = sel();
     if (!g) return;
@@ -383,7 +390,7 @@
     const t = e.target, k = t.dataset.prop;
     if (!k) return;
     zetProp(k, t.type === "checkbox" ? t.checked : t.value);
-    if (k === "symbologie") bouwEigenschappen();
+    if (k === "symbologie" || k === "toonTekst") bouwEigenschappen();
   });
   eig.addEventListener("click", (e) => {
     const t = e.target.closest("button");
@@ -512,7 +519,7 @@
       const k = el.dataset.k;
       if (el.type === "radio") el.checked = cfg[k] === el.value;
       else if (el.type === "checkbox") el.checked = !!cfg[k];
-      else el.value = cfg[k] ?? "";
+      else if (el !== document.activeElement) el.value = cfg[k] ?? "";   // niet in een veld schrijven waarin je typt
     }
     document.querySelectorAll("[data-modus]").forEach((el) => (el.hidden = el.dataset.modus !== cfg.modus));
     const hit = Object.entries(L.FORMATEN).find(([, f]) => f.b === +cfg.breedte && f.h === +cfg.hoogte);
@@ -521,11 +528,12 @@
     $("vel").value = cfg.vel || "";
     $("vel-opties").hidden = !cfg.vel;
     $("vel-eigen").hidden = cfg.vel !== "eigen";
+    $("vel-maat").hidden = cfg.velPagina !== "eigen";
     $("drukkerij").hidden = !!cfg.vel;
     let info = "";
     try {
       const v = L.velIndeling(cfg);
-      if (v) info = `${v.perVel} per vel (${v.kol} × ${v.rij}), etiket ${v.b} × ${v.h} mm. Print op 100% / werkelijke grootte en doe eerst een proefprint op gewoon papier.`;
+      if (v) info = `${v.perVel} per vel (${v.kol} × ${v.rij}) op ${v.pagina.naam}, elk ${v.b} × ${v.h} mm. Print op 100% / werkelijke grootte en doe eerst een proefprint op gewoon papier.`;
     } catch (e) { info = e.message; }
     $("vel-info").textContent = info;
     $("raster").value = String(raster);
@@ -731,7 +739,7 @@
     for (const [k, v] of Object.entries(L.VELLEN)) if (filter(k)) og.append(new Option(v.naam, k));
     velKeuze.append(og);
   }
-  velKeuze.add(new Option("A4 met eigen indeling (kolommen × rijen)…", "eigen"));
+  velKeuze.add(new Option("Raster op een vel — eigen indeling (A4, A5, eigen maat)…", "eigen"));
   velKeuze.addEventListener("change", () => {
     const k = velKeuze.value, v = L.VELLEN[k];
     if (v) { schaal(v.b, v.h); cfg.vel = k; }
@@ -771,7 +779,13 @@
     if (cfg.elementen.length && !confirm(`Huidig ontwerp vervangen door “${s.naam}”?\n(Ongedaan maken kan met ↶.)`)) return;
     const nieuw = { ...cfg, breedte: s.breedte, hoogte: s.hoogte, elementen: s.elementen.map((x) => ({ ...x })), vel: "" };
     if (s.modus) nieuw.modus = s.modus;
-    if (s.inhoud) Object.assign(nieuw, s.inhoud);   // bijv. voorbeeldlijst en A4-indeling
+    if (s.inhoud) {   // bijv. voorbeeldlijst en vel-indeling
+      Object.assign(nieuw, s.inhoud);
+      // Heb je al een eigen lijst met dezelfde kolommen (bijv. je gebruikers)? Dan blijft die staan.
+      const kop = (t) => String(t || "").split(/\r?\n/)[0].trim().toLowerCase().replace(/\t/g, ";");
+      const eigen = cfg.modus === "lijst" && String(cfg.lijst || "").trim() && !L.VOORBEELD_LIJSTEN.includes(cfg.lijst);
+      if (s.inhoud.lijst && eigen && cfg.lijstKop && kop(cfg.lijst) === kop(s.inhoud.lijst)) nieuw.lijst = cfg.lijst;
+    }
     if (s.locatie) nieuw.locatie = { ...cfg.locatie, ...JSON.parse(JSON.stringify(s.locatie)) };
     laadOntwerp(nieuw);
   });

@@ -126,9 +126,22 @@
     Z3655: { naam: "Avery Zweckform 3655 — 2 per vel (210 × 148 mm)", b: 210, h: 148, kol: 1, rij: 2, gx: 0, gy: 0 },
     Z3478: { naam: "Avery Zweckform 3478 — 1 per vel (210 × 297 mm)", b: 210, h: 297, kol: 1, rij: 1, gx: 0, gy: 0 },
   };
-  const A4 = { b: 210, h: 297 };
+  // Paginaformaten voor een eigen indeling (raster van labels op één vel).
+  const PAGINAS = {
+    a4: { naam: "A4 staand", b: 210, h: 297 }, a4l: { naam: "A4 liggend", b: 297, h: 210 },
+    a5: { naam: "A5 staand", b: 148, h: 210 }, a5l: { naam: "A5 liggend", b: 210, h: 148 },
+    a6: { naam: "A6 staand", b: 105, h: 148 }, a6l: { naam: "A6 liggend", b: 148, h: 105 },
+    letter: { naam: "US Letter", b: 215.9, h: 279.4 },
+  };
+  const TITEL_HOOGTE = 14;   // mm boven aan het vel voor de titel
 
-  // Indeling van etiketten op een A4-vel, of null voor losse labels (één label per pagina).
+  function velPagina(cfg) {
+    if (cfg.vel !== "eigen") return { naam: "A4", b: 210, h: 297 };
+    if (cfg.velPagina === "eigen") return { naam: "Eigen vel", b: Math.max(10, +cfg.velPB || 210), h: Math.max(10, +cfg.velPH || 297) };
+    return PAGINAS[cfg.velPagina] || PAGINAS.a4;
+  }
+
+  // Indeling van labels op een vel, of null voor losse labels (één label per pagina).
   function velIndeling(cfg) {
     if (!cfg.vel) return null;
     let v;
@@ -141,11 +154,16 @@
       if (Math.abs(v.b - cfg.breedte) > 0.05 || Math.abs(v.h - cfg.hoogte) > 0.05)
         throw new Error(`Het labelformaat (${cfg.breedte} × ${cfg.hoogte} mm) past niet bij ${v.naam}. Kies het vel opnieuw.`);
     }
-    const links = (A4.b - v.kol * v.b - (v.kol - 1) * v.gx) / 2, boven = (A4.h - v.rij * v.h - (v.rij - 1) * v.gy) / 2;
-    if (links < -0.01 || boven < -0.01) throw new Error(`${v.kol} × ${v.rij} etiketten van ${v.b} × ${v.h} mm passen niet op een A4-vel.`);
+    const pagina = velPagina(cfg);
+    const titel = cfg.vel === "eigen" ? String(cfg.velTitel || "").trim() : "";
+    const tb = titel ? TITEL_HOOGTE : 0;
+    const links = (pagina.b - v.kol * v.b - (v.kol - 1) * v.gx) / 2;
+    const boven = tb + (pagina.h - tb - v.rij * v.h - (v.rij - 1) * v.gy) / 2;
+    if (links < -0.01 || boven < tb - 0.01)
+      throw new Error(`${v.kol} × ${v.rij} labels van ${v.b} × ${v.h} mm passen niet op ${pagina.naam} (${pagina.b} × ${pagina.h} mm)${tb ? " met titel" : ""}.`);
     const perVel = v.kol * v.rij;
     const start = Math.min(Math.max(Math.round(+cfg.velStart || 1), 1), perVel);
-    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, 0), perVel, start };
+    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, tb), perVel, start, pagina, titel };
   }
 
   const LETTERTYPEN = {
@@ -160,7 +178,8 @@
   const TYPE_STANDAARD = {
     tekst: { naam: "Tekst", w: 60, h: 14, tekst: "Tekst", lettertype: "helvetica", grootte: 24, vet: false,
       kleur: "#000000", uitlijning: "center", verticaal: "middle", terugloop: true, passend: true },
-    barcode: { naam: "Barcode", w: 80, h: 30, inhoud: "{waarde}", symbologie: "CODE128", stilleZones: true },
+    barcode: { naam: "Barcode", w: 80, h: 30, inhoud: "{waarde}", symbologie: "CODE128", stilleZones: true,
+      toonTekst: false, tekstGrootte: 10, maxStreep: 0, bcUitlijning: "center" },
     kader: { naam: "Kader", w: 60, h: 30, dikte: 0.5, gevuld: false, kleur: "#000000" },
     afbeelding: { naam: "Afbeelding", w: 30, h: 30, data: "", imgB: 1, imgH: 1 },
     locaties: { naam: "Locaties", w: 190, h: 44, richting: "naast", tussenruimte: 3, stijl: "balk", pijlen: true,
@@ -202,11 +221,14 @@
     modus: "reeks", start: "1000", eind: "1025", stap: 1, prefix: "", suffix: "",
     lijst: "", vasteWaarde: "", kopieen: 1, marge: 4, afloop: 0, snijtekens: false,
     vel: "", velStart: 1, velKaders: false, velKol: 2, velRij: 7, velGx: 0, velGy: 0,
+    velPagina: "a4", velPB: 210, velPH: 297, velTitel: "",
     lijstKop: false,
   };
 
-  const COMMANDO_LIJST = "Code;Omschrijving\ne;Stoppen / terug\n/;Stoppen / afsluiten\nZ001;Crossdock zone";
-  const GEBRUIKERS_LIJST = "Naam;Gebruiker;Wachtwoord\nJan Jansen;JJANSEN;Welkom01\nPiet de Vries;PDVRIES;Magazijn22";
+  const COMMANDO_LIJST = "Code;Omschrijving\nZ001;Crossdock zone (07)\n/;Stoppen / afsluiten\ne;Stoppen / terug\n07  X;\n07  JJ00 0;";
+  const GEBRUIKERS_LIJST = "Naam;Username;Password\nJan Jansen;jan;11\nPiet de Vries;piet;11\nKees Bakker;kees;11\nAnna Smit;anna;11";
+  // Kopregels van de voorbeeldlijsten: bij wisselen tussen ontwerpen met dezelfde kolommen blijft je eigen lijst staan.
+  const VOORBEELD_LIJSTEN = [COMMANDO_LIJST, GEBRUIKERS_LIJST];
 
   const STARTERS = {
     nummer: {
@@ -297,47 +319,55 @@
     },
 
     // ----- Scanner en gebruikers (WMS) -----
-    commando: {
-      groep: "wms", naam: "Scannercommando — barcode met omschrijving (100 × 50 mm)", breedte: 100, hoogte: 50, modus: "lijst",
-      inhoud: { lijstKop: true, lijst: COMMANDO_LIJST },
+    commandokaart: {
+      groep: "wms", naam: "Commandokaart — raster zoals op de heftruck (A5 liggend, 3 × 2)", breedte: 64, hoogte: 58, modus: "lijst",
+      inhoud: { lijstKop: true, lijst: COMMANDO_LIJST, vel: "eigen", velPagina: "a5l", velKol: 3, velRij: 2, velGx: 4, velGy: 6, velStart: 1, velKaders: false, velTitel: "" },
       elementen: [
-        { type: "tekst", naam: "Omschrijving", x: 4, y: 3, w: 92, h: 12, tekst: "{Omschrijving}", grootte: 20, vet: true, terugloop: false },
-        { type: "barcode", naam: "Barcode", x: 8, y: 16, w: 84, h: 23, inhoud: "{Code}" },
-        { type: "tekst", naam: "Code", x: 4, y: 40.5, w: 92, h: 7, tekst: "{Code}", grootte: 12, lettertype: "courier", vet: true, terugloop: false },
+        { type: "barcode", naam: "Barcode", x: 2, y: 4, w: 60, h: 30, inhoud: "{Code}", toonTekst: true, tekstGrootte: 14, maxStreep: 0.55 },
+        { type: "tekst", naam: "Omschrijving", x: 2, y: 37, w: 60, h: 14, tekst: "{Omschrijving}", grootte: 10, vet: true, verticaal: "top" },
       ],
     },
     commandoA4: {
-      groep: "wms", naam: "Scannercommando's op A4 — commandoblad (8 per pagina)", breedte: 190, hoogte: 34, modus: "lijst",
-      inhoud: { lijstKop: true, lijst: COMMANDO_LIJST, vel: "eigen", velKol: 1, velRij: 8, velGx: 0, velGy: 0, velStart: 1, velKaders: true },
+      groep: "wms", naam: "Commandoblad A4 — raster 3 × 6 met titel", breedte: 62, hoogte: 42, modus: "lijst",
+      inhoud: { lijstKop: true, lijst: COMMANDO_LIJST, vel: "eigen", velPagina: "a4", velKol: 3, velRij: 6, velGx: 2, velGy: 2, velStart: 1, velKaders: true, velTitel: "Scannercommando's" },
       elementen: [
-        { type: "tekst", naam: "Omschrijving", x: 5, y: 3, w: 80, h: 28, tekst: "{Omschrijving}", grootte: 18, vet: true, uitlijning: "left" },
-        { type: "barcode", naam: "Barcode", x: 92, y: 4, w: 93, h: 20, inhoud: "{Code}" },
-        { type: "tekst", naam: "Code", x: 92, y: 25, w: 93, h: 6, tekst: "{Code}", grootte: 11, lettertype: "courier", vet: true, terugloop: false },
+        { type: "barcode", naam: "Barcode", x: 3, y: 3, w: 56, h: 24, inhoud: "{Code}", toonTekst: true, tekstGrootte: 12, maxStreep: 0.5 },
+        { type: "tekst", naam: "Omschrijving", x: 2, y: 29, w: 58, h: 11, tekst: "{Omschrijving}", grootte: 10, vet: true, verticaal: "top" },
+      ],
+    },
+    commando: {
+      groep: "wms", naam: "Commandosticker — één per label (100 × 50 mm)", breedte: 100, hoogte: 50, modus: "lijst",
+      inhoud: { lijstKop: true, lijst: COMMANDO_LIJST },
+      elementen: [
+        { type: "tekst", naam: "Omschrijving", x: 4, y: 3, w: 92, h: 11, tekst: "{Omschrijving}", grootte: 20, vet: true, terugloop: false },
+        { type: "barcode", naam: "Barcode", x: 6, y: 15, w: 88, h: 31, inhoud: "{Code}", toonTekst: true, tekstGrootte: 14, maxStreep: 0.8 },
+      ],
+    },
+    gebruikerslijst: {
+      groep: "wms", naam: "Gebruikerslijst A4 — naam, RF username en RF password (8 per pagina)", breedte: 190, hoogte: 32, modus: "lijst",
+      inhoud: { lijstKop: true, lijst: GEBRUIKERS_LIJST, vel: "eigen", velPagina: "a4", velKol: 1, velRij: 8, velGx: 0, velGy: 0, velStart: 1, velKaders: false, velTitel: "Gebruikers RF-scanners" },
+      elementen: [
+        { type: "kader", naam: "Vak naam", x: 0, y: 0, w: 60, h: 32, dikte: 0.3 },
+        { type: "tekst", naam: "Kop naam", x: 2.5, y: 1.5, w: 55, h: 3.5, tekst: "Naam", grootte: 7, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Naam", x: 3, y: 6, w: 54, h: 23, tekst: "{Naam}", grootte: 16, vet: true, uitlijning: "left" },
+        { type: "kader", naam: "Vak username", x: 60, y: 0, w: 65, h: 32, dikte: 0.3 },
+        { type: "tekst", naam: "Kop username", x: 62.5, y: 1.5, w: 60, h: 3.5, tekst: "RF username", grootte: 7, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "barcode", naam: "Barcode username", x: 63, y: 6, w: 59, h: 24, inhoud: "{Username}", toonTekst: true, tekstGrootte: 10, maxStreep: 0.5 },
+        { type: "kader", naam: "Vak password", x: 125, y: 0, w: 65, h: 32, dikte: 0.3 },
+        { type: "tekst", naam: "Kop password", x: 127.5, y: 1.5, w: 60, h: 3.5, tekst: "RF password", grootte: 7, kleur: "#555555", uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "barcode", naam: "Barcode password", x: 128, y: 6, w: 59, h: 24, inhoud: "{Password}", toonTekst: true, tekstGrootte: 10, maxStreep: 0.5 },
       ],
     },
     gebruikerspasje: {
-      groep: "wms", naam: "Gebruikerspasje — inlog en wachtwoord als barcode (85,6 × 54 mm)", breedte: 85.6, hoogte: 54, modus: "lijst",
+      groep: "wms", naam: "Gebruikerspasje — RF username en password (85,6 × 54 mm)", breedte: 85.6, hoogte: 54, modus: "lijst",
       inhoud: { lijstKop: true, lijst: GEBRUIKERS_LIJST },
       elementen: [
         { type: "kader", naam: "Balk", x: 0, y: 0, w: 85.6, h: 10, gevuld: true, kleur: "#111111" },
         { type: "tekst", naam: "Naam", x: 3, y: 0, w: 79.6, h: 10, tekst: "{Naam}", grootte: 15, vet: true, kleur: "#ffffff", uitlijning: "left", terugloop: false },
-        { type: "tekst", naam: "Kop gebruiker", x: 3, y: 11.5, w: 40, h: 3.6, tekst: "GEBRUIKER", grootte: 6.5, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
-        { type: "tekst", naam: "Gebruikersnaam", x: 42.6, y: 11.5, w: 40, h: 3.6, tekst: "{Gebruiker}", grootte: 6.5, uitlijning: "right", verticaal: "top", terugloop: false },
-        { type: "barcode", naam: "Barcode gebruiker", x: 3, y: 15.5, w: 79.6, h: 13, inhoud: "{Gebruiker}" },
-        { type: "tekst", naam: "Kop wachtwoord", x: 3, y: 31, w: 40, h: 3.6, tekst: "WACHTWOORD", grootte: 6.5, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
-        { type: "barcode", naam: "Barcode wachtwoord", x: 3, y: 35, w: 79.6, h: 13, inhoud: "{Wachtwoord}" },
-        { type: "tekst", naam: "Voettekst", x: 3, y: 49.5, w: 79.6, h: 3.6, tekst: "Scanner-inlog — persoonlijk, niet uitlenen", grootte: 5.5, uitlijning: "right", verticaal: "top", terugloop: false },
-      ],
-    },
-    gebruikerslijst: {
-      groep: "wms", naam: "Gebruikerslijst op A4 — inlog en wachtwoord (6 per pagina)", breedte: 190, hoogte: 45, modus: "lijst",
-      inhoud: { lijstKop: true, lijst: GEBRUIKERS_LIJST, vel: "eigen", velKol: 1, velRij: 6, velGx: 0, velGy: 0, velStart: 1, velKaders: true },
-      elementen: [
-        { type: "tekst", naam: "Naam", x: 5, y: 4, w: 48, h: 37, tekst: "{Naam}", grootte: 16, vet: true, uitlijning: "left" },
-        { type: "tekst", naam: "Kop gebruiker", x: 58, y: 3, w: 62, h: 4.5, tekst: "Gebruiker: {Gebruiker}", grootte: 8, uitlijning: "left", verticaal: "top", terugloop: false },
-        { type: "barcode", naam: "Barcode gebruiker", x: 58, y: 9, w: 62, h: 31, inhoud: "{Gebruiker}" },
-        { type: "tekst", naam: "Kop wachtwoord", x: 124, y: 3, w: 62, h: 4.5, tekst: "Wachtwoord", grootte: 8, uitlijning: "left", verticaal: "top", terugloop: false },
-        { type: "barcode", naam: "Barcode wachtwoord", x: 124, y: 9, w: 62, h: 31, inhoud: "{Wachtwoord}" },
+        { type: "tekst", naam: "Kop username", x: 3, y: 11.5, w: 40, h: 3.6, tekst: "RF USERNAME", grootte: 6.5, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "barcode", naam: "Barcode username", x: 3, y: 15.5, w: 79.6, h: 15.5, inhoud: "{Username}", toonTekst: true, tekstGrootte: 8, maxStreep: 0.6 },
+        { type: "tekst", naam: "Kop password", x: 3, y: 33, w: 40, h: 3.6, tekst: "RF PASSWORD", grootte: 6.5, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "barcode", naam: "Barcode password", x: 3, y: 37, w: 79.6, h: 15.5, inhoud: "{Password}", toonTekst: true, tekstGrootte: 8, maxStreep: 0.6 },
       ],
     },
   };
@@ -654,11 +684,19 @@
     return { soort: "1d", bits: doel.encodings.map((e) => e.data).join(""), stil: type === "EAN13" ? 11 : 10, tekst };
   }
 
-  // Tekent een gecodeerde barcode of QR in een vak.
-  function tekenCode(r, c, x, y, w, h, stilleZones, naam) {
+  // Tekent een gecodeerde barcode of QR in een vak. Met opties.maxStreep (mm) wordt een korte code niet
+  // uitgerekt maar op natuurlijke breedte getekend en uitgelijnd (links/midden/rechts). Geeft de getekende
+  // horizontale grenzen terug, zodat er tekst onder kan.
+  function tekenCode(r, c, x, y, w, h, stilleZones, naam, opties = {}) {
+    const uitl = opties.uitlijning || "center";
+    const plaats = (breed) => (uitl === "left" ? x : uitl === "right" ? x + w - breed : x + (w - breed) / 2);
     if (c.soort === "1d") {
-      const q = stilleZones ? c.stil : 0, bw = w / (c.bits.length + 2 * q), x0 = x + q * bw;
+      const q = stilleZones ? c.stil : 0;
+      let bw = w / (c.bits.length + 2 * q);
+      if (opties.maxStreep > 0 && bw > opties.maxStreep) bw = opties.maxStreep;
+      const totaal = bw * (c.bits.length + 2 * q), x0 = plaats(totaal) + q * bw;
       if (bw < 0.25) r.waarschuwingen.push(`“${naam}”: streepjes erg dun (${bw.toFixed(2)} mm). Maak de barcode breder of de waarde korter.`);
+      r.grens = { x0, x1: x0 + c.bits.length * bw };
       for (let j = 0; j < c.bits.length;) {
         if (c.bits[j] === "1") {
           let k = j;
@@ -670,7 +708,8 @@
     } else {
       const z = Math.min(w, h), n = c.matrix.length, q = stilleZones ? 2 : 0, cel = z / (n + 2 * q);
       if (cel < 0.3) r.waarschuwingen.push(`“${naam}”: QR-code is erg klein. Maak hem groter of de inhoud korter.`);
-      const x0 = x + (w - z) / 2 + q * cel, y0 = y + (h - z) / 2 + q * cel;
+      const x0 = plaats(z) + q * cel, y0 = y + (h - z) / 2 + q * cel;
+      r.grens = { x0, x1: x0 + n * cel };
       c.matrix.forEach((rij, ri) => {
         for (let k = 0; k < n;) {
           if (rij[k]) {
@@ -944,7 +983,15 @@
         const c = codes.get(el.id);
         if (!c) continue;
         if (c.fout) { r.ops.push({ t: "fout", x, y, w, h }); continue; }
-        tekenCode(r, c, x, y, w, h, el.stilleZones, el.naam);
+        // Optioneel de waarde als leesbare tekst onder de barcode (spaties blijven staan)
+        const s = Math.max(+el.tekstGrootte || 10, 3), th = el.toonTekst ? (CAP + DESC) * s * PT : 0, gap = el.toonTekst ? Math.min(h * 0.04, 1) : 0;
+        const bh = Math.max(h - th - gap, 1);
+        tekenCode(r, c, x, y, w, bh, el.stilleZones, el.naam, { maxStreep: +el.maxStreep || 0, uitlijning: el.bcUitlijning });
+        if (el.toonTekst && r.grens) {
+          const uitl = el.bcUitlijning || "center", { x0, x1 } = r.grens;
+          const tx = uitl === "left" ? x0 : uitl === "right" ? x1 : (x0 + x1) / 2;
+          r.ops.push({ t: "tekst", x: tx, y: y + bh + gap + CAP * s * PT, tekst: c.tekst, s, vet: false, lettertype: "helvetica", uitlijning: uitl, kleur: "#000000" });
+        }
       } else if (el.type === "locaties") {
         tekenLocaties(r, { ...el, x, y, w, h }, ctx, libs, meet);
       } else {
@@ -1054,12 +1101,26 @@
 
   // Meerdere etiketten per A4-vel. Elk etiket wordt bijgesneden tot zijn eigen vak.
   function maakVelPdf(cfg, items, vel, libs) {
-    const doc = new libs.jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    doc.setProperties({ title: "Stickers" });
+    const P = vel.pagina, liggend = P.b > P.h, formaat = [Math.min(P.b, P.h), Math.max(P.b, P.h)];
+    const doc = new libs.jsPDF({ orientation: liggend ? "landscape" : "portrait", unit: "mm", format: formaat });
+    doc.setProperties({ title: vel.titel || "Stickers" });
     const meet = meetMet(doc), cache = new Map();
-    let pos = vel.start - 1;
+    const totaalVellen = Math.ceil((vel.start - 1 + items.length) / vel.perVel);
+    const titel = (nr) => {
+      if (!vel.titel) return;
+      const breed = vel.kol * vel.b + (vel.kol - 1) * vel.gx, y = vel.boven - TITEL_HOOGTE * 0.45;
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+      doc.text(vel.titel, vel.links, y, { baseline: "alphabetic" });
+      if (totaalVellen > 1) {
+        doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+        doc.text(`${nr} / ${totaalVellen}`, vel.links + breed, y, { align: "right", baseline: "alphabetic" });
+      }
+    };
+    let pos = vel.start - 1, vel_nr = 1;
+    titel(1);
     items.forEach((item, i) => {
-      if (pos >= vel.perVel) { doc.addPage("a4", "portrait"); pos = 0; }
+      if (pos >= vel.perVel) { doc.addPage(formaat, liggend ? "landscape" : "portrait"); pos = 0; titel(++vel_nr); }
       const kol = pos % vel.kol, rij = Math.floor(pos / vel.kol);
       const dx = vel.links + kol * (vel.b + vel.gx), dy = vel.boven + rij * (vel.h + vel.gy);
       const r = render(cfg, item, context(item, i + 1, items.length), libs, meet, cache);
@@ -1109,7 +1170,7 @@
     }).join("");
   }
 
-  const api = { PT, MAX_PAGINAS, FORMATEN, FORMAATGROEPEN, VELLEN, velIndeling, aantalVellen, LETTERTYPEN, PALET, TYPE_STANDAARD, STARTERS, INHOUD_STANDAARD, LOCATIE_STANDAARD,
+  const api = { VOORBEELD_LIJSTEN, PT, MAX_PAGINAS, FORMATEN, FORMAATGROEPEN, VELLEN, PAGINAS, velIndeling, aantalVellen, LETTERTYPEN, PALET, TYPE_STANDAARD, STARTERS, INHOUD_STANDAARD, LOCATIE_STANDAARD,
     lijstKolommen, nieuwId, element, standaard, normaliseer, migreer, locatieInstellingen, segmentWaarden, standaardKleuren, standaardPijlen, PIJLRICHTINGEN, waarden, context, render,
     meetMet, maakPdf, opsNaarSvg, esc, contrast };
   if (typeof module !== "undefined" && module.exports) module.exports = api;

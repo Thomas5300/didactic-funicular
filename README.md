@@ -26,8 +26,10 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   *kleurbalk*, *vol gekleurd* en *streep*; tekstkleur automatisch/zwart/wit, segmentnamen, pijlen en barcode per locatie.
 - **Magazijnontwerpen**: diagonaal met 3 niveaus per ligger, diagonaal losse locatie, losse locatie met grote code,
   compact met kleurstreep, posities naast elkaar en niveaus onder elkaar. Optioneel een logo in elk vak.
-- **Scanner en gebruikers**: scannercommando-sticker, commandoblad op A4, gebruikerspasje (85,6 × 54 mm) en
-  gebruikerslijst op A4 met inlognaam en wachtwoord als barcode.
+- **Scanner en gebruikers**: commandokaart (raster op A5, zoals op de heftruck), commandoblad A4, commandosticker,
+  gebruikerslijst A4 (Naam | RF username | RF password, barcode met tekst eronder) en gebruikerspasje (85,6 × 54 mm).
+- **Barcodes**: optioneel de waarde als tekst eronder, en een maximale streepdikte zodat korte codes (`e`, `11`) niet worden uitgerekt.
+- **Raster op een vel**: eigen indeling (kolommen × rijen) op A4, A5, A6 (staand/liggend), Letter of een eigen maat, met titel boven elk vel.
 - **Voor de drukkerij**: afloop (2/3/5 mm) en snijtekens in de PDF; kleuren voor tekst en kaders.
 - **Variabelen** in tekst en barcodes: `{waarde}`, `{nr}`, `{n}`, `{totaal}`, `{datum}`, `{barcode}`.
 - **Labelformaten** (75, gegroepeerd): verzendlabels (PostNL, 4×6 inch, 100×150, A6 …), thermische rollen in inch en mm,

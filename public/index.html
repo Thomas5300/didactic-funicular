@@ -88,11 +88,24 @@
         <span class="sublabel">Afdrukken op</span>
         <select id="vel" aria-label="Afdrukken op"></select>
         <div id="vel-opties" class="sectie plat" hidden>
-          <div class="rij4" id="vel-eigen">
-            <label>Kolommen <input data-k="velKol" type="number" min="1" max="20"></label>
-            <label>Rijen <input data-k="velRij" type="number" min="1" max="40"></label>
-            <label>Ruimte ↔ <input data-k="velGx" type="number" min="0" step="0.1"></label>
-            <label>Ruimte ↕ <input data-k="velGy" type="number" min="0" step="0.1"></label>
+          <div id="vel-eigen" class="sectie plat">
+            <label>Vel <select data-k="velPagina">
+              <option value="a4">A4 staand</option><option value="a4l">A4 liggend</option>
+              <option value="a5">A5 staand</option><option value="a5l">A5 liggend</option>
+              <option value="a6">A6 staand</option><option value="a6l">A6 liggend</option>
+              <option value="letter">US Letter</option><option value="eigen">Eigen maat…</option>
+            </select></label>
+            <div class="rij" id="vel-maat">
+              <label>Velbreedte (mm) <input data-k="velPB" type="number" min="10" step="0.5"></label>
+              <label>Velhoogte (mm) <input data-k="velPH" type="number" min="10" step="0.5"></label>
+            </div>
+            <div class="rij4">
+              <label>Kolommen <input data-k="velKol" type="number" min="1" max="20"></label>
+              <label>Rijen <input data-k="velRij" type="number" min="1" max="40"></label>
+              <label>Ruimte ↔ <input data-k="velGx" type="number" min="0" step="0.1"></label>
+              <label>Ruimte ↕ <input data-k="velGy" type="number" min="0" step="0.1"></label>
+            </div>
+            <label>Titel boven elk vel <input data-k="velTitel" placeholder="bijv. Gebruikers RF-scanners (leeg = geen titel)"></label>
           </div>
           <div class="rij">
             <label>Begin bij etiket <input data-k="velStart" type="number" min="1"></label>
