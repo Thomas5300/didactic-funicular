@@ -26,8 +26,9 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   *kleurbalk*, *vol gekleurd* en *streep*; tekstkleur automatisch/zwart/wit, segmentnamen, pijlen en barcode per locatie.
 - **Magazijnontwerpen**: diagonaal met 3 niveaus per ligger, diagonaal losse locatie, losse locatie met grote code,
   compact met kleurstreep, posities naast elkaar en niveaus onder elkaar. Optioneel een logo in elk vak.
-- **Locaties op A4 (zwart-wit)**: A4 locatiebord (één locatie groot), vouwkaart (zelfde locatie 2× op A4, bovenste
-  helft op z'n kop — dubbelvouwen over een ligger en aan beide kanten leesbaar) en 2 locaties per A4 om door te knippen.
+- **Locaties op A4 (zwart-wit)**: losse locatie met grote code op een half A4 als vouwkaart (zelfde locatie 2× op A4,
+  bovenste helft op z'n kop — dubbelvouwen en aan beide kanten leesbaar), 2 per A4 om door te knippen, of op een heel A4.
+  Op grote labels komt de code automatisch op twee regels (bijv. `07 AA` / `01 0`) zodat hij zo groot mogelijk is.
   Het locatievak heeft een zwart-witstand voor zwart-witprinters. In Locaties-modus kun je ook `{code}`, `{bc}` en
   de segmentnamen (bijv. `{Gang}`) in tekstvakken gebruiken.
 - **Scanner en gebruikers**: commandokaart (raster op A5, zoals op de heftruck), commandoblad A4, commandosticker,

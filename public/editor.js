@@ -332,7 +332,9 @@
                <label>Barcode ${keuze("barcode", [["CODE128", "Code 128"], ["CODE39", "Code 39"], ["QR", "QR-code"], ["GEEN", "Geen"]])}</label>
                ${num("barcodeDeel", "Barcode (% hoogte)", 5, 15)}
              </div>
-             ${chk("koppen", "Segmentnamen boven de code (GANG, STELLING …)")}`}
+             ${chk("koppen", "Segmentnamen boven de code (GANG, STELLING …)")}
+             ${g.koppen ? "" : `${num("splits", "Segmenten op regel 1 (bij twee regels)", 1, 0)}
+             <p class="hint">Is er hoogte genoeg, dan komt de code op twee regels zodat hij groter wordt, bijv. <code>07 AA</code> / <code>01 0</code>. Zet op <code>0</code> voor altijd één regel.</p>`}`}
         ${chk("pijlen", "Pijlen tonen")}
         ${chk("rand", "Dunne rand om elk vak")}
         ${chk("zwartWit", "Zwart-wit (voor een zwart-witprinter): zwarte vlakken, witte tekst")}
@@ -391,7 +393,7 @@
     const t = e.target, k = t.dataset.prop;
     if (!k) return;
     zetProp(k, t.type === "checkbox" ? t.checked : t.value);
-    if (k === "symbologie" || k === "toonTekst") bouwEigenschappen();
+    if (k === "symbologie" || k === "toonTekst" || k === "koppen") bouwEigenschappen();
   });
   eig.addEventListener("click", (e) => {
     const t = e.target.closest("button");

@@ -328,26 +328,26 @@
       ],
     },
 
-    a4bord: {
-      groep: "magazijn", naam: "A4 locatiebord — één locatie groot (liggend, zwart-wit)", breedte: 297, hoogte: 210, modus: "locaties",
-      locatie: { groep: -1 },
-      elementen: [
-        { type: "locaties", naam: "Locatie", x: 6, y: 6, w: 285, h: 198, stijl: "streep", zwartWit: true, koppen: false, barcodeDeel: 38, tussenruimte: 0 },
-      ],
-    },
-    vouwkaart: {
-      groep: "magazijn", naam: "Vouwkaart — half A4, dubbelvouwen: aan beide kanten leesbaar (zwart-wit)", breedte: 200, hoogte: 138, modus: "locaties",
+    halfA4vouw: {
+      groep: "magazijn", naam: "Losse locatie — grote code, half A4 vouwkaart (zwart-wit)", breedte: 200, hoogte: 138, modus: "locaties",
       locatie: { groep: -1 }, inhoud: { vel: "vouw" },
       elementen: [
-        { type: "locaties", naam: "Locatie", x: 0, y: 0, w: 200, h: 138, stijl: "streep", zwartWit: true, koppen: false, barcodeDeel: 38, tussenruimte: 0 },
+        { type: "locaties", naam: "Locatie", x: 0, y: 0, w: 200, h: 138, stijl: "balk", zwartWit: true, koppen: false, barcodeDeel: 42, tussenruimte: 0 },
       ],
     },
-    a5twee: {
-      groep: "magazijn", naam: "Half A4 — 2 locaties per vel, doorknippen (zwart-wit)", breedte: 200, hoogte: 130, modus: "locaties",
+    halfA4twee: {
+      groep: "magazijn", naam: "Losse locatie — grote code, half A4 (2 per vel, knippen, zwart-wit)", breedte: 200, hoogte: 130, modus: "locaties",
       locatie: { groep: -1 },
-      inhoud: { vel: "eigen", velPagina: "a4", velKol: 1, velRij: 2, velGx: 0, velGy: 18.5, velStart: 1, velKaders: true, velTitel: "", velUitvullen: false, velCentreren: false },
+      inhoud: { vel: "eigen", velPagina: "a4", velKol: 1, velRij: 2, velGx: 0, velGy: 18.5, velStart: 1, velKaders: false, velTitel: "", velUitvullen: false, velCentreren: false },
       elementen: [
-        { type: "locaties", naam: "Locatie", x: 0, y: 0, w: 200, h: 130, stijl: "streep", zwartWit: true, koppen: false, barcodeDeel: 38, tussenruimte: 0 },
+        { type: "locaties", naam: "Locatie", x: 0, y: 0, w: 200, h: 130, stijl: "balk", zwartWit: true, koppen: false, barcodeDeel: 42, tussenruimte: 0 },
+      ],
+    },
+    a4bord: {
+      groep: "magazijn", naam: "Losse locatie — grote code, heel A4 (liggend, zwart-wit)", breedte: 297, hoogte: 210, modus: "locaties",
+      locatie: { groep: -1 },
+      elementen: [
+        { type: "locaties", naam: "Locatie", x: 6, y: 6, w: 285, h: 198, stijl: "balk", zwartWit: true, koppen: false, barcodeDeel: 42, tussenruimte: 0 },
       ],
     },
 
@@ -936,7 +936,7 @@
     const p = Math.min(w, h) * 0.05;
     let cx = x, cw = w;
     if (el.pijlen && maxPijlen > 0) {
-      const aw = Math.min(h * (0.42 + 0.2 * (maxPijlen - 1)), w * 0.3);
+      const aw = Math.min(h * (0.42 + 0.2 * (maxPijlen - 1)), w * (maxPijlen > 1 ? 0.3 : 0.24));
       r.ops.push({ t: "rect", x, y, w: aw, h, kleur, achtergrond: true });
       pijlen(r, loc.pijl, x + aw * 0.08, y + h * 0.1, aw * 0.84, h * 0.8, tekstKleurVoor(el, kleur));
       cx += aw; cw -= aw;
@@ -964,7 +964,17 @@
         eenRegel(r, v, tx + i * kw, ty + kopH, kw, waardeH, sWaarde, true, tekstKleur);
       });
     } else {
-      eenRegel(r, loc.code, tx, ty, tw, th, pasKorps(loc.code, tw * 0.95, th * 0.9, true, meet), true, tekstKleur);
+      // Eén regel, of twee regels (bijv. "07 AA" / "01 0") als de code dan groter wordt
+      const s1 = pasKorps(loc.code, tw * 0.95, th * 0.9, true, meet);
+      const [r1, r2] = splitsCode(loc, el.splits ?? 2);
+      let s2 = 0;
+      if (r1 && r2) s2 = Math.min(pasKorps(r1, tw * 0.95, Infinity, true, meet), pasKorps(r2, tw * 0.95, Infinity, true, meet),
+        (th * 0.92) / ((CAP + LH) * PT));
+      if (s2 > s1 * 1.12) {
+        const blok = (CAP + LH) * s2 * PT, b1 = ty + (th - blok) / 2 + CAP * s2 * PT;
+        [r1, r2].forEach((regel, i) => r.ops.push({ t: "tekst", x: tx + tw / 2, y: b1 + i * LH * s2 * PT, tekst: regel, s: s2, vet: true,
+          lettertype: "helvetica", uitlijning: "center", kleur: tekstKleur }));
+      } else eenRegel(r, loc.code, tx, ty, tw, th, s1, true, tekstKleur);
     }
 
     if (metBc) {
