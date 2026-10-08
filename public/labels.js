@@ -454,7 +454,9 @@
     heftruckBord: bordOntwerp({ vorm: "heftruck", formaat: "a4l", kleurstijl: "kleur" }),
     voetgangersBord: bordOntwerp({ vorm: "geenVoetgangers", formaat: "a4l", kleurstijl: "kleur" }),
     schoenenBord: bordOntwerp({ vorm: "schoenen", formaat: "a4", kleurstijl: "kleur" }),
+    laadperronBord: bordOntwerp({ vorm: "laadperron", formaat: "a4l", kleurstijl: "kleur" }),
     nooduitgangBord: bordOntwerp({ vorm: "nooduitgang", formaat: "a4l", kleurstijl: "kleur" }),
+    verzamelplaatsBord: bordOntwerp({ vorm: "verzamelplaats", formaat: "a4l", kleurstijl: "kleur" }),
     nietRokenBord: bordOntwerp({ vorm: "nietRoken", formaat: "a5l", kleurstijl: "kleur" }),
 
     // ----- Scanner en gebruikers (WMS) -----

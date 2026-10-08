@@ -367,6 +367,35 @@
       q.rect(72, 10, 20, 88, q.gat);
       VORM.persoonRennend(q.sub(0, 8, 70));
     },
+    laadperron(q) {   // stapt van de rand van een verhoogd perron, pijl omlaag
+      q.rect(4, 62, 42, 36);
+      q.rect(46, 94, 50, 4);
+      q.cirkel(61, 9, 8);
+      q.lijn([[58, 22], [50, 44]], 13.5);
+      q.lijn([[50, 44], [42, 52], [37, 57]], 10.5);
+      q.lijn([[50, 44], [60, 52], [62, 66]], 10.5);
+      q.lijn([[59, 25], [68, 22], [74, 13]], 8.5);
+      q.lijn([[56, 25], [46, 22], [40, 13]], 8.5);
+      q.rect(79.5, 42, 5, 28);
+      q.vlak([[72, 68], [92, 68], [82, 86]]);
+    },
+    verzamelplaats(q) {   // vier pijlen naar het midden en een groepje mensen
+      const pijlNaar = (a, b) => {
+        const L = Math.hypot(b[0] - a[0], b[1] - a[1]), d = [(b[0] - a[0]) / L, (b[1] - a[1]) / L], n = [-d[1], d[0]];
+        const h = [b[0] - d[0] * 12, b[1] - d[1] * 12], P = (o, w) => [o[0] + n[0] * w, o[1] + n[1] * w];
+        q.vlak([P(a, 3.5), P(h, 3.5), P(h, 10), b, P(h, -10), P(h, -3.5), P(a, -3.5)]);
+      };
+      pijlNaar([3, 3], [27, 27]); pijlNaar([97, 3], [73, 27]); pijlNaar([3, 97], [27, 73]); pijlNaar([97, 97], [73, 73]);
+      const figuur = (cx, top, s, k) => {
+        const z = (v) => v * s, rand = k === q.gat ? 2.2 : 0;
+        q.cirkel(cx, top + z(5), z(5) + rand, k);
+        q.rrect(cx - z(8) - rand, top + z(12) - rand, z(16) + 2 * rand, z(21) + 2 * rand, z(6), k);
+        q.lijn([[cx - z(3.6), top + z(30)], [cx - z(3.6), top + z(44)]], z(6) + 2 * rand, k);
+        q.lijn([[cx + z(3.6), top + z(30)], [cx + z(3.6), top + z(44)]], z(6) + 2 * rand, k);
+      };
+      figuur(37, 27, 0.82); figuur(63, 27, 0.82);
+      figuur(50, 33, 1, q.gat); figuur(50, 33, 1);
+    },
     hart(q) {
       q.pad("M50,92 C30,76 4,58 4,34 C4,17 17,6 31,6 C40,6 46,11 50,19 C54,11 60,6 69,6 C83,6 96,17 96,34 C96,58 70,76 50,92 Z");
       q.pad("M55,22 L36,54 L49,54 L41,80 L64,44 L51,44 L60,22 Z", q.gat);
@@ -506,6 +535,11 @@
       nl: ["Lage temperatuur", "Vriescel — draag warme kleding"], en: ["Low temperature", "Freezer — wear warm clothing"],
       teken: (q) => VORM.sneeuw(q),
     },
+    laadperron: {
+      naam: "Valgevaar laadperron", groep: "waarschuwing", vak: [27, 34, 44],
+      nl: ["Valgevaar laadperron", "Blijf uit de buurt van de rand"], en: ["Fall hazard: loading dock", "Keep away from the edge"],
+      teken: (q) => VORM.laadperron(q),
+    },
     brandbaar: {
       naam: "Brandbare stoffen", groep: "waarschuwing", vak: [30, 33, 40],
       nl: ["Brandbare stoffen", "Geen open vuur in de buurt"], en: ["Flammable material", "No open flames nearby"],
@@ -606,6 +640,11 @@
       naam: "AED", groep: "nood",
       nl: ["AED", "Automatische externe defibrillator"], en: ["AED", "Automated external defibrillator"],
       teken: (q) => VORM.hart(q),
+    },
+    verzamelplaats: {
+      naam: "Verzamelplaats", groep: "nood", vak: [8, 8, 84], kop: "VERZAMELPLAATS  —  ASSEMBLY POINT",
+      nl: ["Verzamelplaats", "Bij ontruiming hier verzamelen"], en: ["Assembly point", "Gather here in case of evacuation"],
+      teken: (q) => VORM.verzamelplaats(q),
     },
     noodpijl: {
       naam: "Vluchtroute (pijl)", groep: "nood", richting: true, kop: "VLUCHTROUTE  —  ESCAPE ROUTE",
