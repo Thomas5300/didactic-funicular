@@ -11,7 +11,7 @@
 
   // Bekende labelformaten (breedte × hoogte zoals het label voor je ligt). Gegroepeerd voor de keuzelijst.
   const FORMAATGROEPEN = ["Verzendlabels", "Thermische labels (inch)", "Thermische labels (mm)", "Dymo LabelWriter",
-    "Brother DK", "Stelling- en magazijnlabels", "Papierformaten"];
+    "Brother DK", "Stelling- en magazijnlabels", "Kaarten en pasjes", "Papierformaten"];
   const FORMATEN = {
     // Verzendlabels
     postnl: { groep: "Verzendlabels", naam: "PostNL 150 × 102 mm (liggend)", b: 150, h: 102 },
@@ -86,6 +86,11 @@
     st70x70: { groep: "Stelling- en magazijnlabels", naam: "Vak 70 × 70 mm", b: 70, h: 70 },
     st80x220: { groep: "Stelling- en magazijnlabels", naam: "Niveaulabel 80 × 220 mm (staand)", b: 80, h: 220 },
     st200x200: { groep: "Stelling- en magazijnlabels", naam: "Vloerlabel 200 × 200 mm", b: 200, h: 200 },
+    // Kaarten en pasjes
+    pasje: { groep: "Kaarten en pasjes", naam: "Pasje / creditcard 85,6 × 54 mm", b: 85.6, h: 54 },
+    pasjeStaand: { groep: "Kaarten en pasjes", naam: "Pasje staand 54 × 85,6 mm", b: 54, h: 85.6 },
+    visitekaartje: { groep: "Kaarten en pasjes", naam: "Visitekaartje 85 × 55 mm", b: 85, h: 55 },
+    badge: { groep: "Kaarten en pasjes", naam: "Naambadge 90 × 60 mm", b: 90, h: 60 },
     // Papierformaten
     a4staand: { groep: "Papierformaten", naam: "A4 staand — 210 × 297 mm", b: 210, h: 297 },
     a4: { groep: "Papierformaten", naam: "A4 liggend — 297 × 210 mm", b: 297, h: 210 },
@@ -159,7 +164,8 @@
     kader: { naam: "Kader", w: 60, h: 30, dikte: 0.5, gevuld: false, kleur: "#000000" },
     afbeelding: { naam: "Afbeelding", w: 30, h: 30, data: "", imgB: 1, imgH: 1 },
     locaties: { naam: "Locaties", w: 190, h: 44, richting: "naast", tussenruimte: 3, stijl: "balk", pijlen: true,
-      barcode: "CODE128", barcodeDeel: 45, koppen: true, rand: true, tekstKleur: "auto", splits: 2 },
+      barcode: "CODE128", barcodeDeel: 45, koppen: true, rand: true, tekstKleur: "auto", splits: 2,
+      logo: "", logoB: 1, logoH: 1, logoPositie: "boven-rechts", logoGrootte: 25 },
   };
 
   const PIJLRICHTINGEN = ["geen", "omhoog", "omlaag", "links", "rechts"];
@@ -196,7 +202,11 @@
     modus: "reeks", start: "1000", eind: "1025", stap: 1, prefix: "", suffix: "",
     lijst: "", vasteWaarde: "", kopieen: 1, marge: 4, afloop: 0, snijtekens: false,
     vel: "", velStart: 1, velKaders: false, velKol: 2, velRij: 7, velGx: 0, velGy: 0,
+    lijstKop: false,
   };
+
+  const COMMANDO_LIJST = "Code;Omschrijving\ne;Stoppen / terug\n/;Stoppen / afsluiten\nZ001;Crossdock zone";
+  const GEBRUIKERS_LIJST = "Naam;Gebruiker;Wachtwoord\nJan Jansen;JJANSEN;Welkom01\nPiet de Vries;PDVRIES;Magazijn22";
 
   const STARTERS = {
     nummer: {
@@ -283,6 +293,51 @@
       },
       elementen: [
         { type: "locaties", naam: "Locaties", x: 2, y: 2, w: 76, h: 216, richting: "onder", tussenruimte: 2, stijl: "vol", barcodeDeel: 42 },
+      ],
+    },
+
+    // ----- Scanner en gebruikers (WMS) -----
+    commando: {
+      groep: "wms", naam: "Scannercommando — barcode met omschrijving (100 × 50 mm)", breedte: 100, hoogte: 50, modus: "lijst",
+      inhoud: { lijstKop: true, lijst: COMMANDO_LIJST },
+      elementen: [
+        { type: "tekst", naam: "Omschrijving", x: 4, y: 3, w: 92, h: 12, tekst: "{Omschrijving}", grootte: 20, vet: true, terugloop: false },
+        { type: "barcode", naam: "Barcode", x: 8, y: 16, w: 84, h: 23, inhoud: "{Code}" },
+        { type: "tekst", naam: "Code", x: 4, y: 40.5, w: 92, h: 7, tekst: "{Code}", grootte: 12, lettertype: "courier", vet: true, terugloop: false },
+      ],
+    },
+    commandoA4: {
+      groep: "wms", naam: "Scannercommando's op A4 — commandoblad (8 per pagina)", breedte: 190, hoogte: 34, modus: "lijst",
+      inhoud: { lijstKop: true, lijst: COMMANDO_LIJST, vel: "eigen", velKol: 1, velRij: 8, velGx: 0, velGy: 0, velStart: 1, velKaders: true },
+      elementen: [
+        { type: "tekst", naam: "Omschrijving", x: 5, y: 3, w: 80, h: 28, tekst: "{Omschrijving}", grootte: 18, vet: true, uitlijning: "left" },
+        { type: "barcode", naam: "Barcode", x: 92, y: 4, w: 93, h: 20, inhoud: "{Code}" },
+        { type: "tekst", naam: "Code", x: 92, y: 25, w: 93, h: 6, tekst: "{Code}", grootte: 11, lettertype: "courier", vet: true, terugloop: false },
+      ],
+    },
+    gebruikerspasje: {
+      groep: "wms", naam: "Gebruikerspasje — inlog en wachtwoord als barcode (85,6 × 54 mm)", breedte: 85.6, hoogte: 54, modus: "lijst",
+      inhoud: { lijstKop: true, lijst: GEBRUIKERS_LIJST },
+      elementen: [
+        { type: "kader", naam: "Balk", x: 0, y: 0, w: 85.6, h: 10, gevuld: true, kleur: "#111111" },
+        { type: "tekst", naam: "Naam", x: 3, y: 0, w: 79.6, h: 10, tekst: "{Naam}", grootte: 15, vet: true, kleur: "#ffffff", uitlijning: "left", terugloop: false },
+        { type: "tekst", naam: "Kop gebruiker", x: 3, y: 11.5, w: 40, h: 3.6, tekst: "GEBRUIKER", grootte: 6.5, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Gebruikersnaam", x: 42.6, y: 11.5, w: 40, h: 3.6, tekst: "{Gebruiker}", grootte: 6.5, uitlijning: "right", verticaal: "top", terugloop: false },
+        { type: "barcode", naam: "Barcode gebruiker", x: 3, y: 15.5, w: 79.6, h: 13, inhoud: "{Gebruiker}" },
+        { type: "tekst", naam: "Kop wachtwoord", x: 3, y: 31, w: 40, h: 3.6, tekst: "WACHTWOORD", grootte: 6.5, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "barcode", naam: "Barcode wachtwoord", x: 3, y: 35, w: 79.6, h: 13, inhoud: "{Wachtwoord}" },
+        { type: "tekst", naam: "Voettekst", x: 3, y: 49.5, w: 79.6, h: 3.6, tekst: "Scanner-inlog — persoonlijk, niet uitlenen", grootte: 5.5, uitlijning: "right", verticaal: "top", terugloop: false },
+      ],
+    },
+    gebruikerslijst: {
+      groep: "wms", naam: "Gebruikerslijst op A4 — inlog en wachtwoord (6 per pagina)", breedte: 190, hoogte: 45, modus: "lijst",
+      inhoud: { lijstKop: true, lijst: GEBRUIKERS_LIJST, vel: "eigen", velKol: 1, velRij: 6, velGx: 0, velGy: 0, velStart: 1, velKaders: true },
+      elementen: [
+        { type: "tekst", naam: "Naam", x: 5, y: 4, w: 48, h: 37, tekst: "{Naam}", grootte: 16, vet: true, uitlijning: "left" },
+        { type: "tekst", naam: "Kop gebruiker", x: 58, y: 3, w: 62, h: 4.5, tekst: "Gebruiker: {Gebruiker}", grootte: 8, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "barcode", naam: "Barcode gebruiker", x: 58, y: 9, w: 62, h: 31, inhoud: "{Gebruiker}" },
+        { type: "tekst", naam: "Kop wachtwoord", x: 124, y: 3, w: 62, h: 4.5, tekst: "Wachtwoord", grootte: 8, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "barcode", naam: "Barcode wachtwoord", x: 124, y: 9, w: 62, h: 31, inhoud: "{Wachtwoord}" },
       ],
     },
   };
@@ -509,8 +564,16 @@
         lijst.push({ waarde: (cfg.prefix || "") + nr + (cfg.suffix || ""), nr });
       }
     } else if (cfg.modus === "lijst") {
-      lijst = String(cfg.lijst || "").split(/\r?\n/).map((r) => r.trim()).filter(Boolean).map((w) => ({ waarde: w, nr: w }));
-      if (!lijst.length) throw new Error("Vul minstens één regel in de lijst in.");
+      const { kop, rijen } = lijstTabel(cfg);
+      if (!rijen.length) throw new Error(cfg.lijstKop ? "Vul onder de kopregel minstens één regel in." : "Vul minstens één regel in de lijst in.");
+      lijst = rijen.map((cellen) => {
+        const kolommen = {};
+        cellen.forEach((c, i) => {
+          kolommen[String(i + 1)] = c;
+          if (kop && kop[i]) kolommen[kop[i].toLowerCase()] = c;
+        });
+        return { waarde: cellen[0] || "", nr: cellen[0] || "", kolommen };
+      });
     } else if (cfg.modus === "locaties") {
       lijst = locatieStickers(cfg, k);
     } else {
@@ -523,14 +586,43 @@
     return uit;
   }
 
-  function context(item, n, totaal) {
-    return { waarde: item.waarde, nr: item.nr, n, totaal, datum: new Date().toLocaleDateString("nl-NL"), locaties: item.locaties };
+  // Lijst als tabel: kolommen gescheiden door tab (plakken uit Excel) of puntkomma; optioneel een kopregel.
+  function lijstTabel(cfg) {
+    const regels = String(cfg.lijst || "").split(/\r?\n/).filter((r) => r.trim());
+    const cellen = (r) => (r.includes("\t") ? r.split("\t") : r.includes(";") ? r.split(";") : [r]).map((c) => c.trim());
+    const rijen = regels.map(cellen);
+    const kop = cfg.lijstKop && rijen.length ? rijen.shift() : null;
+    return { kop, rijen };
   }
 
+  // Invoegbare kolommen voor de editor: {Naam}… bij een kopregel, anders {1}, {2}… (alleen bij meer kolommen).
+  function lijstKolommen(cfg) {
+    if (cfg.modus !== "lijst") return [];
+    const { kop, rijen } = lijstTabel(cfg);
+    if (kop) return kop.filter(Boolean).map((k) => `{${k}}`);
+    const n = Math.max(0, ...rijen.map((r) => r.length));
+    return n > 1 ? Array.from({ length: n }, (_, i) => `{${i + 1}}`) : [];
+  }
+
+  function context(item, n, totaal) {
+    return { waarde: item.waarde, nr: item.nr, n, totaal, datum: new Date().toLocaleDateString("nl-NL"),
+      locaties: item.locaties, kolommen: item.kolommen };
+  }
+
+  const VAST = ["waarde", "nr", "n", "totaal", "datum", "barcode"];
   function vulIn(tekst, ctx) {
-    return String(tekst ?? "")
-      .replace(/\{loc(\d{1,2})\}/g, (_, i) => { const l = ctx.locaties && ctx.locaties[+i - 1]; return l ? l.code : ""; })
-      .replace(/\{(waarde|nr|n|totaal|datum|barcode)\}/g, (_, k) => String(ctx[k] ?? ""));
+    return String(tekst ?? "").replace(/\{([^{}\n]+)\}/g, (m, k) => {
+      const s = k.trim();
+      if (VAST.includes(s)) return String(ctx[s] ?? "");
+      const loc = /^loc(\d{1,2})$/.exec(s);
+      if (loc) { const l = ctx.locaties && ctx.locaties[+loc[1] - 1]; return l ? l.code : ""; }
+      if (ctx.kolommen) {
+        const v = ctx.kolommen[s.toLowerCase()];
+        if (v !== undefined) return v;
+        if (/^\d+$/.test(s)) return "";       // kolom bestaat niet in deze regel
+      }
+      return m;
+    });
   }
 
   // ---------- Barcodes ----------
@@ -653,6 +745,18 @@
     }
   }
 
+  // Logo in een hoek van een locatievak (zelfde logo in elk vak).
+  function celLogo(r, el, x, y, w, h) {
+    if (!el.logo) return;
+    const m = Math.min(w, h), p = m * 0.05;
+    const z = m * Math.min(Math.max(+el.logoGrootte || 25, 5), 90) / 100;
+    const s = Math.min(z / el.logoB, z / el.logoH), lw = el.logoB * s, lh = el.logoH * s;
+    const pos = el.logoPositie || "boven-rechts";
+    const lx = pos.endsWith("links") ? x + p : pos.endsWith("rechts") ? x + w - p - lw : x + (w - lw) / 2;
+    const ly = pos.startsWith("boven") ? y + p : pos.startsWith("onder") ? y + h - p - lh : y + (h - lh) / 2;
+    r.ops.push({ t: "img", data: el.logo, alias: el.id + "-logo-" + el.logo.length, x: lx, y: ly, w: lw, h: lh });
+  }
+
   function tekstKleurVoor(el, achtergrond) {
     return el.tekstKleur === "zwart" ? "#000000" : el.tekstKleur === "wit" ? "#ffffff" : contrast(achtergrond);
   }
@@ -743,6 +847,7 @@
       const aw = Math.min(x + w - p - xMin, verticaal ? ah * 0.55 * n : ah * 1.1);
       if (aw > 1) pijlen(r, loc.pijl, x + w - p - aw, ay, aw, ah, tk);
     }
+    celLogo(r, el, x, y, w, h);
     if (el.rand) r.ops.push({ t: "kader", x, y, w, h, dikte: 0.3, gevuld: false, kleur: "#000000" });
   }
 
@@ -791,6 +896,7 @@
         catch (e) { r.fouten.push(`${el.naam}: ${e.message}`); r.ops.push({ t: "fout", x: cx + p, y: by, w: cw - 2 * p, h: bh }); }
       }
     }
+    celLogo(r, el, x, y, w, h);
     if (el.rand) r.ops.push({ t: "kader", x, y, w, h, dikte: 0.3, gevuld: false, kleur: "#000000" });
   }
 
@@ -1004,7 +1110,7 @@
   }
 
   const api = { PT, MAX_PAGINAS, FORMATEN, FORMAATGROEPEN, VELLEN, velIndeling, aantalVellen, LETTERTYPEN, PALET, TYPE_STANDAARD, STARTERS, INHOUD_STANDAARD, LOCATIE_STANDAARD,
-    nieuwId, element, standaard, normaliseer, migreer, locatieInstellingen, segmentWaarden, standaardKleuren, standaardPijlen, PIJLRICHTINGEN, waarden, context, render,
+    lijstKolommen, nieuwId, element, standaard, normaliseer, migreer, locatieInstellingen, segmentWaarden, standaardKleuren, standaardPijlen, PIJLRICHTINGEN, waarden, context, render,
     meetMet, maakPdf, opsNaarSvg, esc, contrast };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Labels = api;

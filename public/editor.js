@@ -274,7 +274,8 @@
     const chk = (k, l) => `<label class="check"><input type="checkbox" data-prop="${k}" ${g[k] ? "checked" : ""}> ${l}</label>`;
     const seg = (k, opties) => `<div class="seg">${opties.map(([v, t]) => `<button type="button" data-prop="${k}" data-waarde="${v}" class="${g[k] === v ? "actief" : ""}">${t}</button>`).join("")}</div>`;
     const keuze = (k, opties) => `<select data-prop="${k}">${opties.map(([v, t]) => `<option value="${v}" ${g[k] === v ? "selected" : ""}>${t}</option>`).join("")}</select>`;
-    const chips = (doel) => `<div class="chips">${CHIPS.map((c) => `<button type="button" data-chip="${c}" data-doel="${doel}" title="Invoegen">${c}</button>`).join("")}</div>`;
+    const alleChips = [...CHIPS, ...L.lijstKolommen(cfg)];
+    const chips = (doel) => `<div class="chips">${alleChips.map((c) => `<button type="button" data-chip="${esc(c)}" data-doel="${doel}" title="Invoegen">${esc(c)}</button>`).join("")}</div>`;
     const kleur = (k) => `<div class="kleurkeuze"><input type="color" data-prop="${k}" value="${g[k]}" title="Eigen kleur">
       ${["#000000", "#ffffff", ...L.PALET.slice(0, 7)].map((c) => `<button type="button" class="swatch ${g[k] === c ? "actief" : ""}" data-prop="${k}" data-waarde="${c}" style="background:${c}" title="${c}"></button>`).join("")}</div>`;
 
@@ -327,6 +328,14 @@
              ${chk("koppen", "Segmentnamen boven de code (GANG, STELLING …)")}`}
         ${chk("pijlen", "Pijlen tonen")}
         ${chk("rand", "Dunne rand om elk vak")}
+        <span class="sublabel">Logo in elk vak</span>
+        ${g.logo
+          ? `<div class="rij">
+               <label>Plaats ${keuze("logoPositie", [["boven-links", "Linksboven"], ["boven-rechts", "Rechtsboven"], ["onder-links", "Linksonder"], ["onder-rechts", "Rechtsonder"], ["midden", "Midden"]])}</label>
+               ${num("logoGrootte", "Grootte (% van vak)", 1, 5)}
+             </div>
+             <div class="knoprij"><button type="button" data-actie="locatielogo">Ander logo…</button><button type="button" data-actie="locatielogo-weg" class="gevaar">Logo weghalen</button></div>`
+          : `<button type="button" data-actie="locatielogo">＋ Logo toevoegen…</button>`}
         <p class="hint">Het vak wordt automatisch verdeeld over de locaties van elke sticker. Locaties, kleuren, pijlrichting en aantal pijlen stel je in bij <b>Inhoud → Locaties</b>.</p>`;
     } else {
       h += `<button type="button" data-actie="afbeelding">Andere afbeelding kiezen…</button>
@@ -348,7 +357,7 @@
     }
   }
 
-  const GETALLEN = ["x", "y", "w", "h", "grootte", "dikte", "tussenruimte", "barcodeDeel", "splits"];
+  const GETALLEN = ["x", "y", "w", "h", "grootte", "dikte", "tussenruimte", "barcodeDeel", "splits", "logoGrootte"];
   function zetProp(k, v) {
     const g = sel();
     if (!g) return;
@@ -420,6 +429,8 @@
     } else if (a === "voren" && i < cfg.elementen.length - 1) { cfg.elementen.splice(i, 1); cfg.elementen.splice(i + 1, 0, g); }
     else if (a === "achter" && i > 0) { cfg.elementen.splice(i, 1); cfg.elementen.splice(i - 1, 0, g); }
     else if (a === "afbeelding") { afbModus = "vervang"; $("afb-bestand").click(); return; }
+    else if (a === "locatielogo") { afbModus = "locatielogo"; $("afb-bestand").click(); return; }
+    else if (a === "locatielogo-weg") { g.logo = ""; }
     gewijzigd(true); bouwLijst(); bouwEigenschappen(); teken();
   }
 
@@ -481,6 +492,9 @@
       const g = sel();
       if (afbModus === "vervang" && g && g.type === "afbeelding") {
         Object.assign(g, a); gewijzigd(true); bouwLijst(); teken();
+      } else if (afbModus === "locatielogo" && g && g.type === "locaties") {
+        g.logo = a.data; g.logoB = a.imgB; g.logoH = a.imgH;
+        gewijzigd(true); bouwEigenschappen(); teken();
       } else {
         const B = +cfg.breedte, H = +cfg.hoogte, m = +cfg.marge || 0;
         let w = Math.min(40, B - 2 * m), h = w * a.imgH / a.imgB;
@@ -549,6 +563,7 @@
     document.querySelectorAll("[data-modus]").forEach((el) => (el.hidden = el.dataset.modus !== cfg.modus));
     if (k === "modus") bouwLocaties();
     if (k.startsWith("vel")) zetFormulier();
+    if ((k === "modus" || k === "lijst" || k === "lijstKop") && sel()) bouwEigenschappen();   // invoegknopjes voor kolommen bijwerken
     planTeken();
   });
 
@@ -739,7 +754,7 @@
   }
 
   const starters = $("starters");
-  for (const [groep, titel] of [["algemeen", "Algemeen"], ["magazijn", "Magazijnlocaties"]]) {
+  for (const [groep, titel] of [["algemeen", "Algemeen"], ["magazijn", "Magazijnlocaties"], ["wms", "Scanner en gebruikers"]]) {
     const kop = document.createElement("span");
     kop.className = "starterkop"; kop.textContent = titel;
     starters.append(kop);
@@ -754,8 +769,9 @@
     const s = L.STARTERS[e.target.dataset.starter];
     if (!s) return;
     if (cfg.elementen.length && !confirm(`Huidig ontwerp vervangen door “${s.naam}”?\n(Ongedaan maken kan met ↶.)`)) return;
-    const nieuw = { ...cfg, breedte: s.breedte, hoogte: s.hoogte, elementen: s.elementen.map((x) => ({ ...x })) };
+    const nieuw = { ...cfg, breedte: s.breedte, hoogte: s.hoogte, elementen: s.elementen.map((x) => ({ ...x })), vel: "" };
     if (s.modus) nieuw.modus = s.modus;
+    if (s.inhoud) Object.assign(nieuw, s.inhoud);   // bijv. voorbeeldlijst en A4-indeling
     if (s.locatie) nieuw.locatie = { ...cfg.locatie, ...JSON.parse(JSON.stringify(s.locatie)) };
     laadOntwerp(nieuw);
   });

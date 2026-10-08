@@ -12,7 +12,9 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   - Raster en hulplijnen (randen, midden, andere onderdelen), ongedaan maken/opnieuw, dupliceren, lagen.
 - **Vier modi voor de inhoud**
   - *Reeks*: oplopende nummers met voorvoegsel, achtervoegsel en stap. Voorloopnullen blijven behouden.
-  - *Lijst*: één sticker per regel (ook te plakken uit Excel).
+  - *Lijst*: één sticker per regel (ook te plakken uit Excel), met optioneel meerdere kolommen (tab of `;`) en een kopregel.
+    Gebruik kolommen in tekst én barcodes als `{1}`, `{2}` of `{Kolomnaam}` — bijv. scannercommando's
+    (`e;Stoppen / terug`, `/;Stoppen / afsluiten`, `Z001;Crossdock zone`) of gebruikers (`Naam;Gebruiker;Wachtwoord`).
   - *Vast*: één ontwerp, N keer — ook zonder barcode.
   - *Locaties*: magazijnlocaties opgebouwd uit segmenten (bijv. Gang `AA`, Stelling `01–05`, Niveau `00`, Positie `00–01`).
     Kies welk segment samen op één sticker komt (bijv. `AA 01 00 00` + `AA 01 00 01`, volgende sticker `AA 02 00 00` + `AA 02 00 01`),
@@ -23,7 +25,9 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   *diagonaal* (schuine barcode in een witte band, code linksboven en rechtsonder — zoals op stellingliggers),
   *kleurbalk*, *vol gekleurd* en *streep*; tekstkleur automatisch/zwart/wit, segmentnamen, pijlen en barcode per locatie.
 - **Magazijnontwerpen**: diagonaal met 3 niveaus per ligger, diagonaal losse locatie, losse locatie met grote code,
-  compact met kleurstreep, posities naast elkaar en niveaus onder elkaar.
+  compact met kleurstreep, posities naast elkaar en niveaus onder elkaar. Optioneel een logo in elk vak.
+- **Scanner en gebruikers**: scannercommando-sticker, commandoblad op A4, gebruikerspasje (85,6 × 54 mm) en
+  gebruikerslijst op A4 met inlognaam en wachtwoord als barcode.
 - **Voor de drukkerij**: afloop (2/3/5 mm) en snijtekens in de PDF; kleuren voor tekst en kaders.
 - **Variabelen** in tekst en barcodes: `{waarde}`, `{nr}`, `{n}`, `{totaal}`, `{datum}`, `{barcode}`.
 - **Labelformaten** (75, gegroepeerd): verzendlabels (PostNL, 4×6 inch, 100×150, A6 …), thermische rollen in inch en mm,

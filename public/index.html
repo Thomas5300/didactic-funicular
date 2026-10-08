@@ -43,8 +43,9 @@
           <p class="hint">Voorloopnullen blijven behouden (<code>0001</code> → <code>0002</code>).</p>
         </div>
         <div data-modus="lijst" class="sectie plat">
-          <label>Waarden, één per regel <textarea data-k="lijst" rows="6" placeholder="ART-1001&#10;ART-1002&#10;Plank A3"></textarea></label>
-          <p class="hint">Elke regel wordt een sticker. Plakken uit Excel kan ook.</p>
+          <label>Eén sticker per regel <textarea data-k="lijst" rows="6" placeholder="ART-1001&#10;ART-1002&#10;&#10;of met kolommen:&#10;Code;Omschrijving&#10;e;Stoppen / terug"></textarea></label>
+          <label class="check"><input type="checkbox" data-k="lijstKop"> Eerste regel bevat kolomnamen</label>
+          <p class="hint">Meerdere kolommen? Scheid ze met <code>;</code> of plak direct uit Excel. Gebruik ze in tekst en barcodes als <code>{1}</code>, <code>{2}</code> … of met kolomnamen als <code>{Naam}</code>, <code>{Wachtwoord}</code>.</p>
         </div>
         <div data-modus="vast" class="sectie plat">
           <label>Waarde (optioneel) <input data-k="vasteWaarde" placeholder="bijv. een vaste barcode"></label>
