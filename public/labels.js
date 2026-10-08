@@ -191,6 +191,7 @@
       toonTekst: false, tekstGrootte: 10, maxStreep: 0, bcUitlijning: "center" },
     kader: { naam: "Kader", w: 60, h: 30, dikte: 0.5, gevuld: false, kleur: "#000000" },
     afbeelding: { naam: "Afbeelding", w: 30, h: 30, data: "", imgB: 1, imgH: 1 },
+    symbool: { naam: "Symbool", w: 40, h: 36, vorm: "letop", richting: "omhoog", aantal: 1, kleur: "#000000", vulling: "#ffffff" },
     locaties: { naam: "Locaties", w: 190, h: 44, richting: "naast", tussenruimte: 3, stijl: "balk", pijlen: true,
       barcode: "CODE128", barcodeDeel: 45, koppen: true, rand: true, tekstKleur: "auto", splits: 2,
       logo: "", logoB: 1, logoH: 1, logoPositie: "boven-rechts", logoGrootte: 25, zwartWit: false },
@@ -348,6 +349,40 @@
       locatie: { groep: -1 },
       elementen: [
         { type: "locaties", naam: "Locatie", x: 6, y: 6, w: 285, h: 198, stijl: "balk", zwartWit: true, koppen: false, barcodeDeel: 42, tussenruimte: 0 },
+      ],
+    },
+
+    // ----- Borden en waarschuwingen -----
+    letopLiggend: {
+      groep: "borden", naam: "LET OP — losse goederen achter pallet, NL/EN (A4 liggend, zwart-wit)", breedte: 297, hoogte: 210, modus: "vast",
+      inhoud: { vasteWaarde: "", kopieen: 1 },
+      elementen: [
+        { type: "kader", naam: "Rand", x: 6, y: 6, w: 285, h: 198, dikte: 3 },
+        { type: "kader", naam: "Balk", x: 6, y: 6, w: 285, h: 42, gevuld: true },
+        { type: "tekst", naam: "Kop", x: 10, y: 6, w: 277, h: 42, tekst: "LET OP!  —  CAUTION!", grootte: 64, vet: true, kleur: "#ffffff", terugloop: false },
+        { type: "symbool", naam: "Waarschuwing", x: 14, y: 70, w: 90, h: 80, vorm: "letop" },
+        { type: "tekst", naam: "Nederlands", x: 112, y: 78, w: 172, h: 12, tekst: "Losse goederen achter deze pallet", grootte: 28, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Nederlands uitleg", x: 112, y: 93, w: 172, h: 9, tekst: "Pallet voorzichtig wegnemen: er kunnen goederen vallen!", grootte: 20, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "kader", naam: "Scheidingslijn", x: 112, y: 109, w: 172, h: 0.8, gevuld: true },
+        { type: "tekst", naam: "Engels", x: 112, y: 116, w: 172, h: 12, tekst: "Loose goods behind this pallet", grootte: 28, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Engels uitleg", x: 112, y: 131, w: 172, h: 9, tekst: "Remove the pallet carefully: items may fall!", grootte: 20, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Onderregel", x: 14, y: 185, w: 269, h: 12, tekst: "Losse goederen eerst zekeren of weghalen  ·  Secure or remove loose goods first", grootte: 14, vet: true, terugloop: false },
+      ],
+    },
+    letopStaand: {
+      groep: "borden", naam: "LET OP — losse goederen achter pallet, NL/EN (A4 staand, zwart-wit)", breedte: 210, hoogte: 297, modus: "vast",
+      inhoud: { vasteWaarde: "", kopieen: 1 },
+      elementen: [
+        { type: "kader", naam: "Rand", x: 6, y: 6, w: 198, h: 285, dikte: 3 },
+        { type: "kader", naam: "Balk", x: 6, y: 6, w: 198, h: 40, gevuld: true },
+        { type: "tekst", naam: "Kop", x: 10, y: 6, w: 190, h: 40, tekst: "LET OP!  —  CAUTION!", grootte: 48, vet: true, kleur: "#ffffff", terugloop: false },
+        { type: "symbool", naam: "Waarschuwing", x: 50, y: 56, w: 110, h: 96, vorm: "letop" },
+        { type: "tekst", naam: "Nederlands", x: 14, y: 178, w: 182, h: 12, tekst: "Losse goederen achter deze pallet", grootte: 28, vet: true, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Nederlands uitleg", x: 14, y: 193, w: 182, h: 9, tekst: "Pallet voorzichtig wegnemen: er kunnen goederen vallen!", grootte: 17, verticaal: "top", terugloop: false },
+        { type: "kader", naam: "Scheidingslijn", x: 45, y: 209, w: 120, h: 0.8, gevuld: true },
+        { type: "tekst", naam: "Engels", x: 14, y: 216, w: 182, h: 12, tekst: "Loose goods behind this pallet", grootte: 28, vet: true, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Engels uitleg", x: 14, y: 231, w: 182, h: 9, tekst: "Remove the pallet carefully: items may fall!", grootte: 17, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Onderregel", x: 16, y: 276, w: 178, h: 10, tekst: "Eerst zekeren of weghalen  ·  Secure or remove first", grootte: 12, vet: true, terugloop: false },
       ],
     },
 
@@ -835,6 +870,23 @@
     r.ops.push({ t: "img", data: el.logo, alias: el.id + "-logo-" + el.logo.length, x: lx, y: ly, w: lw, h: lh });
   }
 
+  // Waarschuwingsdriehoek met uitroepteken, passend in het vak (gelijkzijdig).
+  function waarschuwing(r, x, y, w, h, kleur, vulling) {
+    const zijde = Math.min(w, h / 0.866), th = zijde * 0.866;
+    const cx = x + w / 2, top = y + (h - th) / 2, bot = top + th;
+    const hoeken = [[cx, top], [cx - zijde / 2, bot], [cx + zijde / 2, bot]];
+    r.ops.push({ t: "poly", kleur, pts: hoeken });
+    // binnenkant: kleiner gemaakt rond het zwaartepunt, zodat een even dikke rand overblijft
+    const G = [cx, top + (th * 2) / 3], rin = th / 3, k = (rin - zijde * 0.085) / rin;
+    r.ops.push({ t: "poly", kleur: vulling, pts: hoeken.map(([a, b]) => [G[0] + (a - G[0]) * k, G[1] + (b - G[1]) * k]) });
+    // uitroepteken: taps toelopende streep en een ronde punt
+    const bw = zijde * 0.08, y1 = top + th * 0.34, y2 = top + th * 0.7;
+    r.ops.push({ t: "poly", kleur, pts: [[cx - bw * 0.62, y1], [cx + bw * 0.62, y1], [cx + bw * 0.4, y2], [cx - bw * 0.4, y2]] });
+    const rp = bw * 0.6, py = top + th * 0.8, cirkel = [];
+    for (let i = 0; i < 20; i++) { const a = (i / 20) * 2 * Math.PI; cirkel.push([cx + rp * Math.cos(a), py + rp * Math.sin(a)]); }
+    r.ops.push({ t: "poly", kleur, pts: cirkel });
+  }
+
   function tekstKleurVoor(el, achtergrond) {
     if (el.zwartWit) return "#ffffff";
     return el.tekstKleur === "zwart" ? "#000000" : el.tekstKleur === "wit" ? "#ffffff" : contrast(achtergrond);
@@ -1044,6 +1096,10 @@
         }
       } else if (el.type === "locaties") {
         tekenLocaties(r, { ...el, x, y, w, h }, ctx, libs, meet);
+      } else if (el.type === "symbool") {
+        const kleur = geldigeKleur(el.kleur, "#000000");
+        if (el.vorm === "pijl") pijlen(r, { r: PIJLRICHTINGEN.includes(el.richting) ? el.richting : "omhoog", n: Math.min(Math.max(+el.aantal || 1, 1), 3) }, x, y, w, h, kleur);
+        else waarschuwing(r, x, y, w, h, kleur, geldigeKleur(el.vulling, "#ffffff"));
       } else {
         const tekst = vulIn(el.tekst, ctx2);
         if (!tekst.trim()) continue;

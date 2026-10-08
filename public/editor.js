@@ -21,7 +21,7 @@
   let gidsen = [];
   let losseMelding = null;
 
-  const TYPENAAM = { tekst: "tekstvak", barcode: "barcode", kader: "kader", afbeelding: "afbeelding", locaties: "locatievak" };
+  const TYPENAAM = { tekst: "tekstvak", barcode: "barcode", kader: "kader", afbeelding: "afbeelding", locaties: "locatievak", symbool: "symbool" };
   const sel = () => cfg.elementen.find((e) => e.id === geselecteerd) || null;
 
   // ---------- Opslaan en ongedaan maken ----------
@@ -244,11 +244,12 @@
     if (e.type === "tekst") return String(e.tekst).split("\n")[0];
     if (e.type === "barcode") return ({ CODE128: "Code 128", CODE39: "Code 39", EAN13: "EAN-13", QR: "QR" }[e.symbologie] || "") + " · " + e.inhoud;
     if (e.type === "kader") return e.gevuld ? "gevuld vlak / lijn" : `rand ${e.dikte} mm`;
+    if (e.type === "symbool") return e.vorm === "pijl" ? `pijl ${{ omhoog: "↑", omlaag: "↓", links: "←", rechts: "→" }[e.richting] || ""} × ${e.aantal}` : "waarschuwingsdriehoek";
     if (e.type === "locaties") return `${e.richting === "onder" ? "onder elkaar" : "naast elkaar"} · ${{ diagonaal: "diagonaal", balk: "kleurbalk", vol: "vol gekleurd", streep: "kleurstreep" }[e.stijl] || ""}`;
     return e.data ? `${e.imgB} × ${e.imgH} px` : "geen afbeelding";
   }
   function bouwLijst() {
-    const ICON = { tekst: "T", barcode: "▥", kader: "▢", afbeelding: "▣", locaties: "⌖" };
+    const ICON = { tekst: "T", barcode: "▥", kader: "▢", afbeelding: "▣", locaties: "⌖", symbool: "△" };
     const lijst = [...cfg.elementen].reverse();
     $("lagen").innerHTML = lijst.length ? lijst.map((e) => `<li><button type="button" data-kies="${e.id}" class="${e.id === geselecteerd ? "actief" : ""}">
       <span class="ico">${e.type === "barcode" && e.symbologie === "QR" ? "▦" : ICON[e.type]}</span><span class="nm">${esc(e.naam)}</span>
@@ -273,7 +274,7 @@
     const num = (k, l, step = 0.5, min = "") => `<label>${l} <input type="number" data-prop="${k}" step="${step}" min="${min}" value="${g[k]}"></label>`;
     const chk = (k, l) => `<label class="check"><input type="checkbox" data-prop="${k}" ${g[k] ? "checked" : ""}> ${l}</label>`;
     const seg = (k, opties) => `<div class="seg">${opties.map(([v, t]) => `<button type="button" data-prop="${k}" data-waarde="${v}" class="${g[k] === v ? "actief" : ""}">${t}</button>`).join("")}</div>`;
-    const keuze = (k, opties) => `<select data-prop="${k}">${opties.map(([v, t]) => `<option value="${v}" ${g[k] === v ? "selected" : ""}>${t}</option>`).join("")}</select>`;
+    const keuze = (k, opties) => `<select data-prop="${k}">${opties.map(([v, t]) => `<option value="${v}" ${String(g[k]) === v ? "selected" : ""}>${t}</option>`).join("")}</select>`;
     const alleChips = [...CHIPS, ...L.lijstKolommen(cfg)];
     const chips = (doel) => `<div class="chips">${alleChips.map((c) => `<button type="button" data-chip="${esc(c)}" data-doel="${doel}" title="Invoegen">${esc(c)}</button>`).join("")}</div>`;
     const kleur = (k) => `<div class="kleurkeuze"><input type="color" data-prop="${k}" value="${g[k]}" title="Eigen kleur">
@@ -316,6 +317,18 @@
     } else if (g.type === "kader") {
       h += `${num("dikte", "Lijndikte (mm)", 0.1, 0.1)}${chk("gevuld", "Gevuld (vlak — dun = lijn)")}
         <span class="sublabel">Kleur</span>${kleur("kleur")}`;
+    } else if (g.type === "symbool") {
+      h += `<span class="sublabel">Vorm</span>
+        ${seg("vorm", [["letop", "△ Waarschuwing"], ["pijl", "↑ Pijl"]])}
+        ${g.vorm === "pijl"
+          ? `<div class="rij">
+               <label>Richting ${keuze("richting", [["omhoog", "↑ Omhoog"], ["omlaag", "↓ Omlaag"], ["links", "← Links"], ["rechts", "→ Rechts"]])}</label>
+               <label>Aantal ${keuze("aantal", [["1", "1 pijl"], ["2", "2 pijlen"], ["3", "3 pijlen"]])}</label>
+             </div>`
+          : ""}
+        <span class="sublabel">Kleur</span>${kleur("kleur")}
+        ${g.vorm === "pijl" ? "" : `<span class="sublabel">Binnenkant</span>${kleur("vulling")}
+          <p class="hint">Wit is het best op een zwart-witprinter; geel (<code>#fdd835</code>) is de klassieke waarschuwingskleur.</p>`}`;
     } else if (g.type === "locaties") {
       h += `<span class="sublabel">Locaties op de sticker</span>
         ${seg("richting", [["naast", "Naast elkaar"], ["onder", "Onder elkaar"]])}
@@ -474,6 +487,7 @@
     if (soort === "qr") { const z = Math.min(30, vb, vh); plaatsNieuw({ type: "barcode", naam: "QR-code", symbologie: "QR", w: z, h: z }); }
     if (soort === "kader") plaatsNieuw({ type: "kader", w: Math.min(60, vb), h: Math.min(30, vh) });
     if (soort === "lijn") plaatsNieuw({ type: "kader", naam: "Lijn", gevuld: true, w: vb, h: 0.6 });
+    if (soort === "symbool") { const z = Math.min(40, vb, vh); plaatsNieuw({ type: "symbool", w: z, h: Math.round(z * 0.9 * 10) / 10 }); }
     if (soort === "locaties") plaatsNieuw({ type: "locaties", w: vb, h: vh, richting: B >= H ? "naast" : "onder" });
   }));
 
@@ -788,7 +802,7 @@
   }
 
   const starters = $("starters");
-  for (const [groep, titel] of [["algemeen", "Algemeen"], ["magazijn", "Magazijnlocaties"], ["wms", "Scanner en gebruikers"]]) {
+  for (const [groep, titel] of [["algemeen", "Algemeen"], ["magazijn", "Magazijnlocaties"], ["borden", "Borden en waarschuwingen"], ["wms", "Scanner en gebruikers"]]) {
     const kop = document.createElement("span");
     kop.className = "starterkop"; kop.textContent = titel;
     starters.append(kop);
