@@ -1,20 +1,23 @@
-# Stickerbouwer voor Zebra-labelprinters
+# Stickerbouwer
 
-Statische website die PDF's met (barcode)stickers maakt — volledig in de browser, geen server nodig.
+Gratis online stickerontwerper van **Thomas-IT** voor labelprinters. Volledig statisch: de PDF wordt in de browser gemaakt, er is geen server nodig.
+Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
 
 ## Mogelijkheden
 
-- **Drie modi**
-  - *Reeks*: oplopende nummers van start t/m eind, met optioneel voorvoegsel, achtervoegsel en stap. Voorloopnullen blijven behouden (`0001` → `0002`).
+- **Zelf ontwerpen**: zet onderdelen vrij op het label, versleep ze en verander de grootte met de muis (of touch).
+  - Tekstvakken (meerdere), barcodes (Code 128, Code 39, EAN-13), QR-codes, kaders, lijnen en afbeeldingen/logo's.
+  - Per onderdeel: positie en grootte in mm, uitlijnen op het label (links/midden/rechts, boven/midden/onder, volle breedte).
+  - Tekst: lettertype, grootte, vet, wit-op-zwart, uitlijning in het vak, regels laten teruglopen, automatisch verkleinen.
+  - Raster en hulplijnen (randen, midden, andere onderdelen), ongedaan maken/opnieuw, dupliceren, lagen.
+- **Drie modi voor de inhoud**
+  - *Reeks*: oplopende nummers met voorvoegsel, achtervoegsel en stap. Voorloopnullen blijven behouden.
   - *Lijst*: één sticker per regel (ook te plakken uit Excel).
-  - *Vaste sticker*: één ontwerp, N keer — ook zonder barcode, bijvoorbeeld “BREEKBAAR”.
-- **Vaste tekst** boven en onder op elke sticker, meerdere regels, eigen grootte/uitlijning/vet. Variabelen: `{waarde}`, `{nr}`, `{n}`, `{totaal}`, `{datum}`.
-- **Barcodes**: Code 128, Code 39, EAN-13 (controlecijfer automatisch), QR-code of geen.
-- **Labelformaten**: PostNL 150×102 (standaard), 102×150, 4×6 inch, 102×76, 100×50, 57×32 of eigen maat; label draaien.
-- Kopieën per sticker, live voorbeeld per sticker, waarschuwing als iets niet past of te dun wordt.
-- **Sjablonen** opslaan in de browser, en exporteren/importeren als `.json`.
-
-Standaardinstelling: PostNL-label 150×102 mm, Code 128 van 125 mm breed (incl. stille zones) × 50 mm hoog, nummer in Helvetica Bold 60 pt.
+  - *Vast*: één ontwerp, N keer — ook zonder barcode.
+- **Variabelen** in tekst en barcodes: `{waarde}`, `{nr}`, `{n}`, `{totaal}`, `{datum}`, `{barcode}`.
+- **Labelformaten**: PostNL 150×102 (standaard), 102×150, 4×6 inch, 102×76, 100×50, 57×32 of eigen maat; draaien en meeschalen.
+- **Sjablonen**: vier voorbeeldontwerpen, eigen sjablonen opslaan in de browser, exporteren/importeren als `.json`.
+- Instellingen uit de vorige versie worden automatisch omgezet naar het nieuwe ontwerp.
 
 ## Hosten op Cloudflare
 
@@ -38,7 +41,7 @@ pip install reportlab
 python labels.py 1000 1050
 ```
 
-## Afdrukken op de Zebra
+## Afdrukken
 
 Druk af op **werkelijke grootte / 100%** (niet "passend maken"), met het papierformaat van je label.
 

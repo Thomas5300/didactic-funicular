@@ -1,4 +1,4 @@
-"""Barcodelabels (Code 128) voor een Zebra-labelprinter.
+"""Barcodelabels (Code 128) als PDF voor een labelprinter.
 
 Elke pagina is één PostNL-label van 150 x 102 mm (liggend).
 """

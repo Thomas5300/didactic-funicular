@@ -4,362 +4,156 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Stickerbouwer</title>
-  <style>
-    :root { --bg:#f4f4f5; --kaart:#fff; --rand:#e4e4e7; --tekst:#18181b; --zacht:#71717a;
-            --accent:#111; --fout-bg:#fee2e2; --fout:#991b1b; --let-bg:#fef3c7; --let:#92400e; }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--tekst); margin: 0; }
-    header { padding: 1rem 1.5rem; display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
-    header h1 { margin: 0; font-size: 1.35rem; }
-    header span { color: var(--zacht); font-size: .9rem; }
-    .layout { display: grid; grid-template-columns: minmax(320px, 430px) 1fr; gap: 1.25rem;
-              padding: 0 1.5rem 2rem; align-items: start; }
-    @media (max-width: 860px) {
-      .layout { grid-template-columns: 1fr; padding: 0 1rem 2rem; }
-      .voorbeeld { order: -1; position: static; }
-      .papier svg { max-height: 40vh; }
-    }
-    .kaart { background: var(--kaart); border: 1px solid var(--rand); border-radius: 12px; }
-    details { border-bottom: 1px solid var(--rand); }
-    details:last-child { border-bottom: 0; }
-    summary { padding: .85rem 1rem; font-weight: 650; cursor: pointer; list-style: none; display: flex;
-              justify-content: space-between; }
-    summary::after { content: "▾"; color: var(--zacht); }
-    details:not([open]) summary::after { content: "▸"; }
-    .sectie { padding: 0 1rem 1rem; display: grid; gap: .75rem; }
-    .rij { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
-    .rij3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .6rem; }
-    label { display: grid; gap: .25rem; font-size: .85rem; font-weight: 600; }
-    label.check { display: flex; align-items: center; gap: .5rem; font-weight: 500; }
-    input, select, textarea { width: 100%; padding: .5rem .55rem; font: inherit; font-size: .95rem;
-      border: 1px solid #d4d4d8; border-radius: 8px; background: #fff; color: inherit; }
-    input[type=checkbox] { width: auto; }
-    textarea { resize: vertical; min-height: 4.5rem; font-family: ui-monospace, monospace; font-size: .9rem; }
-    .hint { font-size: .78rem; color: var(--zacht); margin: -.35rem 0 0; }
-    code { background: #f4f4f5; padding: 0 .25rem; border-radius: 4px; }
-    .modus { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem; background: #f4f4f5;
-             padding: .25rem; border-radius: 10px; }
-    .modus input { display: none; }
-    .modus label { text-align: center; padding: .5rem .25rem; border-radius: 8px; cursor: pointer;
-                   font-weight: 600; display: block; }
-    .modus input:checked + label { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-    button { padding: .6rem .9rem; font: inherit; font-weight: 600; border-radius: 8px; cursor: pointer;
-             border: 1px solid #d4d4d8; background: #fff; color: inherit; }
-    button.primair { background: var(--accent); color: #fff; border-color: var(--accent); }
-    button:disabled { opacity: .5; cursor: default; }
-    .voorbeeld { padding: 1rem; position: sticky; top: 1rem; display: grid; gap: .8rem; }
-    .papier { background: repeating-conic-gradient(#ececee 0 25%, #f7f7f8 0 50%) 0 0/16px 16px;
-              border-radius: 8px; padding: 1.25rem; display: grid; place-items: center; min-height: 240px; }
-    .papier svg { width: 100%; max-height: 62vh; box-shadow: 0 2px 10px rgba(0,0,0,.18); background: #fff; }
-    .nav { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
-    .nav span { color: var(--zacht); font-size: .9rem; }
-    .acties { display: flex; gap: .5rem; flex-wrap: wrap; }
-    .acties .primair { flex: 1; }
-    .melding { padding: .6rem .75rem; border-radius: 8px; font-size: .9rem; }
-    .melding.fout { background: var(--fout-bg); color: var(--fout); }
-    .melding.let { background: var(--let-bg); color: var(--let); }
-    .sjablonen { display: flex; gap: .4rem; flex-wrap: wrap; }
-    .sjablonen select { flex: 1 1 140px; width: auto; }
-    [hidden] { display: none !important; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>Stickerbouwer</h1>
-  <span>Barcodestickers voor de Zebra — alles gebeurt in je browser</span>
+<header class="kop">
+  <div class="titel">
+    <h1>Stickerbouwer <span class="badge">Gratis service van Thomas-IT</span></h1>
+    <span>Ontwerp je eigen (barcode)stickers voor je labelprinter — alles gebeurt in je browser</span>
+  </div>
+  <div class="kop-acties">
+    <button type="button" id="print">Open om te printen</button>
+    <button type="button" class="primair" id="download">Download PDF</button>
+  </div>
 </header>
 
-<div class="layout">
-  <form id="form" class="kaart" autocomplete="off" onsubmit="return false">
+<div class="app">
+  <!-- Links: inhoud, label, sjablonen -->
+  <aside class="kolom links kaart" id="instellingen">
     <details open>
       <summary>Inhoud</summary>
       <div class="sectie">
-        <div class="modus" role="radiogroup">
+        <div class="seg modus" role="radiogroup">
           <input type="radio" name="modus" id="m-reeks" value="reeks" data-k="modus"><label for="m-reeks">Reeks</label>
           <input type="radio" name="modus" id="m-lijst" value="lijst" data-k="modus"><label for="m-lijst">Lijst</label>
-          <input type="radio" name="modus" id="m-vast" value="vast" data-k="modus"><label for="m-vast">Vaste sticker</label>
+          <input type="radio" name="modus" id="m-vast" value="vast" data-k="modus"><label for="m-vast">Vast</label>
         </div>
-
-        <div data-modus="reeks" class="sectie" style="padding:0">
+        <div data-modus="reeks" class="sectie plat">
           <div class="rij">
             <label>Startnummer <input data-k="start" inputmode="numeric"></label>
             <label>Eindnummer <input data-k="eind" inputmode="numeric"></label>
           </div>
           <div class="rij3">
-            <label>Voorvoegsel <input data-k="prefix" placeholder="bijv. PAL-"></label>
+            <label>Voorvoegsel <input data-k="prefix" placeholder="PAL-"></label>
             <label>Achtervoegsel <input data-k="suffix"></label>
             <label>Stap <input data-k="stap" type="number" min="1"></label>
           </div>
-          <p class="hint">Voorloopnullen in het startnummer blijven behouden (<code>0001</code> → <code>0002</code>).</p>
+          <p class="hint">Voorloopnullen blijven behouden (<code>0001</code> → <code>0002</code>).</p>
         </div>
-
-        <div data-modus="lijst" class="sectie" style="padding:0">
+        <div data-modus="lijst" class="sectie plat">
           <label>Waarden, één per regel <textarea data-k="lijst" rows="6" placeholder="ART-1001&#10;ART-1002&#10;Plank A3"></textarea></label>
-          <p class="hint">Elke regel wordt een sticker. Je kunt hier ook uit Excel plakken (één kolom).</p>
+          <p class="hint">Elke regel wordt een sticker. Plakken uit Excel kan ook.</p>
         </div>
-
-        <div data-modus="vast" class="sectie" style="padding:0">
-          <label>Barcodewaarde (optioneel) <input data-k="vasteWaarde" placeholder="leeg = sticker zonder barcode"></label>
-          <p class="hint">Eén ontwerp, zo vaak als je wilt — handig voor info-stickers zoals “BREEKBAAR”.</p>
+        <div data-modus="vast" class="sectie plat">
+          <label>Waarde (optioneel) <input data-k="vasteWaarde" placeholder="bijv. een vaste barcode"></label>
+          <p class="hint">Eén ontwerp, zo vaak als je wilt — ook zonder barcode.</p>
         </div>
-
-        <label>Aantal kopieën per sticker <input data-k="kopieen" type="number" min="1"></label>
+        <label>Kopieën per sticker <input data-k="kopieen" type="number" min="1"></label>
+        <p class="hint">De waarde komt op het label via <code>{waarde}</code> in een tekstvak of barcode.</p>
       </div>
     </details>
 
     <details open>
-      <summary>Vaste tekst op elke sticker</summary>
-      <div class="sectie">
-        <label>Tekst boven <textarea data-k="kopTekst" rows="2" placeholder="bijv. bedrijfsnaam"></textarea></label>
-        <div class="rij3">
-          <label>Grootte (pt) <input data-k="kopGrootte" type="number" min="4"></label>
-          <label>Uitlijning <select data-k="kopUitlijning"><option value="left">Links</option><option value="center">Midden</option><option value="right">Rechts</option></select></label>
-          <label class="check" style="align-self:end"><input type="checkbox" data-k="kopVet"> Vet</label>
-        </div>
-        <label>Tekst onder <textarea data-k="voetTekst" rows="3" placeholder="bijv. locatie, datum, opmerking"></textarea></label>
-        <div class="rij3">
-          <label>Grootte (pt) <input data-k="voetGrootte" type="number" min="4"></label>
-          <label>Uitlijning <select data-k="voetUitlijning"><option value="left">Links</option><option value="center">Midden</option><option value="right">Rechts</option></select></label>
-          <label class="check" style="align-self:end"><input type="checkbox" data-k="voetVet"> Vet</label>
-        </div>
-        <p class="hint">Variabelen: <code>{waarde}</code> <code>{nr}</code> <code>{n}</code> (stickernummer) <code>{totaal}</code> <code>{datum}</code>. Te lange tekst wordt automatisch kleiner gemaakt.</p>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Barcode</summary>
-      <div class="sectie">
-        <label>Type
-          <select data-k="barcodeType">
-            <option value="CODE128">Code 128</option>
-            <option value="CODE39">Code 39</option>
-            <option value="EAN13">EAN-13</option>
-            <option value="QR">QR-code</option>
-            <option value="GEEN">Geen barcode</option>
-          </select>
-        </label>
-        <div class="rij" data-barcode>
-          <label>Breedte (mm) <input data-k="barcodeBreedte" type="number" min="5" step="0.5"></label>
-          <label>Hoogte (mm) <input data-k="barcodeHoogte" type="number" min="0" step="0.5"></label>
-        </div>
-        <p class="hint" data-barcode>Hoogte <code>0</code> = automatisch de resterende ruimte vullen. De breedte is inclusief stille zones.</p>
-        <label class="check"><input type="checkbox" data-k="toonWaarde"> Waarde als tekst tonen</label>
-        <div class="rij" data-waarde>
-          <label>Tekstgrootte (pt) <input data-k="waardeGrootte" type="number" min="4"></label>
-          <label class="check" style="align-self:end"><input type="checkbox" data-k="waardeVet"> Vet</label>
-        </div>
-      </div>
-    </details>
-
-    <details>
       <summary>Labelformaat</summary>
       <div class="sectie">
         <label>Formaat <select id="formaat"></select></label>
         <div class="rij3">
-          <label>Breedte (mm) <input data-k="breedte" type="number" min="10" step="0.1"></label>
-          <label>Hoogte (mm) <input data-k="hoogte" type="number" min="10" step="0.1"></label>
-          <label>Marge (mm) <input data-k="marge" type="number" min="0" step="0.5"></label>
+          <label>Breedte <input data-k="breedte" type="number" min="10" step="0.1"></label>
+          <label>Hoogte <input data-k="hoogte" type="number" min="10" step="0.1"></label>
+          <label title="Afstand tot de rand bij de uitlijnknoppen">Rand <input data-k="marge" type="number" min="0" step="0.5"></label>
         </div>
-        <button type="button" id="draai">↻ Draai label</button>
+        <p class="hint">Alle maten in mm. De rand gebruiken de knoppen “Plaats op label” en de hulplijnen.</p>
+        <label class="check"><input type="checkbox" id="meeschalen" checked> Ontwerp meeschalen bij ander formaat</label>
+        <button type="button" id="draai">↻ Label draaien</button>
       </div>
     </details>
 
-    <details>
+    <details open>
       <summary>Sjablonen</summary>
       <div class="sectie">
-        <div class="sjablonen">
+        <span class="sublabel">Begin met een voorbeeld</span>
+        <div class="starters" id="starters"></div>
+        <span class="sublabel">Mijn sjablonen</span>
+        <div class="knoprij">
           <select id="sjabloon"><option value="">— kies sjabloon —</option></select>
           <button type="button" id="sj-laad">Laden</button>
+        </div>
+        <div class="knoprij">
+          <button type="button" id="sj-opslaan">Opslaan als…</button>
           <button type="button" id="sj-weg">Verwijderen</button>
         </div>
-        <div class="sjablonen">
-          <button type="button" id="sj-opslaan">Huidige opslaan als…</button>
-          <button type="button" id="sj-reset">Standaard</button>
-        </div>
-        <div class="sjablonen">
-          <button type="button" id="sj-export">Exporteren (.json)</button>
+        <div class="knoprij">
+          <button type="button" id="sj-export">Exporteren</button>
           <button type="button" id="sj-import">Importeren</button>
           <input type="file" id="sj-bestand" accept="application/json,.json" hidden>
         </div>
-        <p class="hint">Sjablonen worden in deze browser bewaard. Exporteer ze om ze op een andere computer te gebruiken.</p>
+        <p class="hint">Sjablonen staan in deze browser. Exporteer ze (.json) om ze elders te gebruiken.</p>
       </div>
     </details>
-  </form>
+  </aside>
 
-  <section class="kaart voorbeeld">
-    <div class="nav">
-      <button type="button" id="vorige" aria-label="Vorige sticker">‹</button>
-      <span id="teller">–</span>
-      <button type="button" id="volgende" aria-label="Volgende sticker">›</button>
+  <!-- Midden: werkvlak -->
+  <main class="kolom midden">
+    <div class="werkbalk kaart">
+      <div class="groep">
+        <button type="button" data-nieuw="tekst" title="Tekstvak toevoegen">＋ Tekst</button>
+        <button type="button" data-nieuw="barcode" title="Barcode toevoegen">＋ Barcode</button>
+        <button type="button" data-nieuw="qr" title="QR-code toevoegen">＋ QR</button>
+        <button type="button" data-nieuw="kader" title="Kader toevoegen">＋ Kader</button>
+        <button type="button" data-nieuw="lijn" title="Lijn toevoegen">＋ Lijn</button>
+        <button type="button" data-nieuw="afbeelding" title="Logo of afbeelding toevoegen">＋ Afbeelding</button>
+        <input type="file" id="afb-bestand" accept="image/*" hidden>
+      </div>
+      <div class="groep">
+        <button type="button" id="ongedaan" title="Ongedaan maken (Ctrl+Z)">↶</button>
+        <button type="button" id="opnieuw" title="Opnieuw (Ctrl+Y)">↷</button>
+        <label class="inline">Raster
+          <select id="raster">
+            <option value="0">uit</option><option value="0.5">0,5 mm</option><option value="1">1 mm</option>
+            <option value="2">2 mm</option><option value="5">5 mm</option>
+          </select>
+        </label>
+        <label class="check inline"><input type="checkbox" id="kaders" checked> Vakken tonen</label>
+      </div>
     </div>
-    <div class="papier" id="papier"></div>
-    <div id="meldingen"></div>
-    <div class="acties">
-      <button type="button" class="primair" id="download">Download PDF</button>
-      <button type="button" id="print">Open om te printen</button>
+
+    <div class="werkvlak kaart">
+      <div class="papier"><svg id="canvas" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ontwerp van de sticker"></svg></div>
+      <div class="nav">
+        <button type="button" id="vorige" aria-label="Vorige sticker">‹</button>
+        <span id="teller">–</span>
+        <button type="button" id="volgende" aria-label="Volgende sticker">›</button>
+      </div>
+      <div id="meldingen"></div>
+      <p class="hint">Sleep onderdelen om ze te verplaatsen, sleep de blauwe hoekjes om de grootte te veranderen.
+        Pijltjestoetsen schuiven (Shift = 5 mm), Delete verwijdert, Ctrl+D dupliceert. Houd Alt ingedrukt om zonder raster te slepen.
+        Print op <b>werkelijke grootte / 100%</b>.</p>
     </div>
-    <p class="hint">Print op <b>werkelijke grootte / 100%</b> (niet “passend maken”) met het papierformaat van je label.</p>
-  </section>
+  </main>
+
+  <!-- Rechts: onderdelen en eigenschappen -->
+  <aside class="kolom rechts">
+    <section class="kaart">
+      <h2>Onderdelen</h2>
+      <ul class="lagen" id="lagen"></ul>
+    </section>
+    <section class="kaart">
+      <h2 id="eig-titel">Eigenschappen</h2>
+      <div id="eigenschappen" class="sectie"></div>
+    </section>
+  </aside>
 </div>
+
+<footer class="voet">
+  <p><strong>Stickerbouwer</strong> is onderdeel van <strong>Thomas-IT</strong> en is een gratis service.</p>
+  <p>Vragen of opmerkingen? Neem contact op via <a href="mailto:info@thomas-it.nl">info@thomas-it.nl</a>.</p>
+</footer>
 
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/JsBarcode.all.min.js"></script>
 <script src="vendor/qrcode.js"></script>
 <script src="labels.js"></script>
-<script>
-(() => {
-  const libs = { jsPDF: window.jspdf.jsPDF, JsBarcode: window.JsBarcode, qrcode: window.qrcode };
-  const meetDoc = new libs.jsPDF();
-  const $ = (id) => document.getElementById(id);
-  const velden = [...document.querySelectorAll("[data-k]")];
-  const opslag = {
-    lees(k, s) { try { return JSON.parse(localStorage.getItem(k)) ?? s; } catch { return s; } },
-    schrijf(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
-  };
-
-  let cfg = Object.assign({}, Labels.STANDAARD, opslag.lees("stickers.cfg", {}));
-  let index = 0;
-
-  // ---- formulier <-> cfg ----
-  function zetFormulier() {
-    for (const el of velden) {
-      const k = el.dataset.k;
-      if (el.type === "radio") el.checked = cfg[k] === el.value;
-      else if (el.type === "checkbox") el.checked = !!cfg[k];
-      else el.value = cfg[k] ?? "";
-    }
-    zichtbaarheid();
-    zetFormaat();
-  }
-  function leesVeld(el) {
-    const k = el.dataset.k;
-    if (el.type === "radio") { if (el.checked) cfg[k] = el.value; }
-    else if (el.type === "checkbox") cfg[k] = el.checked;
-    else if (el.type === "number") cfg[k] = el.value === "" ? "" : Number(el.value);
-    else cfg[k] = el.value;
-  }
-  function zichtbaarheid() {
-    document.querySelectorAll("[data-modus]").forEach((el) => el.hidden = el.dataset.modus !== cfg.modus);
-    document.querySelectorAll("[data-barcode]").forEach((el) => el.hidden = cfg.barcodeType === "GEEN");
-    document.querySelectorAll("[data-waarde]").forEach((el) => el.hidden = !cfg.toonWaarde);
-  }
-
-  // ---- labelformaat ----
-  const formaat = $("formaat");
-  for (const [k, f] of Object.entries(Labels.FORMATEN)) formaat.add(new Option(f.naam, k));
-  formaat.add(new Option("Aangepast", ""));
-  function zetFormaat() {
-    const hit = Object.entries(Labels.FORMATEN).find(([, f]) => f.b === Number(cfg.breedte) && f.h === Number(cfg.hoogte));
-    formaat.value = hit ? hit[0] : "";
-  }
-  formaat.addEventListener("change", () => {
-    const f = Labels.FORMATEN[formaat.value];
-    if (f) { cfg.breedte = f.b; cfg.hoogte = f.h; zetFormulier(); bijwerken(); }
-  });
-  $("draai").addEventListener("click", () => {
-    [cfg.breedte, cfg.hoogte] = [cfg.hoogte, cfg.breedte]; zetFormulier(); bijwerken();
-  });
-
-  // ---- voorbeeld ----
-  let timer;
-  function bijwerken(direct) {
-    clearTimeout(timer);
-    opslag.schrijf("stickers.cfg", cfg);
-    timer = setTimeout(tekenVoorbeeld, direct ? 0 : 120);
-  }
-  function melding(soort, tekst) {
-    const d = document.createElement("div");
-    d.className = "melding " + soort; d.textContent = tekst;
-    $("meldingen").append(d);
-  }
-  function tekenVoorbeeld() {
-    $("meldingen").replaceChildren();
-    try {
-      const v = Labels.voorbeeldSvg(cfg, index, libs, meetDoc);
-      index = v.index;
-      $("papier").innerHTML = v.svg;
-      $("teller").textContent = `Sticker ${v.index + 1} van ${v.totaal}`;
-      $("vorige").disabled = v.index === 0;
-      $("volgende").disabled = v.index >= v.totaal - 1;
-      v.waarschuwingen.forEach((w) => melding("let", w));
-      $("download").disabled = $("print").disabled = false;
-    } catch (e) {
-      melding("fout", e.message);
-      $("teller").textContent = "–";
-      $("download").disabled = $("print").disabled = true;
-    }
-  }
-  $("vorige").addEventListener("click", () => { index--; tekenVoorbeeld(); });
-  $("volgende").addEventListener("click", () => { index++; tekenVoorbeeld(); });
-
-  $("form").addEventListener("input", (e) => {
-    if (!e.target.dataset.k) return;
-    leesVeld(e.target);
-    if (e.target.dataset.k === "modus") index = 0;
-    zichtbaarheid(); zetFormaat(); bijwerken();
-  });
-
-  // ---- PDF ----
-  function maak(actie) {
-    const knop = actie === "download" ? $("download") : $("print");
-    const oud = knop.textContent;
-    knop.disabled = true; knop.textContent = "Bezig…";
-    setTimeout(() => {
-      try {
-        const { doc } = Labels.maakPdf(cfg, libs);
-        if (actie === "download") doc.save(`stickers_${new Date().toISOString().slice(0, 10)}.pdf`);
-        else window.open(doc.output("bloburl"), "_blank");
-      } catch (e) { $("meldingen").replaceChildren(); melding("fout", e.message); }
-      finally { knop.disabled = false; knop.textContent = oud; }
-    }, 20);
-  }
-  $("download").addEventListener("click", () => maak("download"));
-  $("print").addEventListener("click", () => maak("print"));
-
-  // ---- sjablonen ----
-  const sjSelect = $("sjabloon");
-  function sjablonen() { return opslag.lees("stickers.sjablonen", {}); }
-  function vulSjablonen(kies) {
-    sjSelect.length = 1;
-    Object.keys(sjablonen()).sort().forEach((n) => sjSelect.add(new Option(n, n)));
-    if (kies) sjSelect.value = kies;
-  }
-  function laad(nieuw) { cfg = Object.assign({}, Labels.STANDAARD, nieuw); index = 0; zetFormulier(); bijwerken(true); }
-  $("sj-opslaan").addEventListener("click", () => {
-    const naam = prompt("Naam voor dit sjabloon:", sjSelect.value || "");
-    if (!naam) return;
-    const alle = sjablonen(); alle[naam] = { ...cfg }; opslag.schrijf("stickers.sjablonen", alle);
-    vulSjablonen(naam);
-  });
-  $("sj-laad").addEventListener("click", () => { const s = sjablonen()[sjSelect.value]; if (s) laad(s); });
-  $("sj-weg").addEventListener("click", () => {
-    if (!sjSelect.value || !confirm(`Sjabloon “${sjSelect.value}” verwijderen?`)) return;
-    const alle = sjablonen(); delete alle[sjSelect.value]; opslag.schrijf("stickers.sjablonen", alle); vulSjablonen();
-  });
-  $("sj-reset").addEventListener("click", () => laad({}));
-  $("sj-export").addEventListener("click", () => {
-    const data = { huidig: cfg, sjablonen: sjablonen() };
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-    a.download = "sticker-sjablonen.json"; a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  });
-  $("sj-import").addEventListener("click", () => $("sj-bestand").click());
-  $("sj-bestand").addEventListener("change", async (e) => {
-    const f = e.target.files[0]; e.target.value = "";
-    if (!f) return;
-    try {
-      const data = JSON.parse(await f.text());
-      const alle = Object.assign(sjablonen(), data.sjablonen || {});
-      opslag.schrijf("stickers.sjablonen", alle); vulSjablonen();
-      if (data.huidig) laad(data.huidig);
-    } catch { $("meldingen").replaceChildren(); melding("fout", "Dit bestand kon niet worden gelezen."); }
-  });
-
-  vulSjablonen();
-  zetFormulier();
-  tekenVoorbeeld();
-})();
-</script>
+<script src="editor.js"></script>
 </body>
 </html>
