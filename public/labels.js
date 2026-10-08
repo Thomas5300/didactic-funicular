@@ -884,23 +884,25 @@
     r.ops.push({ t: "poly", kleur: vulling, pts: hoeken.map(([a, b]) => [G[0] + (a - G[0]) * k, G[1] + (b - G[1]) * k]) });
     // vloer
     vak(0.2, 0.858, 0.8, 0.874);
-    // pallet: dek en drie klossen
-    vak(0.25, 0.79, 0.56, 0.815);
-    for (const u of [0.25, 0.385, 0.52]) vak(u, 0.815, u + 0.04, 0.858);
-    // gestapelde dozen (witte naden ertussen)
-    vak(0.26, 0.655, 0.4, 0.782); vak(0.41, 0.655, 0.55, 0.782);
-    vak(0.335, 0.53, 0.475, 0.647);
-    // vallende doos, gekanteld
-    const cu = 0.665, cv = 0.735, s = 0.06, a = (28 * Math.PI) / 180;
-    const draai = ([du, dv]) => {
-      // draaien in mm, zodat de doos vierkant blijft
-      const dx = du * zijde, dy = dv * zijde;
-      return [x0 + cu * zijde + dx * Math.cos(a) - dy * Math.sin(a), top + cv * th + dx * Math.sin(a) + dy * Math.cos(a)];
+    // links: pallet met stevig ingepakte lading (folie = witte banden)
+    vak(0.27, 0.795, 0.51, 0.818);
+    for (const u of [0.27, 0.37, 0.47]) vak(u, 0.818, u + 0.04, 0.858);
+    vak(0.305, 0.585, 0.505, 0.79);
+    for (const v of [0.63, 0.68, 0.73]) r.ops.push({ t: "poly", kleur: vulling, pts: [P(0.305, v), P(0.505, v), P(0.505, v + 0.012), P(0.305, v + 0.012)] });
+    // rechts: los gestapelde dozen, scheef, de bovenste kantelt
+    vak(0.545, 0.755, 0.685, 0.858);
+    vak(0.565, 0.655, 0.7, 0.745);
+    const doos = (cu, cv, s, graden) => {
+      const a = (graden * Math.PI) / 180, M = [x0 + cu * zijde, top + cv * th];
+      r.ops.push({ t: "poly", kleur, pts: [[-s, -s], [s, -s], [s, s], [-s, s]].map(([du, dv]) => {
+        const dx = du * zijde, dy = dv * zijde;   // in mm draaien, zodat de doos vierkant blijft
+        return [M[0] + dx * Math.cos(a) - dy * Math.sin(a), M[1] + dx * Math.sin(a) + dy * Math.cos(a)];
+      }) });
     };
-    r.ops.push({ t: "poly", kleur, pts: [[-s, -s], [s, -s], [s, s], [-s, s]].map(draai) });
-    // valstreepjes boven de vallende doos
-    const streep = (u, v0, v1) => r.ops.push({ t: "poly", kleur, pts: [P(u - 0.012, v0), P(u + 0.012, v0), P(u + 0.03, v1), P(u + 0.006, v1)] });
-    streep(0.585, 0.53, 0.63); streep(0.645, 0.5, 0.61);
+    doos(0.61, 0.585, 0.048, 18);
+    // wiebelstreepjes boven de kantelende doos
+    const streep = (u, v0, v1) => r.ops.push({ t: "poly", kleur, pts: [P(u - 0.01, v0), P(u + 0.01, v0), P(u + 0.022, v1), P(u + 0.002, v1)] });
+    streep(0.555, 0.43, 0.48); streep(0.61, 0.42, 0.47);
   }
 
   // Waarschuwingsdriehoek met uitroepteken, passend in het vak (gelijkzijdig).
