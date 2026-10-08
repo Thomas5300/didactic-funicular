@@ -104,7 +104,9 @@
     }
     svg.innerHTML = s;
 
-    $("teller").textContent = r.totaal ? `Sticker ${index + 1} van ${r.totaal}` : "–";
+    let vellen = 0;
+    try { vellen = r.totaal ? L.aantalVellen(cfg, r.totaal) : 0; } catch { vellen = 0; }
+    $("teller").textContent = r.totaal ? `Sticker ${index + 1} van ${r.totaal}${vellen ? ` · ${vellen} A4-vel${vellen === 1 ? "" : "len"}` : ""}` : "–";
     $("vorige").disabled = index <= 0;
     $("volgende").disabled = !r.totaal || index >= r.totaal - 1;
     const m = $("meldingen");
@@ -501,6 +503,17 @@
     document.querySelectorAll("[data-modus]").forEach((el) => (el.hidden = el.dataset.modus !== cfg.modus));
     const hit = Object.entries(L.FORMATEN).find(([, f]) => f.b === +cfg.breedte && f.h === +cfg.hoogte);
     $("formaat").value = hit ? hit[0] : "";
+    // A4-vel
+    $("vel").value = cfg.vel || "";
+    $("vel-opties").hidden = !cfg.vel;
+    $("vel-eigen").hidden = cfg.vel !== "eigen";
+    $("drukkerij").hidden = !!cfg.vel;
+    let info = "";
+    try {
+      const v = L.velIndeling(cfg);
+      if (v) info = `${v.perVel} per vel (${v.kol} × ${v.rij}), etiket ${v.b} × ${v.h} mm. Print op 100% / werkelijke grootte en doe eerst een proefprint op gewoon papier.`;
+    } catch (e) { info = e.message; }
+    $("vel-info").textContent = info;
     $("raster").value = String(raster);
     $("kaders").checked = toonVakken;
   }
@@ -519,6 +532,9 @@
       }
     }
     cfg.breedte = B2; cfg.hoogte = H2;
+    // Ander formaat dan het gekozen Avery-vel → terug naar losse labels
+    const v = L.VELLEN[cfg.vel];
+    if (v && (Math.abs(v.b - B2) > 0.05 || Math.abs(v.h - H2) > 0.05)) cfg.vel = "";
     gewijzigd(true); zetFormulier(); bouwEigenschappen(); teken();
   }
 
@@ -532,6 +548,7 @@
     gewijzigd(t.type === "radio" || t.type === "checkbox" || t.tagName === "SELECT");
     document.querySelectorAll("[data-modus]").forEach((el) => (el.hidden = el.dataset.modus !== cfg.modus));
     if (k === "modus") bouwLocaties();
+    if (k.startsWith("vel")) zetFormulier();
     planTeken();
   });
 
@@ -681,9 +698,32 @@
   });
 
   const formaat = $("formaat");
-  for (const [k, f] of Object.entries(L.FORMATEN)) formaat.add(new Option(f.naam, k));
   formaat.add(new Option("Eigen formaat", ""));
+  for (const groep of L.FORMAATGROEPEN) {
+    const og = document.createElement("optgroup");
+    og.label = groep;
+    for (const [k, f] of Object.entries(L.FORMATEN)) if (f.groep === groep) og.append(new Option(f.naam, k));
+    formaat.append(og);
+  }
   formaat.addEventListener("change", () => { const f = L.FORMATEN[formaat.value]; if (f) schaal(f.b, f.h); });
+
+  // A4-vellen
+  const velKeuze = $("vel");
+  velKeuze.add(new Option("Losse labels — labelprinter, rol of drukker (1 label per pagina)", ""));
+  for (const [titel, filter] of [["A4-vellen — Avery", (k) => k.startsWith("L")], ["A4-vellen — Avery Zweckform", (k) => k.startsWith("Z")]]) {
+    const og = document.createElement("optgroup");
+    og.label = titel;
+    for (const [k, v] of Object.entries(L.VELLEN)) if (filter(k)) og.append(new Option(v.naam, k));
+    velKeuze.append(og);
+  }
+  velKeuze.add(new Option("A4 met eigen indeling (kolommen × rijen)…", "eigen"));
+  velKeuze.addEventListener("change", () => {
+    const k = velKeuze.value, v = L.VELLEN[k];
+    if (v) { schaal(v.b, v.h); cfg.vel = k; }
+    else cfg.vel = k;
+    cfg.velStart = 1;
+    gewijzigd(true); zetFormulier(); teken();
+  });
   $("draai").addEventListener("click", () => schaal(+cfg.hoogte, +cfg.breedte));
 
   $("raster").addEventListener("change", (e) => { raster = Number(e.target.value); opslag.schrijf("stickers.raster", raster); });

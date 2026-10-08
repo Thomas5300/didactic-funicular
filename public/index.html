@@ -83,14 +83,33 @@
         <p class="hint">Alle maten in mm. De rand gebruiken de knoppen “Plaats op label” en de hulplijnen.</p>
         <label class="check"><input type="checkbox" id="meeschalen" checked> Ontwerp meeschalen bij ander formaat</label>
         <button type="button" id="draai">↻ Label draaien</button>
-        <span class="sublabel">Voor de drukkerij</span>
-        <div class="rij">
-          <label>Afloop
-            <select data-k="afloop"><option value="0">geen</option><option value="2">2 mm</option><option value="3">3 mm</option><option value="5">5 mm</option></select>
-          </label>
-          <label class="check" style="align-self:end"><input type="checkbox" data-k="snijtekens"> Snijtekens</label>
+
+        <span class="sublabel">Afdrukken op</span>
+        <select id="vel" aria-label="Afdrukken op"></select>
+        <div id="vel-opties" class="sectie plat" hidden>
+          <div class="rij4" id="vel-eigen">
+            <label>Kolommen <input data-k="velKol" type="number" min="1" max="20"></label>
+            <label>Rijen <input data-k="velRij" type="number" min="1" max="40"></label>
+            <label>Ruimte ↔ <input data-k="velGx" type="number" min="0" step="0.1"></label>
+            <label>Ruimte ↕ <input data-k="velGy" type="number" min="0" step="0.1"></label>
+          </div>
+          <div class="rij">
+            <label>Begin bij etiket <input data-k="velStart" type="number" min="1"></label>
+            <label class="check" style="align-self:end"><input type="checkbox" data-k="velKaders"> Randen tonen</label>
+          </div>
+          <p class="hint" id="vel-info"></p>
         </div>
-        <p class="hint">Met afloop lopen gekleurde vlakken die tegen de rand liggen door buiten het label, zodat er na het snijden geen witte randjes zijn. Voor een labelprinter: laat dit op “geen”.</p>
+
+        <div id="drukkerij" class="sectie plat">
+          <span class="sublabel">Voor de drukkerij</span>
+          <div class="rij">
+            <label>Afloop
+              <select data-k="afloop"><option value="0">geen</option><option value="2">2 mm</option><option value="3">3 mm</option><option value="5">5 mm</option></select>
+            </label>
+            <label class="check" style="align-self:end"><input type="checkbox" data-k="snijtekens"> Snijtekens</label>
+          </div>
+          <p class="hint">Met afloop lopen gekleurde vlakken die tegen de rand liggen door buiten het label, zodat er na het snijden geen witte randjes zijn. Voor een labelprinter: laat dit op “geen”.</p>
+        </div>
       </div>
     </details>
 

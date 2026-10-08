@@ -26,7 +26,11 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   compact met kleurstreep, posities naast elkaar en niveaus onder elkaar.
 - **Voor de drukkerij**: afloop (2/3/5 mm) en snijtekens in de PDF; kleuren voor tekst en kaders.
 - **Variabelen** in tekst en barcodes: `{waarde}`, `{nr}`, `{n}`, `{totaal}`, `{datum}`, `{barcode}`.
-- **Labelformaten**: PostNL 150×102 (standaard), 102×150, 4×6 inch, 102×76, 100×50, 57×32 of eigen maat; draaien en meeschalen.
+- **Labelformaten** (75, gegroepeerd): verzendlabels (PostNL, 4×6 inch, 100×150, A6 …), thermische rollen in inch en mm,
+  Dymo LabelWriter, Brother DK, stelling-/magazijnlabels en papierformaten — of een eigen maat; draaien en meeschalen.
+- **A4-vellen**: Avery (L7160, L7163, L7165, L7173, L7651 …) en Avery Zweckform (3474, 3475, 3424, 3425, 3427, 3483 …),
+  of een eigen indeling (kolommen × rijen). Begin bij etiket nr. voor halfgebruikte vellen, randen tonen voor een proefprint;
+  elk etiket wordt bijgesneden tot zijn eigen vak.
 - **Sjablonen**: voorbeeldontwerpen (algemeen en magazijn), eigen sjablonen opslaan in de browser, exporteren/importeren als `.json`.
 - Instellingen uit de vorige versie worden automatisch omgezet naar het nieuwe ontwerp.
 

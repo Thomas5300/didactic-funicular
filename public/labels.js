@@ -9,19 +9,139 @@
   const MAX_PAGINAS = 5000;
   const MAX_PER_STICKER = 24;
 
+  // Bekende labelformaten (breedte × hoogte zoals het label voor je ligt). Gegroepeerd voor de keuzelijst.
+  const FORMAATGROEPEN = ["Verzendlabels", "Thermische labels (inch)", "Thermische labels (mm)", "Dymo LabelWriter",
+    "Brother DK", "Stelling- en magazijnlabels", "Papierformaten"];
   const FORMATEN = {
-    postnl: { naam: "PostNL 150 × 102 mm (liggend)", b: 150, h: 102 },
-    postnlStaand: { naam: "102 × 150 mm (staand)", b: 102, h: 150 },
-    inch4x6: { naam: "4 × 6 inch (102 × 152 mm)", b: 101.6, h: 152.4 },
-    l102x76: { naam: "102 × 76 mm", b: 102, h: 76 },
-    l100x50: { naam: "100 × 50 mm", b: 100, h: 50 },
-    l57x32: { naam: "57 × 32 mm", b: 57, h: 32 },
-    st200x50: { naam: "Stellinglabel 200 × 50 mm", b: 200, h: 50 },
-    st150x40: { naam: "Stellinglabel 150 × 40 mm", b: 150, h: 40 },
-    st80x220: { naam: "Niveaulabel 80 × 220 mm (staand)", b: 80, h: 220 },
-    a5: { naam: "A5 liggend (210 × 148 mm)", b: 210, h: 148 },
-    a4: { naam: "A4 liggend (297 × 210 mm)", b: 297, h: 210 },
+    // Verzendlabels
+    postnl: { groep: "Verzendlabels", naam: "PostNL 150 × 102 mm (liggend)", b: 150, h: 102 },
+    postnlStaand: { groep: "Verzendlabels", naam: "PostNL 102 × 150 mm (staand)", b: 102, h: 150 },
+    inch4x6: { groep: "Verzendlabels", naam: "4 × 6 inch — 102 × 152 mm (DHL, UPS, DPD, GLS)", b: 101.6, h: 152.4 },
+    inch6x4: { groep: "Verzendlabels", naam: "6 × 4 inch — 152 × 102 mm (liggend)", b: 152.4, h: 101.6 },
+    v100x150: { groep: "Verzendlabels", naam: "100 × 150 mm (DPD, GLS, Sendcloud)", b: 100, h: 150 },
+    v150x100: { groep: "Verzendlabels", naam: "150 × 100 mm (liggend)", b: 150, h: 100 },
+    v100x200: { groep: "Verzendlabels", naam: "100 × 200 mm", b: 100, h: 200 },
+    inch4x8: { groep: "Verzendlabels", naam: "4 × 8 inch — 102 × 203 mm", b: 101.6, h: 203.2 },
+    a6: { groep: "Verzendlabels", naam: "A6 — 105 × 148 mm", b: 105, h: 148 },
+    // Thermische labels (inch)
+    inch4x4: { groep: "Thermische labels (inch)", naam: "4 × 4 inch — 102 × 102 mm", b: 101.6, h: 101.6 },
+    inch4x3: { groep: "Thermische labels (inch)", naam: "4 × 3 inch — 102 × 76 mm", b: 101.6, h: 76.2 },
+    inch4x2: { groep: "Thermische labels (inch)", naam: "4 × 2 inch — 102 × 51 mm", b: 101.6, h: 50.8 },
+    inch4x1: { groep: "Thermische labels (inch)", naam: "4 × 1 inch — 102 × 25 mm", b: 101.6, h: 25.4 },
+    inch3x2: { groep: "Thermische labels (inch)", naam: "3 × 2 inch — 76 × 51 mm", b: 76.2, h: 50.8 },
+    inch3x1: { groep: "Thermische labels (inch)", naam: "3 × 1 inch — 76 × 25 mm", b: 76.2, h: 25.4 },
+    inch225x125: { groep: "Thermische labels (inch)", naam: "2,25 × 1,25 inch — 57 × 32 mm", b: 57.15, h: 31.75 },
+    inch225x075: { groep: "Thermische labels (inch)", naam: "2,25 × 0,75 inch — 57 × 19 mm", b: 57.15, h: 19.05 },
+    inch2x1: { groep: "Thermische labels (inch)", naam: "2 × 1 inch — 51 × 25 mm", b: 50.8, h: 25.4 },
+    inch15x1: { groep: "Thermische labels (inch)", naam: "1,5 × 1 inch — 38 × 25 mm", b: 38.1, h: 25.4 },
+    inch125x1: { groep: "Thermische labels (inch)", naam: "1,25 × 1 inch — 32 × 25 mm", b: 31.75, h: 25.4 },
+    // Thermische labels (mm)
+    m100x100: { groep: "Thermische labels (mm)", naam: "100 × 100 mm", b: 100, h: 100 },
+    m102x76: { groep: "Thermische labels (mm)", naam: "102 × 76 mm", b: 102, h: 76 },
+    m100x70: { groep: "Thermische labels (mm)", naam: "100 × 70 mm", b: 100, h: 70 },
+    m102x64: { groep: "Thermische labels (mm)", naam: "102 × 64 mm", b: 102, h: 64 },
+    m100x50: { groep: "Thermische labels (mm)", naam: "100 × 50 mm", b: 100, h: 50 },
+    m100x30: { groep: "Thermische labels (mm)", naam: "100 × 30 mm", b: 100, h: 30 },
+    m80x60: { groep: "Thermische labels (mm)", naam: "80 × 60 mm", b: 80, h: 60 },
+    m80x50: { groep: "Thermische labels (mm)", naam: "80 × 50 mm", b: 80, h: 50 },
+    m80x40: { groep: "Thermische labels (mm)", naam: "80 × 40 mm", b: 80, h: 40 },
+    m70x40: { groep: "Thermische labels (mm)", naam: "70 × 40 mm", b: 70, h: 40 },
+    m60x40: { groep: "Thermische labels (mm)", naam: "60 × 40 mm", b: 60, h: 40 },
+    m58x40: { groep: "Thermische labels (mm)", naam: "58 × 40 mm", b: 58, h: 40 },
+    m58x30: { groep: "Thermische labels (mm)", naam: "58 × 30 mm", b: 58, h: 30 },
+    m57x32: { groep: "Thermische labels (mm)", naam: "57 × 32 mm", b: 57, h: 32 },
+    m50x30: { groep: "Thermische labels (mm)", naam: "50 × 30 mm", b: 50, h: 30 },
+    m50x25: { groep: "Thermische labels (mm)", naam: "50 × 25 mm", b: 50, h: 25 },
+    m40x30: { groep: "Thermische labels (mm)", naam: "40 × 30 mm", b: 40, h: 30 },
+    m40x20: { groep: "Thermische labels (mm)", naam: "40 × 20 mm", b: 40, h: 20 },
+    m38x25: { groep: "Thermische labels (mm)", naam: "38 × 25 mm", b: 38, h: 25 },
+    m30x20: { groep: "Thermische labels (mm)", naam: "30 × 20 mm", b: 30, h: 20 },
+    m25x25: { groep: "Thermische labels (mm)", naam: "25 × 25 mm", b: 25, h: 25 },
+    // Dymo LabelWriter
+    dymo99010: { groep: "Dymo LabelWriter", naam: "Dymo 99010 — adres 89 × 28 mm", b: 89, h: 28 },
+    dymo99012: { groep: "Dymo LabelWriter", naam: "Dymo 99012 — groot adres 89 × 36 mm", b: 89, h: 36 },
+    dymo11356: { groep: "Dymo LabelWriter", naam: "Dymo 11356 — naambadge 89 × 41 mm", b: 89, h: 41 },
+    dymo99014: { groep: "Dymo LabelWriter", naam: "Dymo 99014 — verzending 101 × 54 mm", b: 101, h: 54 },
+    dymoXL: { groep: "Dymo LabelWriter", naam: "Dymo S0904980 — verzending XL 104 × 159 mm", b: 104, h: 159 },
+    dymo11354: { groep: "Dymo LabelWriter", naam: "Dymo 11354 — multifunctioneel 57 × 32 mm", b: 57, h: 32 },
+    dymo11352: { groep: "Dymo LabelWriter", naam: "Dymo 11352 — retouradres 54 × 25 mm", b: 54, h: 25 },
+    dymo11355: { groep: "Dymo LabelWriter", naam: "Dymo 11355 — multifunctioneel 51 × 19 mm", b: 51, h: 19 },
+    dymo99017: { groep: "Dymo LabelWriter", naam: "Dymo 99017 — hangmap 50 × 12 mm", b: 50, h: 12 },
+    // Brother DK
+    dk11201: { groep: "Brother DK", naam: "Brother DK-11201 — adres 90 × 29 mm", b: 90, h: 29 },
+    dk11208: { groep: "Brother DK", naam: "Brother DK-11208 — groot adres 90 × 38 mm", b: 90, h: 38 },
+    dk11209: { groep: "Brother DK", naam: "Brother DK-11209 — klein adres 62 × 29 mm", b: 62, h: 29 },
+    dk11204: { groep: "Brother DK", naam: "Brother DK-11204 — multifunctioneel 54 × 17 mm", b: 54, h: 17 },
+    dk11202: { groep: "Brother DK", naam: "Brother DK-11202 — verzending 100 × 62 mm", b: 100, h: 62 },
+    dk11240: { groep: "Brother DK", naam: "Brother DK-11240 — 102 × 51 mm", b: 102, h: 51 },
+    dk11241: { groep: "Brother DK", naam: "Brother DK-11241 — 102 × 152 mm", b: 102, h: 152 },
+    dk11247: { groep: "Brother DK", naam: "Brother DK-11247 — 103 × 164 mm", b: 103, h: 164 },
+    // Stelling- en magazijnlabels
+    st210x70: { groep: "Stelling- en magazijnlabels", naam: "Ligger 210 × 70 mm (3 vakken van 70 × 70)", b: 210, h: 70 },
+    st200x50: { groep: "Stelling- en magazijnlabels", naam: "Ligger 200 × 50 mm", b: 200, h: 50 },
+    st150x50: { groep: "Stelling- en magazijnlabels", naam: "Ligger 150 × 50 mm", b: 150, h: 50 },
+    st150x40: { groep: "Stelling- en magazijnlabels", naam: "Ligger 150 × 40 mm", b: 150, h: 40 },
+    st100x50: { groep: "Stelling- en magazijnlabels", naam: "Ligger 100 × 50 mm", b: 100, h: 50 },
+    st100x30: { groep: "Stelling- en magazijnlabels", naam: "Ligger 100 × 30 mm", b: 100, h: 30 },
+    st70x70: { groep: "Stelling- en magazijnlabels", naam: "Vak 70 × 70 mm", b: 70, h: 70 },
+    st80x220: { groep: "Stelling- en magazijnlabels", naam: "Niveaulabel 80 × 220 mm (staand)", b: 80, h: 220 },
+    st200x200: { groep: "Stelling- en magazijnlabels", naam: "Vloerlabel 200 × 200 mm", b: 200, h: 200 },
+    // Papierformaten
+    a4staand: { groep: "Papierformaten", naam: "A4 staand — 210 × 297 mm", b: 210, h: 297 },
+    a4: { groep: "Papierformaten", naam: "A4 liggend — 297 × 210 mm", b: 297, h: 210 },
+    a5staand: { groep: "Papierformaten", naam: "A5 staand — 148 × 210 mm", b: 148, h: 210 },
+    a5: { groep: "Papierformaten", naam: "A5 liggend — 210 × 148 mm", b: 210, h: 148 },
+    a6liggend: { groep: "Papierformaten", naam: "A6 liggend — 148 × 105 mm", b: 148, h: 105 },
+    a7: { groep: "Papierformaten", naam: "A7 — 74 × 105 mm", b: 74, h: 105 },
+    letter: { groep: "Papierformaten", naam: "US Letter — 216 × 279 mm", b: 215.9, h: 279.4 },
   };
+
+  // A4-vellen met meerdere etiketten. De etiketten staan gecentreerd op het vel (zoals bij deze vellen gebruikelijk).
+  const VELLEN = {
+    L7160: { naam: "Avery L7160 / J8160 — 21 per vel (63,5 × 38,1 mm)", b: 63.5, h: 38.1, kol: 3, rij: 7, gx: 2.54, gy: 0 },
+    L7159: { naam: "Avery L7159 — 24 per vel (63,5 × 33,9 mm)", b: 63.5, h: 33.9, kol: 3, rij: 8, gx: 2.54, gy: 0 },
+    L7161: { naam: "Avery L7161 — 18 per vel (63,5 × 46,6 mm)", b: 63.5, h: 46.6, kol: 3, rij: 6, gx: 2.54, gy: 0 },
+    L7162: { naam: "Avery L7162 — 16 per vel (99,1 × 33,9 mm)", b: 99.1, h: 33.9, kol: 2, rij: 8, gx: 2.5, gy: 0 },
+    L7163: { naam: "Avery L7163 / J8163 — 14 per vel (99,1 × 38,1 mm)", b: 99.1, h: 38.1, kol: 2, rij: 7, gx: 2.5, gy: 0 },
+    L7173: { naam: "Avery L7173 — 10 per vel (99,1 × 57 mm)", b: 99.1, h: 57, kol: 2, rij: 5, gx: 2.5, gy: 0 },
+    L7165: { naam: "Avery L7165 / J8165 — 8 per vel (99,1 × 67,7 mm)", b: 99.1, h: 67.7, kol: 2, rij: 4, gx: 2.5, gy: 0 },
+    L7166: { naam: "Avery L7166 — 6 per vel (99,1 × 93,1 mm)", b: 99.1, h: 93.1, kol: 2, rij: 3, gx: 2.5, gy: 0 },
+    L7169: { naam: "Avery L7169 — 4 per vel (99,1 × 139 mm)", b: 99.1, h: 139, kol: 2, rij: 2, gx: 2.5, gy: 0 },
+    L7168: { naam: "Avery L7168 — 2 per vel (199,6 × 143,5 mm)", b: 199.6, h: 143.5, kol: 1, rij: 2, gx: 0, gy: 0 },
+    L7167: { naam: "Avery L7167 — 1 per vel (199,6 × 289,1 mm)", b: 199.6, h: 289.1, kol: 1, rij: 1, gx: 0, gy: 0 },
+    L7651: { naam: "Avery L7651 — 65 per vel (38,1 × 21,2 mm)", b: 38.1, h: 21.2, kol: 5, rij: 13, gx: 2.5, gy: 0 },
+    L7654: { naam: "Avery L7654 — 40 per vel (45,7 × 25,4 mm)", b: 45.7, h: 25.4, kol: 4, rij: 10, gx: 2.6, gy: 0 },
+    Z3475: { naam: "Avery Zweckform 3475 — 24 per vel (70 × 36 mm)", b: 70, h: 36, kol: 3, rij: 8, gx: 0, gy: 0 },
+    Z3474: { naam: "Avery Zweckform 3474 — 24 per vel (70 × 37 mm)", b: 70, h: 37, kol: 3, rij: 8, gx: 0, gy: 0 },
+    Z3484: { naam: "Avery Zweckform 3484 — 16 per vel (105 × 37 mm)", b: 105, h: 37, kol: 2, rij: 8, gx: 0, gy: 0 },
+    Z3424: { naam: "Avery Zweckform 3424 — 12 per vel (105 × 48 mm)", b: 105, h: 48, kol: 2, rij: 6, gx: 0, gy: 0 },
+    Z3425: { naam: "Avery Zweckform 3425 — 10 per vel (105 × 57 mm)", b: 105, h: 57, kol: 2, rij: 5, gx: 0, gy: 0 },
+    Z3427: { naam: "Avery Zweckform 3427 — 8 per vel (105 × 74 mm)", b: 105, h: 74, kol: 2, rij: 4, gx: 0, gy: 0 },
+    Z3483: { naam: "Avery Zweckform 3483 — 4 per vel (105 × 148 mm)", b: 105, h: 148, kol: 2, rij: 2, gx: 0, gy: 0 },
+    Z3655: { naam: "Avery Zweckform 3655 — 2 per vel (210 × 148 mm)", b: 210, h: 148, kol: 1, rij: 2, gx: 0, gy: 0 },
+    Z3478: { naam: "Avery Zweckform 3478 — 1 per vel (210 × 297 mm)", b: 210, h: 297, kol: 1, rij: 1, gx: 0, gy: 0 },
+  };
+  const A4 = { b: 210, h: 297 };
+
+  // Indeling van etiketten op een A4-vel, of null voor losse labels (één label per pagina).
+  function velIndeling(cfg) {
+    if (!cfg.vel) return null;
+    let v;
+    if (cfg.vel === "eigen") {
+      v = { naam: "Eigen indeling", b: +cfg.breedte, h: +cfg.hoogte, kol: Math.max(1, Math.round(+cfg.velKol || 1)),
+        rij: Math.max(1, Math.round(+cfg.velRij || 1)), gx: Math.max(0, +cfg.velGx || 0), gy: Math.max(0, +cfg.velGy || 0) };
+    } else {
+      v = VELLEN[cfg.vel];
+      if (!v) return null;
+      if (Math.abs(v.b - cfg.breedte) > 0.05 || Math.abs(v.h - cfg.hoogte) > 0.05)
+        throw new Error(`Het labelformaat (${cfg.breedte} × ${cfg.hoogte} mm) past niet bij ${v.naam}. Kies het vel opnieuw.`);
+    }
+    const links = (A4.b - v.kol * v.b - (v.kol - 1) * v.gx) / 2, boven = (A4.h - v.rij * v.h - (v.rij - 1) * v.gy) / 2;
+    if (links < -0.01 || boven < -0.01) throw new Error(`${v.kol} × ${v.rij} etiketten van ${v.b} × ${v.h} mm passen niet op een A4-vel.`);
+    const perVel = v.kol * v.rij;
+    const start = Math.min(Math.max(Math.round(+cfg.velStart || 1), 1), perVel);
+    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, 0), perVel, start };
+  }
 
   const LETTERTYPEN = {
     helvetica: { naam: "Helvetica", css: "Helvetica, Arial, sans-serif" },
@@ -75,6 +195,7 @@
   const INHOUD_STANDAARD = {
     modus: "reeks", start: "1000", eind: "1025", stap: 1, prefix: "", suffix: "",
     lijst: "", vasteWaarde: "", kopieen: 1, marge: 4, afloop: 0, snijtekens: false,
+    vel: "", velStart: 1, velKaders: false, velKol: 2, velRij: 7, velGx: 0, velGy: 0,
   };
 
   const STARTERS = {
@@ -807,6 +928,8 @@
     const items = waarden(cfg);
     const B = +cfg.breedte, H = +cfg.hoogte;
     if (!(B >= 10 && H >= 10)) throw new Error("Labelformaat moet minstens 10 × 10 mm zijn.");
+    const vel = velIndeling(cfg);
+    if (vel) return maakVelPdf(cfg, items, vel, libs);
     const a = Math.max(+cfg.afloop || 0, 0), rand = cfg.snijtekens ? 10 : 0, off = a + rand;
     const PB = B + 2 * off, PH = H + 2 * off;
     const liggend = PB >= PH, formaat = [Math.min(PB, PH), Math.max(PB, PH)];
@@ -821,6 +944,39 @@
       if (rand) snijtekens(doc, B, H, off, a);
     });
     return { doc, aantal: items.length };
+  }
+
+  // Meerdere etiketten per A4-vel. Elk etiket wordt bijgesneden tot zijn eigen vak.
+  function maakVelPdf(cfg, items, vel, libs) {
+    const doc = new libs.jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    doc.setProperties({ title: "Stickers" });
+    const meet = meetMet(doc), cache = new Map();
+    let pos = vel.start - 1;
+    items.forEach((item, i) => {
+      if (pos >= vel.perVel) { doc.addPage("a4", "portrait"); pos = 0; }
+      const kol = pos % vel.kol, rij = Math.floor(pos / vel.kol);
+      const dx = vel.links + kol * (vel.b + vel.gx), dy = vel.boven + rij * (vel.h + vel.gy);
+      const r = render(cfg, item, context(item, i + 1, items.length), libs, meet, cache);
+      if (r.fouten.length) throw new Error(`Sticker ${i + 1}: ${r.fouten[0]}`);
+      doc.saveGraphicsState();
+      doc.rect(dx, dy, vel.b, vel.h, null);
+      doc.clip();
+      doc.discardPath();
+      tekenPdf(doc, r.ops, dx, dy);
+      doc.restoreGraphicsState();
+      if (cfg.velKaders) {
+        doc.setDrawColor(170, 170, 170); doc.setLineWidth(0.15);
+        doc.roundedRect(dx, dy, vel.b, vel.h, 1.5, 1.5, "S");
+      }
+      pos++;
+    });
+    return { doc, aantal: items.length, vellen: doc.getNumberOfPages() };
+  }
+
+  // Aantal A4-vellen voor een aantal etiketten (voor de teller in de editor).
+  function aantalVellen(cfg, aantal) {
+    const v = velIndeling(cfg);
+    return v ? Math.ceil((v.start - 1 + aantal) / v.perVel) : 0;
   }
 
   // ---------- SVG (voorbeeld) ----------
@@ -847,7 +1003,7 @@
     }).join("");
   }
 
-  const api = { PT, MAX_PAGINAS, FORMATEN, LETTERTYPEN, PALET, TYPE_STANDAARD, STARTERS, INHOUD_STANDAARD, LOCATIE_STANDAARD,
+  const api = { PT, MAX_PAGINAS, FORMATEN, FORMAATGROEPEN, VELLEN, velIndeling, aantalVellen, LETTERTYPEN, PALET, TYPE_STANDAARD, STARTERS, INHOUD_STANDAARD, LOCATIE_STANDAARD,
     nieuwId, element, standaard, normaliseer, migreer, locatieInstellingen, segmentWaarden, standaardKleuren, standaardPijlen, PIJLRICHTINGEN, waarden, context, render,
     meetMet, maakPdf, opsNaarSvg, esc, contrast };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
