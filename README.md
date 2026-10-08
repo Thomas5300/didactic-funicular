@@ -29,7 +29,7 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
 - **Scanner en gebruikers**: commandokaart (raster op A5, zoals op de heftruck), commandoblad A4, commandosticker,
   gebruikerslijst A4 (Naam | RF username | RF password, barcode met tekst eronder) en gebruikerspasje (85,6 × 54 mm).
 - **Barcodes**: optioneel de waarde als tekst eronder, en een maximale streepdikte zodat korte codes (`e`, `11`) niet worden uitgerekt.
-- **Raster op een vel**: eigen indeling (kolommen × rijen) op A4, A5, A6 (staand/liggend), Letter of een eigen maat, met titel boven elk vel; een onvolledige laatste rij wordt uitgevuld over de hele breedte en de inhoud van elk vak wordt gecentreerd.
+- **Raster op een vel**: eigen indeling (kolommen × rijen) op A4, A5, A6 (staand/liggend), Letter of een eigen maat, met titel en logo boven elk vel; een onvolledige laatste rij wordt uitgevuld over de hele breedte en de inhoud van elk vak wordt gecentreerd.
 - **Voor de drukkerij**: afloop (2/3/5 mm) en snijtekens in de PDF; kleuren voor tekst en kaders.
 - **Variabelen** in tekst en barcodes: `{waarde}`, `{nr}`, `{n}`, `{totaal}`, `{datum}`, `{barcode}`.
 - **Labelformaten** (75, gegroepeerd): verzendlabels (PostNL, 4×6 inch, 100×150, A6 …), thermische rollen in inch en mm,

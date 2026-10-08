@@ -156,16 +156,23 @@
     }
     const pagina = velPagina(cfg);
     const titel = cfg.vel === "eigen" ? String(cfg.velTitel || "").trim() : "";
-    const tb = titel ? TITEL_HOOGTE : 0;
+    // Logo bovenaan het vel (naast de titel)
+    let logo = null;
+    if (cfg.vel === "eigen" && cfg.velLogo) {
+      const lh = Math.min(Math.max(+cfg.velLogoHoogte || 12, 4), 40);
+      const lw = Math.min(lh * (+cfg.velLogoB || 1) / (+cfg.velLogoH || 1), 80);
+      logo = { data: cfg.velLogo, b: lw, h: lw * (+cfg.velLogoH || 1) / (+cfg.velLogoB || 1), plek: cfg.velLogoPlek === "links" ? "links" : "rechts" };
+    }
+    const tb = logo ? Math.max(TITEL_HOOGTE, logo.h + 4) : titel ? TITEL_HOOGTE : 0;
     const links = (pagina.b - v.kol * v.b - (v.kol - 1) * v.gx) / 2;
     const boven = tb + (pagina.h - tb - v.rij * v.h - (v.rij - 1) * v.gy) / 2;
     if (links < -0.01 || boven < tb - 0.01)
-      throw new Error(`${v.kol} × ${v.rij} labels van ${v.b} × ${v.h} mm passen niet op ${pagina.naam} (${pagina.b} × ${pagina.h} mm)${tb ? " met titel" : ""}.`);
+      throw new Error(`${v.kol} × ${v.rij} labels van ${v.b} × ${v.h} mm passen niet op ${pagina.naam} (${pagina.b} × ${pagina.h} mm)${tb ? " met titel/logo" : ""}.`);
     const perVel = v.kol * v.rij;
     const start = Math.min(Math.max(Math.round(+cfg.velStart || 1), 1), perVel);
     const uitvullen = cfg.vel === "eigen" && cfg.velUitvullen !== false;   // Avery-vellen liggen vast
     const centreren = cfg.vel === "eigen" && cfg.velCentreren !== false;
-    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, tb), perVel, start, pagina, titel, uitvullen, centreren };
+    return { ...v, links: Math.max(links, 0), boven: Math.max(boven, tb), perVel, start, pagina, titel, logo, kopHoogte: tb, uitvullen, centreren, eigen: cfg.vel === "eigen" };
   }
 
   const LETTERTYPEN = {
@@ -224,6 +231,7 @@
     lijst: "", vasteWaarde: "", kopieen: 1, marge: 4, afloop: 0, snijtekens: false,
     vel: "", velStart: 1, velKaders: false, velKol: 2, velRij: 7, velGx: 0, velGy: 0,
     velPagina: "a4", velPB: 210, velPH: 297, velTitel: "", velUitvullen: true, velCentreren: true,
+    velLogo: "", velLogoB: 1, velLogoH: 1, velLogoPlek: "rechts", velLogoHoogte: 12,
     lijstKop: false,
   };
 
@@ -1124,15 +1132,26 @@
     doc.setProperties({ title: vel.titel || "Stickers" });
     const meet = meetMet(doc), cache = new Map();
     const totaalVellen = Math.ceil((vel.start - 1 + items.length) / vel.perVel);
+    // Kop van elk vel: logo (links of rechts) en titel; paginanummer onderaan als er meer vellen zijn.
     const titel = (nr) => {
-      if (!vel.titel) return;
-      const breed = vel.kol * vel.b + (vel.kol - 1) * vel.gx, y = vel.boven - TITEL_HOOGTE * 0.45;
-      doc.setTextColor(0, 0, 0);
-      doc.setFont("helvetica", "bold"); doc.setFontSize(15);
-      doc.text(vel.titel, vel.links, y, { baseline: "alphabetic" });
-      if (totaalVellen > 1) {
-        doc.setFont("helvetica", "normal"); doc.setFontSize(9);
-        doc.text(`${nr} / ${totaalVellen}`, vel.links + breed, y, { align: "right", baseline: "alphabetic" });
+      const breed = vel.kol * vel.b + (vel.kol - 1) * vel.gx;
+      const kopBoven = vel.boven - vel.kopHoogte, kopH = vel.kopHoogte - 3;   // 3 mm ruimte tot de eerste rij
+      let tx = vel.links;
+      if (vel.logo) {
+        const L = vel.logo, ly = kopBoven + (kopH - L.h) / 2;
+        const lx = L.plek === "links" ? vel.links : vel.links + breed - L.b;
+        doc.addImage(L.data, L.data.startsWith("data:image/jpeg") ? "JPEG" : "PNG", lx, ly, L.b, L.h, "vellogo-" + L.data.length, "FAST");
+        if (L.plek === "links") tx = vel.links + L.b + 5;
+      }
+      if (vel.titel) {
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+        doc.text(vel.titel, tx, kopBoven + kopH / 2 + (CAP * 15 * PT) / 2, { baseline: "alphabetic" });
+      }
+      if (totaalVellen > 1 && vel.eigen) {
+        doc.setTextColor(110, 110, 110);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8);
+        doc.text(`${nr} / ${totaalVellen}`, vel.pagina.b / 2, vel.pagina.h - 4, { align: "center", baseline: "alphabetic" });
       }
     };
     // Posities vooraf bepalen, zodat een onvolledige laatste rij kan worden uitgevuld.

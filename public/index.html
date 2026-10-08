@@ -106,6 +106,16 @@
               <label>Ruimte ↕ <input data-k="velGy" type="number" min="0" step="0.1"></label>
             </div>
             <label>Titel boven elk vel <input data-k="velTitel" placeholder="bijv. Gebruikers RF-scanners (leeg = geen titel)"></label>
+            <span class="sublabel">Logo bovenaan elk vel</span>
+            <div class="vel-logo">
+              <img id="vel-logo-voorbeeld" alt="Logo" hidden>
+              <button type="button" id="vel-logo-knop">＋ Logo toevoegen…</button>
+              <button type="button" id="vel-logo-weg" class="gevaar" hidden>Weghalen</button>
+            </div>
+            <div class="rij" id="vel-logo-opties" hidden>
+              <label>Plaats <select data-k="velLogoPlek"><option value="rechts">Rechtsboven</option><option value="links">Linksboven, titel ernaast</option></select></label>
+              <label>Hoogte (mm) <input data-k="velLogoHoogte" type="number" min="4" max="40" step="1"></label>
+            </div>
             <label class="check"><input type="checkbox" data-k="velUitvullen"> Onvolledige laatste rij uitvullen over de hele breedte</label>
             <label class="check"><input type="checkbox" data-k="velCentreren"> Inhoud in elk vak centreren (in de PDF)</label>
           </div>

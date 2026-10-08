@@ -499,6 +499,9 @@
       const g = sel();
       if (afbModus === "vervang" && g && g.type === "afbeelding") {
         Object.assign(g, a); gewijzigd(true); bouwLijst(); teken();
+      } else if (afbModus === "vellogo") {
+        cfg.velLogo = a.data; cfg.velLogoB = a.imgB; cfg.velLogoH = a.imgH;
+        gewijzigd(true); zetFormulier(); teken();
       } else if (afbModus === "locatielogo" && g && g.type === "locaties") {
         g.logo = a.data; g.logoB = a.imgB; g.logoH = a.imgH;
         gewijzigd(true); bouwEigenschappen(); teken();
@@ -529,6 +532,13 @@
     $("vel-opties").hidden = !cfg.vel;
     $("vel-eigen").hidden = cfg.vel !== "eigen";
     $("vel-maat").hidden = cfg.velPagina !== "eigen";
+    // Logo bovenaan het vel
+    const heeftLogo = !!cfg.velLogo;
+    $("vel-logo-voorbeeld").hidden = !heeftLogo;
+    if (heeftLogo && $("vel-logo-voorbeeld").src !== cfg.velLogo) $("vel-logo-voorbeeld").src = cfg.velLogo;
+    $("vel-logo-weg").hidden = !heeftLogo;
+    $("vel-logo-opties").hidden = !heeftLogo;
+    $("vel-logo-knop").textContent = heeftLogo ? "Ander logo…" : "＋ Logo toevoegen…";
     $("drukkerij").hidden = !!cfg.vel;
     let info = "";
     try {
@@ -748,6 +758,8 @@
     gewijzigd(true); zetFormulier(); teken();
   });
   $("draai").addEventListener("click", () => schaal(+cfg.hoogte, +cfg.breedte));
+  $("vel-logo-knop").addEventListener("click", () => { afbModus = "vellogo"; $("afb-bestand").click(); });
+  $("vel-logo-weg").addEventListener("click", () => { cfg.velLogo = ""; gewijzigd(true); zetFormulier(); teken(); });
 
   $("raster").addEventListener("change", (e) => { raster = Number(e.target.value); opslag.schrijf("stickers.raster", raster); });
   $("kaders").addEventListener("change", (e) => { toonVakken = e.target.checked; opslag.schrijf("stickers.vakken", toonVakken); teken(); });

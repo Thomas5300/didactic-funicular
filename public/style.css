@@ -115,6 +115,10 @@ button:disabled { opacity: .45; cursor: default; }
 .segrij input { padding: .35rem .4rem; font-size: .85rem; text-transform: none; }
 .segrij input[data-veld="van"], .segrij input[data-veld="tot"] { text-transform: uppercase; font-family: ui-monospace, monospace; }
 .segrij button { padding: .3rem 0; font-size: .8rem; }
+.vel-logo { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.vel-logo img { height: 2.2rem; max-width: 6rem; object-fit: contain; border: 1px solid var(--rand); border-radius: 6px; padding: .15rem; background:
+  repeating-conic-gradient(#f0f0f2 0 25%, #fff 0 50%) 0 0/10px 10px; }
+.vel-logo button { flex: 1 1 auto; }
 input.mono { font-family: ui-monospace, monospace; white-space: pre; }
 code.bc { white-space: pre; font-size: .85rem; color: var(--tekst); }
 .kleuren { display: grid; gap: .3rem; }
