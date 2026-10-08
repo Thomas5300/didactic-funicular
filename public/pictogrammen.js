@@ -486,23 +486,24 @@
   const T = (u, v) => [u * 100, v * 86.6];
   const vakT = (p, u0, v0, u1, v1, k) => p.vlak([T(u0, v0), T(u1, v0), T(u1, v1), T(u0, v1)], k);
 
-  // Muur van losse dozen (in driehoekcoördinaten): verspringend gestapeld zoals stenen, een paar net scheef,
-  // met plakband; de bovenste doos kantelt eraf.
+  // Blok van losse dozen (in driehoekcoördinaten): recht op elkaar gestapeld op de vloer, een paar net scheef,
+  // met plakband; de bovenste doos valt eraf.
   function dozenmuur(p) {
-    const g = p.gat, bw = 9.6, bh = 7.6, gap = 1;
+    const g = p.gat, { kol, rij, bw, bh, gap } = { kol: 4, rij: 3, bw: 7.6, bh: 7.6, gap: 0.9 };
     p.rect(20, 74.3, 60, 1.4);                                              // vloer
-    const scheef = { "0:3": -2.5, "1:0": 3, "2:2": -3.5, "3:1": 4 };       // rij:doos → graden
-    [[24, 5], [29.3, 4], [34.6, 3], [39.9, 2]].forEach(([x0, n], ri) => {
+    const x0 = 50 - (kol * bw + (kol - 1) * gap) / 2;
+    const scheef = { "0:3": -2.5, "1:0": 3, "1:2": -2, "2:1": 3.5, "3:3": -3 };   // rij:doos → graden
+    const doos = (cx, cy, w, h, a) => {
+      p.blok(cx, cy, w, h, a);
+      p.blok(cx + Math.sin(rad(a)) * h * 0.29, cy - Math.cos(rad(a)) * h * 0.29, 1, h * 0.42, a, g);   // plakband
+    };
+    for (let ri = 0; ri < rij; ri++) for (let i = 0; i < kol; i++) {
       const y = 74.3 - (ri + 1) * bh - ri * gap;
-      for (let i = 0; i < n; i++) {
-        const cx = x0 + i * (bw + gap) + bw / 2, cy = y + bh / 2, a = scheef[`${ri}:${i}`] || 0;
-        p.blok(cx, cy, bw, bh, a);
-        p.blok(cx + Math.sin(rad(-a)) * bh * 0.29, cy - bh * 0.29, 1.1, bh * 0.42, a, g);   // plakband
-      }
-    });
-    p.blok(54.5, 36.4, bw * 0.92, bh * 0.92, 24);                             // bovenste doos kantelt eraf
-    p.blok(54.5 + Math.sin(rad(24)) * bh * 0.27, 36.4 - Math.cos(rad(24)) * bh * 0.27, 1.1, bh * 0.38, 24, g);
-    p.streep("M43.5,34 C45.5,31 48.5,30 51,30.6", 1.3);
+      doos(x0 + i * (bw + gap) + bw / 2, y + bh / 2, bw, bh, scheef[`${ri}:${i}`] || 0);
+    }
+    const top = 74.3 - rij * bh - (rij - 1) * gap;
+    doos(55.2, top - bh * 0.95, bw * 0.95, bh * 0.95, 24);                  // bovenste doos valt eraf
+    p.streep(`M${44.5},${top - bh * 1.15} C${46.5},${top - bh * 1.55} ${49.5},${top - bh * 1.7} ${51.8},${top - bh * 1.6}`, 1.3);
   }
 
   // ---------- Alle pictogrammen ----------
@@ -599,7 +600,7 @@
       teken: (q) => VORM.container(q),
     },
     dozenmuur: {
-      naam: "Losse dozen gestapeld (muur)", groep: "waarschuwing", vak: "kader",
+      naam: "Losse dozen gestapeld", groep: "waarschuwing", vak: "kader",
       nl: ["Losse goederen achter deze pallet", "Pallet voorzichtig wegnemen: er kunnen goederen vallen!"],
       en: ["Loose goods behind this pallet", "Remove the pallet carefully: items may fall!"],
       onder: "Losse goederen eerst zekeren of weghalen  ·  Secure or remove loose goods first",
