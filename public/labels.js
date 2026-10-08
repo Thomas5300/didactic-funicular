@@ -870,6 +870,39 @@
     r.ops.push({ t: "img", data: el.logo, alias: el.id + "-logo-" + el.logo.length, x: lx, y: ly, w: lw, h: lh });
   }
 
+  // Waarschuwingsdriehoek met een pallet vol dozen en een vallende doos ernaast (vallende goederen).
+  // Coördinaten u (0..1 van de zijde) en v (0..1 van de hoogte) binnen de driehoek.
+  function vallendeGoederen(r, x, y, w, h, kleur, vulling) {
+    const zijde = Math.min(w, h / 0.866), th = zijde * 0.866;
+    const x0 = x + (w - zijde) / 2, top = y + (h - th) / 2;
+    const P = (u, v) => [x0 + u * zijde, top + v * th];
+    const vak = (u0, v0, u1, v1) => r.ops.push({ t: "poly", kleur, pts: [P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1)] });
+    // driehoek met rand
+    const hoeken = [P(0.5, 0), P(0, 1), P(1, 1)];
+    r.ops.push({ t: "poly", kleur, pts: hoeken });
+    const G = P(0.5, 2 / 3), k = (th / 3 - zijde * 0.085) / (th / 3);
+    r.ops.push({ t: "poly", kleur: vulling, pts: hoeken.map(([a, b]) => [G[0] + (a - G[0]) * k, G[1] + (b - G[1]) * k]) });
+    // vloer
+    vak(0.2, 0.858, 0.8, 0.874);
+    // pallet: dek en drie klossen
+    vak(0.25, 0.79, 0.56, 0.815);
+    for (const u of [0.25, 0.385, 0.52]) vak(u, 0.815, u + 0.04, 0.858);
+    // gestapelde dozen (witte naden ertussen)
+    vak(0.26, 0.655, 0.4, 0.782); vak(0.41, 0.655, 0.55, 0.782);
+    vak(0.335, 0.53, 0.475, 0.647);
+    // vallende doos, gekanteld
+    const cu = 0.665, cv = 0.735, s = 0.06, a = (28 * Math.PI) / 180;
+    const draai = ([du, dv]) => {
+      // draaien in mm, zodat de doos vierkant blijft
+      const dx = du * zijde, dy = dv * zijde;
+      return [x0 + cu * zijde + dx * Math.cos(a) - dy * Math.sin(a), top + cv * th + dx * Math.sin(a) + dy * Math.cos(a)];
+    };
+    r.ops.push({ t: "poly", kleur, pts: [[-s, -s], [s, -s], [s, s], [-s, s]].map(draai) });
+    // valstreepjes boven de vallende doos
+    const streep = (u, v0, v1) => r.ops.push({ t: "poly", kleur, pts: [P(u - 0.012, v0), P(u + 0.012, v0), P(u + 0.03, v1), P(u + 0.006, v1)] });
+    streep(0.585, 0.53, 0.63); streep(0.645, 0.5, 0.61);
+  }
+
   // Waarschuwingsdriehoek met uitroepteken, passend in het vak (gelijkzijdig).
   function waarschuwing(r, x, y, w, h, kleur, vulling) {
     const zijde = Math.min(w, h / 0.866), th = zijde * 0.866;
@@ -1099,6 +1132,7 @@
       } else if (el.type === "symbool") {
         const kleur = geldigeKleur(el.kleur, "#000000");
         if (el.vorm === "pijl") pijlen(r, { r: PIJLRICHTINGEN.includes(el.richting) ? el.richting : "omhoog", n: Math.min(Math.max(+el.aantal || 1, 1), 3) }, x, y, w, h, kleur);
+        else if (el.vorm === "vallen") vallendeGoederen(r, x, y, w, h, kleur, geldigeKleur(el.vulling, "#ffffff"));
         else waarschuwing(r, x, y, w, h, kleur, geldigeKleur(el.vulling, "#ffffff"));
       } else {
         const tekst = vulIn(el.tekst, ctx2);
