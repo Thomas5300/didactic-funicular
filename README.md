@@ -31,8 +31,9 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
   Op grote labels komt de code automatisch op twee regels (bijv. `07 AA` / `01 0`) zodat hij zo groot mogelijk is.
   Het locatievak heeft een zwart-witstand voor zwart-witprinters. In Locaties-modus kun je ook `{code}`, `{bc}` en
   de segmentnamen (bijv. `{Gang}`) in tekstvakken gebruiken.
-- **Borden en waarschuwingen**: A4 "LET OP! — CAUTION!" voor losse goederen achter een pallet (NL/EN, liggend en staand, zwart-wit).
-  Nieuw onderdeel *Symbool*: waarschuwingsdriehoek of 1–3 pijlen in elke richting, als vectorvorm.
+- **Borden en waarschuwingen**: A4 "LET OP! — CAUTION!" voor losse goederen achter een pallet (NL/EN, liggend en staand, zwart-wit),
+  met een uitroepteken, een vallende doos of losse dozen naast een pallet als pictogram.
+  Onderdeel *Symbool*: waarschuwingsdriehoek (uitroepteken, vallende doos, losse dozen) of 1–3 pijlen in elke richting, als vectorvorm.
 - **Scanner en gebruikers**: commandokaart (raster op A5, zoals op de heftruck), commandoblad A4, commandosticker,
   gebruikerslijst A4 (Naam | RF username | RF password, barcode met tekst eronder) en gebruikerspasje (85,6 × 54 mm).
 - **Barcodes**: optioneel de waarde als tekst eronder, en een maximale streepdikte zodat korte codes (`e`, `11`) niet worden uitgerekt.

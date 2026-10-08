@@ -244,7 +244,8 @@
     if (e.type === "tekst") return String(e.tekst).split("\n")[0];
     if (e.type === "barcode") return ({ CODE128: "Code 128", CODE39: "Code 39", EAN13: "EAN-13", QR: "QR" }[e.symbologie] || "") + " · " + e.inhoud;
     if (e.type === "kader") return e.gevuld ? "gevuld vlak / lijn" : `rand ${e.dikte} mm`;
-    if (e.type === "symbool") return e.vorm === "pijl" ? `pijl ${{ omhoog: "↑", omlaag: "↓", links: "←", rechts: "→" }[e.richting] || ""} × ${e.aantal}` : "waarschuwingsdriehoek";
+    if (e.type === "symbool") return e.vorm === "pijl" ? `pijl ${{ omhoog: "↑", omlaag: "↓", links: "←", rechts: "→" }[e.richting] || ""} × ${e.aantal}`
+      : { vallen: "waarschuwing: vallende doos", losse: "waarschuwing: losse dozen naast pallet" }[e.vorm] || "waarschuwingsdriehoek";
     if (e.type === "locaties") return `${e.richting === "onder" ? "onder elkaar" : "naast elkaar"} · ${{ diagonaal: "diagonaal", balk: "kleurbalk", vol: "vol gekleurd", streep: "kleurstreep" }[e.stijl] || ""}`;
     return e.data ? `${e.imgB} × ${e.imgH} px` : "geen afbeelding";
   }
@@ -319,7 +320,7 @@
         <span class="sublabel">Kleur</span>${kleur("kleur")}`;
     } else if (g.type === "symbool") {
       h += `<span class="sublabel">Vorm</span>
-        ${seg("vorm", [["letop", "△ Waarschuwing"], ["pijl", "↑ Pijl"]])}
+        ${seg("vorm", [["letop", "△ !"], ["vallen", "Vallende doos"], ["losse", "Losse dozen"], ["pijl", "↑ Pijl"]])}
         ${g.vorm === "pijl"
           ? `<div class="rij">
                <label>Richting ${keuze("richting", [["omhoog", "↑ Omhoog"], ["omlaag", "↓ Omlaag"], ["links", "← Links"], ["rechts", "→ Rechts"]])}</label>

@@ -354,7 +354,7 @@
 
     // ----- Borden en waarschuwingen -----
     letopLiggend: {
-      groep: "borden", naam: "LET OP — losse goederen achter pallet, NL/EN (A4 liggend, zwart-wit)", breedte: 297, hoogte: 210, modus: "vast",
+      groep: "borden", naam: "Losse goederen achter pallet — uitroepteken (A4 liggend, NL/EN)", breedte: 297, hoogte: 210, modus: "vast",
       inhoud: { vasteWaarde: "", kopieen: 1 },
       elementen: [
         { type: "kader", naam: "Rand", x: 6, y: 6, w: 285, h: 198, dikte: 3 },
@@ -369,14 +369,78 @@
         { type: "tekst", naam: "Onderregel", x: 14, y: 185, w: 269, h: 12, tekst: "Losse goederen eerst zekeren of weghalen  ·  Secure or remove loose goods first", grootte: 14, vet: true, terugloop: false },
       ],
     },
+    vallenLiggend: {
+      groep: "borden", naam: "Losse goederen achter pallet — vallende doos (A4 liggend, NL/EN)", breedte: 297, hoogte: 210, modus: "vast",
+      inhoud: { vasteWaarde: "", kopieen: 1 },
+      elementen: [
+        { type: "kader", naam: "Rand", x: 6, y: 6, w: 285, h: 198, dikte: 3 },
+        { type: "kader", naam: "Balk", x: 6, y: 6, w: 285, h: 42, gevuld: true },
+        { type: "tekst", naam: "Kop", x: 10, y: 6, w: 277, h: 42, tekst: "LET OP!  —  CAUTION!", grootte: 64, vet: true, kleur: "#ffffff", terugloop: false },
+        { type: "symbool", naam: "Waarschuwing", x: 10, y: 62, w: 98, h: 90, vorm: "vallen" },
+        { type: "tekst", naam: "Nederlands", x: 112, y: 78, w: 172, h: 12, tekst: "Losse goederen achter deze pallet", grootte: 28, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Nederlands uitleg", x: 112, y: 93, w: 172, h: 9, tekst: "Pallet voorzichtig wegnemen: er kunnen goederen vallen!", grootte: 20, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "kader", naam: "Scheidingslijn", x: 112, y: 109, w: 172, h: 0.8, gevuld: true },
+        { type: "tekst", naam: "Engels", x: 112, y: 116, w: 172, h: 12, tekst: "Loose goods behind this pallet", grootte: 28, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Engels uitleg", x: 112, y: 131, w: 172, h: 9, tekst: "Remove the pallet carefully: items may fall!", grootte: 20, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Onderregel", x: 14, y: 185, w: 269, h: 12, tekst: "Losse goederen eerst zekeren of weghalen  ·  Secure or remove loose goods first", grootte: 14, vet: true, terugloop: false },
+      ],
+    },
+    losseLiggend: {
+      groep: "borden", naam: "Losse goederen achter pallet — losse dozen naast pallet (A4 liggend, NL/EN)", breedte: 297, hoogte: 210, modus: "vast",
+      inhoud: { vasteWaarde: "", kopieen: 1 },
+      elementen: [
+        { type: "kader", naam: "Rand", x: 6, y: 6, w: 285, h: 198, dikte: 3 },
+        { type: "kader", naam: "Balk", x: 6, y: 6, w: 285, h: 42, gevuld: true },
+        { type: "tekst", naam: "Kop", x: 10, y: 6, w: 277, h: 42, tekst: "LET OP!  —  CAUTION!", grootte: 64, vet: true, kleur: "#ffffff", terugloop: false },
+        { type: "symbool", naam: "Waarschuwing", x: 10, y: 62, w: 98, h: 90, vorm: "losse" },
+        { type: "tekst", naam: "Nederlands", x: 112, y: 78, w: 172, h: 12, tekst: "Losse goederen achter deze pallet", grootte: 28, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Nederlands uitleg", x: 112, y: 93, w: 172, h: 9, tekst: "Pallet voorzichtig wegnemen: er kunnen goederen vallen!", grootte: 20, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "kader", naam: "Scheidingslijn", x: 112, y: 109, w: 172, h: 0.8, gevuld: true },
+        { type: "tekst", naam: "Engels", x: 112, y: 116, w: 172, h: 12, tekst: "Loose goods behind this pallet", grootte: 28, vet: true, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Engels uitleg", x: 112, y: 131, w: 172, h: 9, tekst: "Remove the pallet carefully: items may fall!", grootte: 20, uitlijning: "left", verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Onderregel", x: 14, y: 185, w: 269, h: 12, tekst: "Losse goederen eerst zekeren of weghalen  ·  Secure or remove loose goods first", grootte: 14, vet: true, terugloop: false },
+      ],
+    },
     letopStaand: {
-      groep: "borden", naam: "LET OP — losse goederen achter pallet, NL/EN (A4 staand, zwart-wit)", breedte: 210, hoogte: 297, modus: "vast",
+      groep: "borden", naam: "Losse goederen achter pallet — uitroepteken (A4 staand, NL/EN)", breedte: 210, hoogte: 297, modus: "vast",
       inhoud: { vasteWaarde: "", kopieen: 1 },
       elementen: [
         { type: "kader", naam: "Rand", x: 6, y: 6, w: 198, h: 285, dikte: 3 },
         { type: "kader", naam: "Balk", x: 6, y: 6, w: 198, h: 40, gevuld: true },
         { type: "tekst", naam: "Kop", x: 10, y: 6, w: 190, h: 40, tekst: "LET OP!  —  CAUTION!", grootte: 48, vet: true, kleur: "#ffffff", terugloop: false },
         { type: "symbool", naam: "Waarschuwing", x: 50, y: 56, w: 110, h: 96, vorm: "letop" },
+        { type: "tekst", naam: "Nederlands", x: 14, y: 178, w: 182, h: 12, tekst: "Losse goederen achter deze pallet", grootte: 28, vet: true, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Nederlands uitleg", x: 14, y: 193, w: 182, h: 9, tekst: "Pallet voorzichtig wegnemen: er kunnen goederen vallen!", grootte: 17, verticaal: "top", terugloop: false },
+        { type: "kader", naam: "Scheidingslijn", x: 45, y: 209, w: 120, h: 0.8, gevuld: true },
+        { type: "tekst", naam: "Engels", x: 14, y: 216, w: 182, h: 12, tekst: "Loose goods behind this pallet", grootte: 28, vet: true, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Engels uitleg", x: 14, y: 231, w: 182, h: 9, tekst: "Remove the pallet carefully: items may fall!", grootte: 17, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Onderregel", x: 16, y: 276, w: 178, h: 10, tekst: "Eerst zekeren of weghalen  ·  Secure or remove first", grootte: 12, vet: true, terugloop: false },
+      ],
+    },
+    vallenStaand: {
+      groep: "borden", naam: "Losse goederen achter pallet — vallende doos (A4 staand, NL/EN)", breedte: 210, hoogte: 297, modus: "vast",
+      inhoud: { vasteWaarde: "", kopieen: 1 },
+      elementen: [
+        { type: "kader", naam: "Rand", x: 6, y: 6, w: 198, h: 285, dikte: 3 },
+        { type: "kader", naam: "Balk", x: 6, y: 6, w: 198, h: 40, gevuld: true },
+        { type: "tekst", naam: "Kop", x: 10, y: 6, w: 190, h: 40, tekst: "LET OP!  —  CAUTION!", grootte: 48, vet: true, kleur: "#ffffff", terugloop: false },
+        { type: "symbool", naam: "Waarschuwing", x: 50, y: 56, w: 110, h: 96, vorm: "vallen" },
+        { type: "tekst", naam: "Nederlands", x: 14, y: 178, w: 182, h: 12, tekst: "Losse goederen achter deze pallet", grootte: 28, vet: true, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Nederlands uitleg", x: 14, y: 193, w: 182, h: 9, tekst: "Pallet voorzichtig wegnemen: er kunnen goederen vallen!", grootte: 17, verticaal: "top", terugloop: false },
+        { type: "kader", naam: "Scheidingslijn", x: 45, y: 209, w: 120, h: 0.8, gevuld: true },
+        { type: "tekst", naam: "Engels", x: 14, y: 216, w: 182, h: 12, tekst: "Loose goods behind this pallet", grootte: 28, vet: true, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Engels uitleg", x: 14, y: 231, w: 182, h: 9, tekst: "Remove the pallet carefully: items may fall!", grootte: 17, verticaal: "top", terugloop: false },
+        { type: "tekst", naam: "Onderregel", x: 16, y: 276, w: 178, h: 10, tekst: "Eerst zekeren of weghalen  ·  Secure or remove first", grootte: 12, vet: true, terugloop: false },
+      ],
+    },
+    losseStaand: {
+      groep: "borden", naam: "Losse goederen achter pallet — losse dozen naast pallet (A4 staand, NL/EN)", breedte: 210, hoogte: 297, modus: "vast",
+      inhoud: { vasteWaarde: "", kopieen: 1 },
+      elementen: [
+        { type: "kader", naam: "Rand", x: 6, y: 6, w: 198, h: 285, dikte: 3 },
+        { type: "kader", naam: "Balk", x: 6, y: 6, w: 198, h: 40, gevuld: true },
+        { type: "tekst", naam: "Kop", x: 10, y: 6, w: 190, h: 40, tekst: "LET OP!  —  CAUTION!", grootte: 48, vet: true, kleur: "#ffffff", terugloop: false },
+        { type: "symbool", naam: "Waarschuwing", x: 50, y: 56, w: 110, h: 96, vorm: "losse" },
         { type: "tekst", naam: "Nederlands", x: 14, y: 178, w: 182, h: 12, tekst: "Losse goederen achter deze pallet", grootte: 28, vet: true, verticaal: "top", terugloop: false },
         { type: "tekst", naam: "Nederlands uitleg", x: 14, y: 193, w: 182, h: 9, tekst: "Pallet voorzichtig wegnemen: er kunnen goederen vallen!", grootte: 17, verticaal: "top", terugloop: false },
         { type: "kader", naam: "Scheidingslijn", x: 45, y: 209, w: 120, h: 0.8, gevuld: true },
@@ -870,9 +934,9 @@
     r.ops.push({ t: "img", data: el.logo, alias: el.id + "-logo-" + el.logo.length, x: lx, y: ly, w: lw, h: lh });
   }
 
-  // Waarschuwingsdriehoek met een pallet vol dozen en een vallende doos ernaast (vallende goederen).
+  // Waarschuwingsdriehoek met een stevig ingepakte pallet en een losse, scheve dozenstapel ernaast.
   // Coördinaten u (0..1 van de zijde) en v (0..1 van de hoogte) binnen de driehoek.
-  function vallendeGoederen(r, x, y, w, h, kleur, vulling) {
+  function losseDozen(r, x, y, w, h, kleur, vulling) {
     const zijde = Math.min(w, h / 0.866), th = zijde * 0.866;
     const x0 = x + (w - zijde) / 2, top = y + (h - th) / 2;
     const P = (u, v) => [x0 + u * zijde, top + v * th];
@@ -903,6 +967,38 @@
     // wiebelstreepjes boven de kantelende doos
     const streep = (u, v0, v1) => r.ops.push({ t: "poly", kleur, pts: [P(u - 0.01, v0), P(u + 0.01, v0), P(u + 0.022, v1), P(u + 0.002, v1)] });
     streep(0.555, 0.43, 0.48); streep(0.61, 0.42, 0.47);
+  }
+
+  // Waarschuwingsdriehoek met een pallet vol dozen en een vallende doos ernaast (vallende goederen).
+  function vallendeGoederen(r, x, y, w, h, kleur, vulling) {
+    const zijde = Math.min(w, h / 0.866), th = zijde * 0.866;
+    const x0 = x + (w - zijde) / 2, top = y + (h - th) / 2;
+    const P = (u, v) => [x0 + u * zijde, top + v * th];
+    const vak = (u0, v0, u1, v1) => r.ops.push({ t: "poly", kleur, pts: [P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1)] });
+    // driehoek met rand
+    const hoeken = [P(0.5, 0), P(0, 1), P(1, 1)];
+    r.ops.push({ t: "poly", kleur, pts: hoeken });
+    const G = P(0.5, 2 / 3), k = (th / 3 - zijde * 0.085) / (th / 3);
+    r.ops.push({ t: "poly", kleur: vulling, pts: hoeken.map(([a, b]) => [G[0] + (a - G[0]) * k, G[1] + (b - G[1]) * k]) });
+    // vloer
+    vak(0.2, 0.858, 0.8, 0.874);
+    // pallet: dek en drie klossen
+    vak(0.25, 0.79, 0.56, 0.815);
+    for (const u of [0.25, 0.385, 0.52]) vak(u, 0.815, u + 0.04, 0.858);
+    // gestapelde dozen (witte naden ertussen)
+    vak(0.26, 0.655, 0.4, 0.782); vak(0.41, 0.655, 0.55, 0.782);
+    vak(0.335, 0.53, 0.475, 0.647);
+    // vallende doos, gekanteld
+    const cu = 0.665, cv = 0.735, s = 0.06, a = (28 * Math.PI) / 180;
+    const draai = ([du, dv]) => {
+      // draaien in mm, zodat de doos vierkant blijft
+      const dx = du * zijde, dy = dv * zijde;
+      return [x0 + cu * zijde + dx * Math.cos(a) - dy * Math.sin(a), top + cv * th + dx * Math.sin(a) + dy * Math.cos(a)];
+    };
+    r.ops.push({ t: "poly", kleur, pts: [[-s, -s], [s, -s], [s, s], [-s, s]].map(draai) });
+    // valstreepjes boven de vallende doos
+    const streep = (u, v0, v1) => r.ops.push({ t: "poly", kleur, pts: [P(u - 0.012, v0), P(u + 0.012, v0), P(u + 0.03, v1), P(u + 0.006, v1)] });
+    streep(0.585, 0.53, 0.63); streep(0.645, 0.5, 0.61);
   }
 
   // Waarschuwingsdriehoek met uitroepteken, passend in het vak (gelijkzijdig).
@@ -1135,6 +1231,7 @@
         const kleur = geldigeKleur(el.kleur, "#000000");
         if (el.vorm === "pijl") pijlen(r, { r: PIJLRICHTINGEN.includes(el.richting) ? el.richting : "omhoog", n: Math.min(Math.max(+el.aantal || 1, 1), 3) }, x, y, w, h, kleur);
         else if (el.vorm === "vallen") vallendeGoederen(r, x, y, w, h, kleur, geldigeKleur(el.vulling, "#ffffff"));
+        else if (el.vorm === "losse") losseDozen(r, x, y, w, h, kleur, geldigeKleur(el.vulling, "#ffffff"));
         else waarschuwing(r, x, y, w, h, kleur, geldigeKleur(el.vulling, "#ffffff"));
       } else {
         const tekst = vulIn(el.tekst, ctx2);
