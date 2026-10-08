@@ -335,6 +335,7 @@
              ${chk("koppen", "Segmentnamen boven de code (GANG, STELLING …)")}`}
         ${chk("pijlen", "Pijlen tonen")}
         ${chk("rand", "Dunne rand om elk vak")}
+        ${chk("zwartWit", "Zwart-wit (voor een zwart-witprinter): zwarte vlakken, witte tekst")}
         <span class="sublabel">Logo in elk vak</span>
         ${g.logo
           ? `<div class="rij">
@@ -531,6 +532,7 @@
     $("vel").value = cfg.vel || "";
     $("vel-opties").hidden = !cfg.vel;
     $("vel-eigen").hidden = cfg.vel !== "eigen";
+    $("vel-start-rij").hidden = cfg.vel === "vouw";
     $("vel-maat").hidden = cfg.velPagina !== "eigen";
     // Logo bovenaan het vel
     const heeftLogo = !!cfg.velLogo;
@@ -545,6 +547,9 @@
       const v = L.velIndeling(cfg);
       if (v) info = `${v.perVel} per vel (${v.kol} × ${v.rij}) op ${v.pagina.naam}, elk ${v.b} × ${v.h} mm. Print op 100% / werkelijke grootte en doe eerst een proefprint op gewoon papier.`;
     } catch (e) { info = e.message; }
+    if (cfg.vel === "vouw") info = +cfg.breedte > 210 || +cfg.hoogte > 148.5
+      ? `Te groot voor een vouwkaart: maximaal 210 × 148 mm (nu ${cfg.breedte} × ${cfg.hoogte} mm).`
+      : "Per A4 twee keer hetzelfde label: onder normaal, boven op z'n kop. Vouw het vel dubbel langs de stippellijn (over een ligger of als tentje) en de locatie is aan beide kanten leesbaar.";
     $("vel-info").textContent = info;
     $("raster").value = String(raster);
     $("kaders").checked = toonVakken;
@@ -750,9 +755,16 @@
     velKeuze.append(og);
   }
   velKeuze.add(new Option("Raster op een vel — eigen indeling (A4, A5, eigen maat)…", "eigen"));
+  velKeuze.add(new Option("Vouwkaart — zelfde label 2× op A4, bovenste helft op z'n kop", "vouw"));
   velKeuze.addEventListener("change", () => {
     const k = velKeuze.value, v = L.VELLEN[k];
     if (v) { schaal(v.b, v.h); cfg.vel = k; }
+    else if (k === "vouw") {
+      // Past het label niet op een halve A4, maak het dan zo groot mogelijk binnen 200 × 138 mm
+      const B = +cfg.breedte, Hh = +cfg.hoogte;
+      if (B > 210 || Hh > 148.5) { const f = Math.min(200 / B, 138 / Hh); schaal(Math.round(B * f * 10) / 10, Math.round(Hh * f * 10) / 10); }
+      cfg.vel = k;
+    }
     else cfg.vel = k;
     cfg.velStart = 1;
     gewijzigd(true); zetFormulier(); teken();

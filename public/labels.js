@@ -193,7 +193,7 @@
     afbeelding: { naam: "Afbeelding", w: 30, h: 30, data: "", imgB: 1, imgH: 1 },
     locaties: { naam: "Locaties", w: 190, h: 44, richting: "naast", tussenruimte: 3, stijl: "balk", pijlen: true,
       barcode: "CODE128", barcodeDeel: 45, koppen: true, rand: true, tekstKleur: "auto", splits: 2,
-      logo: "", logoB: 1, logoH: 1, logoPositie: "boven-rechts", logoGrootte: 25 },
+      logo: "", logoB: 1, logoH: 1, logoPositie: "boven-rechts", logoGrootte: 25, zwartWit: false },
   };
 
   const PIJLRICHTINGEN = ["geen", "omhoog", "omlaag", "links", "rechts"];
@@ -325,6 +325,29 @@
       },
       elementen: [
         { type: "locaties", naam: "Locaties", x: 2, y: 2, w: 76, h: 216, richting: "onder", tussenruimte: 2, stijl: "vol", barcodeDeel: 42 },
+      ],
+    },
+
+    a4bord: {
+      groep: "magazijn", naam: "A4 locatiebord — één locatie groot (liggend, zwart-wit)", breedte: 297, hoogte: 210, modus: "locaties",
+      locatie: { groep: -1 },
+      elementen: [
+        { type: "locaties", naam: "Locatie", x: 6, y: 6, w: 285, h: 198, stijl: "streep", zwartWit: true, koppen: false, barcodeDeel: 38, tussenruimte: 0 },
+      ],
+    },
+    vouwkaart: {
+      groep: "magazijn", naam: "Vouwkaart — half A4, dubbelvouwen: aan beide kanten leesbaar (zwart-wit)", breedte: 200, hoogte: 138, modus: "locaties",
+      locatie: { groep: -1 }, inhoud: { vel: "vouw" },
+      elementen: [
+        { type: "locaties", naam: "Locatie", x: 0, y: 0, w: 200, h: 138, stijl: "streep", zwartWit: true, koppen: false, barcodeDeel: 38, tussenruimte: 0 },
+      ],
+    },
+    a5twee: {
+      groep: "magazijn", naam: "Half A4 — 2 locaties per vel, doorknippen (zwart-wit)", breedte: 200, hoogte: 130, modus: "locaties",
+      locatie: { groep: -1 },
+      inhoud: { vel: "eigen", velPagina: "a4", velKol: 1, velRij: 2, velGx: 0, velGy: 18.5, velStart: 1, velKaders: true, velTitel: "", velUitvullen: false, velCentreren: false },
+      elementen: [
+        { type: "locaties", naam: "Locatie", x: 0, y: 0, w: 200, h: 130, stijl: "streep", zwartWit: true, koppen: false, barcodeDeel: 38, tussenruimte: 0 },
       ],
     },
 
@@ -574,7 +597,9 @@
       if (d === buiten.length) {
         const binnen = g >= 0 ? waarden[g] : [null];
         const locaties = binnen.map((v) => { const s = cur.slice(); if (g >= 0) s[g] = v; return maak(s); });
-        uit.push({ waarde: locaties[0].code, nr: locaties[0].code, locaties });
+        const eerste = locaties[0], kolommen = { code: eerste.code, bc: eerste.bc };
+        eerste.segs.forEach((v, i) => { kolommen[String(i + 1)] = v; if (namen[i]) kolommen[String(namen[i]).trim().toLowerCase()] = v; });
+        uit.push({ waarde: eerste.code, nr: eerste.code, locaties, kolommen });
         return;
       }
       const i = buiten[d];
@@ -637,6 +662,10 @@
 
   // Invoegbare kolommen voor de editor: {Naam}… bij een kopregel, anders {1}, {2}… (alleen bij meer kolommen).
   function lijstKolommen(cfg) {
+    if (cfg.modus === "locaties") {
+      const segs = (cfg.locatie && cfg.locatie.segmenten) || [];
+      return ["{code}", "{bc}", ...segs.map((x) => String(x.naam || "").trim()).filter(Boolean).map((n) => `{${n}}`)];
+    }
     if (cfg.modus !== "lijst") return [];
     const { kop, rijen } = lijstTabel(cfg);
     if (kop) return kop.filter(Boolean).map((k) => `{${k}}`);
@@ -807,6 +836,7 @@
   }
 
   function tekstKleurVoor(el, achtergrond) {
+    if (el.zwartWit) return "#ffffff";
     return el.tekstKleur === "zwart" ? "#000000" : el.tekstKleur === "wit" ? "#ffffff" : contrast(achtergrond);
   }
 
@@ -831,7 +861,7 @@
   // Stijl “diagonaal”: gekleurd vak met een witte diagonale band (linksonder → rechtsboven) waarin
   // de barcode schuin staat; code linksboven en rechtsonder, pijlen rechts boven de onderste code.
   function diagonaleCel(r, el, loc, x, y, w, h, libs, meet) {
-    const kleur = loc.kleur || "#000000", tk = tekstKleurVoor(el, kleur);
+    const kleur = el.zwartWit ? "#000000" : loc.kleur || "#000000", tk = tekstKleurVoor(el, kleur);
     const D = Math.hypot(w, h), U = [w / D, -h / D], N = [h / D, w / D];
     const C = [x + w / 2, y + h / 2];
     const d = (P) => (P[0] - C[0]) * N[0] + (P[1] - C[1]) * N[1];
@@ -902,7 +932,7 @@
 
   function locatieCel(r, el, loc, x, y, w, h, libs, meet, maxPijlen) {
     if (el.stijl === "diagonaal") return diagonaleCel(r, el, loc, x, y, w, h, libs, meet);
-    const kleur = loc.kleur || "#000000";
+    const kleur = el.zwartWit ? "#000000" : loc.kleur || "#000000";
     const p = Math.min(w, h) * 0.05;
     let cx = x, cw = w;
     if (el.pijlen && maxPijlen > 0) {
@@ -920,7 +950,7 @@
       const sw = Math.max(Math.min(cw * 0.05, 6), 2);
       r.ops.push({ t: "rect", x: cx, y, w: sw, h, kleur, achtergrond: true });
       cx += sw; cw -= sw;
-      tekstKleur = el.tekstKleur === "wit" ? "#ffffff" : "#000000";
+      tekstKleur = el.tekstKleur === "wit" && !el.zwartWit ? "#ffffff" : "#000000";
     } else r.ops.push({ t: "rect", x: cx, y, w: cw, h: bandH, kleur, achtergrond: true });
 
     // Code (eventueel per segment met kopje)
@@ -1066,13 +1096,16 @@
         const delta = o.pts.slice(1).map(([x, y], i) => [x - o.pts[i][0], y - o.pts[i][1]]);
         doc.lines(delta, x0 + dx, y0 + dy, [1, 1], "F", true);
       } else if (o.t === "img") {
-        doc.addImage(o.data, o.data.startsWith("data:image/jpeg") ? "JPEG" : "PNG", o.x + dx, o.y + dy, o.w, o.h, o.alias, "FAST");
+        const fmt = o.data.startsWith("data:image/jpeg") ? "JPEG" : "PNG";
+        // jsPDF draait om de linkeronderhoek; zo komt een 180° gedraaide afbeelding precies in haar vak
+        if (o.rot === 180) doc.addImage(o.data, fmt, o.x + dx + o.w, o.y + dy - o.h, o.w, o.h, o.alias, "FAST", 180);
+        else doc.addImage(o.data, fmt, o.x + dx, o.y + dy, o.w, o.h, o.alias, "FAST");
       } else if (o.t === "tekst") {
         doc.setFont(o.lettertype, o.vet ? "bold" : "normal");
         doc.setFontSize(o.s);
         const [r, g, b] = hexRgb(o.kleur || "#000000");
         doc.setTextColor(r, g, b);
-        doc.text(o.tekst, o.x + dx, o.y + dy, { align: o.uitlijning, baseline: "alphabetic" });
+        doc.text(o.tekst, o.x + dx, o.y + dy, o.hoek ? { angle: o.hoek, baseline: "alphabetic" } : { align: o.uitlijning, baseline: "alphabetic" });
       }
     }
   }
@@ -1091,6 +1124,7 @@
     const items = waarden(cfg);
     const B = +cfg.breedte, H = +cfg.hoogte;
     if (!(B >= 10 && H >= 10)) throw new Error("Labelformaat moet minstens 10 × 10 mm zijn.");
+    if (cfg.vel === "vouw") return maakVouwPdf(cfg, items, libs);
     const vel = velIndeling(cfg);
     if (vel) return maakVelPdf(cfg, items, vel, libs);
     const a = Math.max(+cfg.afloop || 0, 0), rand = cfg.snijtekens ? 10 : 0, off = a + rand;
@@ -1224,8 +1258,56 @@
     return { doc, aantal: items.length, vellen: doc.getNumberOfPages() };
   }
 
+  // Alles 180° draaien binnen een label van B × H (voor de bovenste helft van een vouwkaart).
+  function draai180(ops, B, H, meet) {
+    return ops.map((o) => {
+      if (o.t === "rect" || o.t === "kader" || o.t === "fout") return { ...o, x: B - o.x - o.w, y: H - o.y - o.h };
+      if (o.t === "img") return { ...o, x: B - o.x - o.w, y: H - o.y - o.h, rot: 180 };
+      if (o.t === "poly") return { ...o, pts: o.pts.map(([x, y]) => [B - x, H - y]) };
+      if (o.t === "tekst") {
+        const b = meet(o.tekst, o.s, { vet: o.vet, lettertype: o.lettertype });
+        const xl = o.uitlijning === "left" ? o.x : o.uitlijning === "right" ? o.x - b : o.x - b / 2;
+        return { ...o, x: B - xl, y: H - o.y, hoek: 180 };
+      }
+      return o;
+    });
+  }
+
+  // Vouwkaart: per A4 twee keer hetzelfde label; de bovenste helft staat op z'n kop.
+  // Dubbelgevouwen (over een ligger of als tentje) is de locatie aan beide kanten leesbaar.
+  const VOUW_HELFT = 148.5;
+  function maakVouwPdf(cfg, items, libs) {
+    const B = +cfg.breedte, H = +cfg.hoogte;
+    if (B > 210.01 || H > VOUW_HELFT + 0.01)
+      throw new Error(`Voor een vouwkaart mag het label maximaal 210 × 148 mm zijn (nu ${B} × ${H} mm). Kies bijv. het formaat A5 liggend of 200 × 138 mm.`);
+    const doc = new libs.jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    doc.setProperties({ title: "Vouwkaarten" });
+    const meet = meetMet(doc), cache = new Map();
+    const dx = (210 - B) / 2, dyOnder = VOUW_HELFT + (VOUW_HELFT - H) / 2, dyBoven = (VOUW_HELFT - H) / 2;
+    const vak = (ops, y) => {
+      doc.saveGraphicsState();
+      doc.rect(dx, y, B, H, null); doc.clip(); doc.discardPath();
+      tekenPdf(doc, ops, dx, y);
+      doc.restoreGraphicsState();
+    };
+    items.forEach((item, i) => {
+      if (i > 0) doc.addPage("a4", "portrait");
+      const r = render(cfg, item, context(item, i + 1, items.length), libs, meet, cache);
+      if (r.fouten.length) throw new Error(`Sticker ${i + 1}: ${r.fouten[0]}`);
+      vak(r.ops, dyOnder);
+      vak(draai180(r.ops, B, H, meet), dyBoven);
+      // Vouwlijn
+      doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.2);
+      doc.setLineDashPattern([3, 2], 0); doc.line(0, VOUW_HELFT, 210, VOUW_HELFT); doc.setLineDashPattern([], 0);
+      doc.setTextColor(150, 150, 150); doc.setFont("helvetica", "normal"); doc.setFontSize(6);
+      doc.text("vouwen", 3, VOUW_HELFT - 1.2, { baseline: "alphabetic" });
+    });
+    return { doc, aantal: items.length, vellen: items.length };
+  }
+
   // Aantal A4-vellen voor een aantal etiketten (voor de teller in de editor).
   function aantalVellen(cfg, aantal) {
+    if (cfg.vel === "vouw") return aantal;
     const v = velIndeling(cfg);
     return v ? Math.ceil((v.start - 1 + aantal) / v.perVel) : 0;
   }
