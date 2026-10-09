@@ -214,3 +214,10 @@ a.knop:hover { background: #f4f4f5; }
 .ov-rij b { text-align: right; font-weight: 600; }
 em.rood { color: var(--fout); font-style: normal; }
 .melding.goed { background: #dcfce7; color: #166534; font-weight: 700; }
+.lagen-tabs { margin-top: -.2rem; }
+.lagen-tabs button { display: flex; align-items: center; justify-content: center; gap: .4rem; }
+.lagen-tabs i { width: .8rem; height: .8rem; border-radius: 3px; border: 1.5px solid; display: inline-block; }
+.aanzichten { display: grid; grid-template-columns: minmax(0, 4.2fr) minmax(0, 1fr); gap: .7rem; align-items: end; }
+.aanzichten > div { display: grid; gap: .3rem; }
+.laag-info { font-weight: 600; color: var(--blauw); }
+@media (max-width: 760px) { .aanzichten { grid-template-columns: 1fr; } .aanzichten > div:last-child { max-width: 220px; } }

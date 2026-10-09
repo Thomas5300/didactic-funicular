@@ -48,6 +48,7 @@
           <label>Lengte (cm) <input id="n-l" type="number" min="10" step="1"></label>
           <label>Breedte (cm) <input id="n-b" type="number" min="10" step="1"></label>
         </div>
+        <p class="hint laag-info" id="laag-info"></p>
         <span class="sublabel">Richting in de container</span>
         <div class="seg" id="richting">
           <button type="button" data-richting="lengte">⟷ In de lengte</button>
@@ -76,10 +77,17 @@
   <main class="kolom midden">
     <div class="werkvlak kaart">
       <div class="plan-kop"><b id="plan-titel"></b><span id="plan-status" class="status"></span></div>
+      <div class="seg lagen-tabs" id="lagen" role="tablist" aria-label="Laag"></div>
       <div class="plan-vlak"><svg id="boven" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bovenaanzicht van de laadruimte"></svg></div>
-      <span class="sublabel">Zijaanzicht — hoogte van de stapels</span>
-      <div class="plan-vlak zij"><svg id="zij" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zijaanzicht van de laadruimte"></svg></div>
-      <p class="hint">Sleep pallets met de muis of je vinger; ze klikken vast tegen de wand en tegen elkaar (Alt ingedrukt = vrij slepen).
+      <div class="aanzichten">
+        <div><span class="sublabel">Zijaanzicht</span>
+          <div class="plan-vlak zij"><svg id="zij" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zijaanzicht van de laadruimte"></svg></div></div>
+        <div><span class="sublabel">Vanaf de deur</span>
+          <div class="plan-vlak zij"><svg id="voor" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vooraanzicht vanaf de deur"></svg></div></div>
+      </div>
+      <p class="hint">Kies bovenaan een laag om daarop te bouwen: bijv. blokpallets op de vloer (laag 1) en europallets erbovenop (laag 2).
+        De laag eronder zie je vaag, een laag erboven als stippellijn.
+        Sleep pallets met de muis of je vinger; ze klikken vast tegen de wand en tegen elkaar (Alt ingedrukt = vrij slepen).
         Dubbelklik of <b>R</b> = draaien, <b>Delete</b> = verwijderen, pijltjes = 1 cm schuiven (Shift = 10 cm), Ctrl+D = dupliceren.
         Maten zijn binnenmaten zoals ze meestal zijn; controleer bij twijfel de maat van je eigen container.</p>
     </div>

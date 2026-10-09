@@ -73,12 +73,16 @@ Plan pallets in een container of trailer en zie direct of alles past.
 - **Pallets**: Europallet (120 × 80), blokpallet (120 × 100), halve pallet, kwartpallet, US-pallet of een eigen maat;
   in de lengte of in de breedte, met hoogte, gewicht en aantal. Nieuwe pallets komen op de eerste vrije plek vanaf de kopse kant.
 - **Slepen en draaien** met muis of vinger; pallets klikken vast tegen de wand en tegen elkaar. Dubbelklik of R = draaien.
+- **Lagen**: bouw op de vloer (laag 1) en daarbovenop (laag 2 en 3), bijv. blokpallets onderop en europallets erbovenop.
+  De laag eronder is vaag zichtbaar; controle of een pallet goed op de pallets eronder staat (niet uitsteken, gelijke hoogte).
+  Zijaanzicht en aanzicht vanaf de deur tonen alles op de echte hoogte.
 - **Maten**: liniaal in meters, laadlengte en vrije ruimte tot de deur, en van de gekozen pallet de afstand tot de wand of de volgende pallet.
 - **Controle**: overlap, buiten de laadruimte, te hoog (binnenhoogte en deurhoogte, ook bij 2 of 3 hoog gestapeld), te zwaar; zwaartepunt.
-- **Vul zo vol mogelijk**: de beste indeling (deels in de lengte, deels in de breedte), bijv. 11 Europallets in een 20ft, 25 in een 40ft,
-  33 in een trailer met 1 cm speling. Met speling tussen de pallets voor wat ruimte.
-- **Laadplan als PDF**: tekening met nummers in laadvolgorde en een lijst met maten, gewicht en plek per pallet.
-- Zijaanzicht met de hoogte van de stapels, ongedaan maken (Ctrl+Z); het plan blijft bewaard in de browser.
+- **Vul zo vol mogelijk**: de beste indeling van rijen in de lengte, rijen in de breedte en om-en-om rijen (verspringend in elkaar),
+  bijv. 11 Europallets of 10 blokpallets in een 20ft, 25 Europallets in een 40ft, 33 in een trailer met 1 cm speling;
+  op een hogere laag over de pallets eronder (bijv. 25 Europallets op 22 blokpallets). Met speling tussen de pallets voor wat ruimte.
+- **Laadplan als PDF**: tekening per laag met nummers in laadvolgorde en een lijst met laag, maten, gewicht, plek en bovenkant per pallet.
+- Ongedaan maken (Ctrl+Z); het plan blijft bewaard in de browser.
 
 ## Hosten op Cloudflare
 
