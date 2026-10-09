@@ -64,6 +64,22 @@ Vragen: [info@thomas-it.nl](mailto:info@thomas-it.nl)
 - **Sjablonen**: eigen sjablonen opslaan in de browser, exporteren/importeren als `.json`.
 - Instellingen uit de vorige versie worden automatisch omgezet naar het nieuwe ontwerp.
 
+## Containerplanner (`laadplanner.html`)
+
+Plan pallets in een container of trailer en zie direct of alles past.
+
+- **Laadruimtes**: 20ft, 20ft high cube, 40ft, 40ft high cube, 45ft, 45ft high cube, trailer (oplegger 13,6 m) of een eigen maat —
+  met binnenmaten, deuropening en maximale lading (gangbare waarden; per container kan het iets verschillen).
+- **Pallets**: Europallet (120 × 80), blokpallet (120 × 100), halve pallet, kwartpallet, US-pallet of een eigen maat;
+  in de lengte of in de breedte, met hoogte, gewicht en aantal. Nieuwe pallets komen op de eerste vrije plek vanaf de kopse kant.
+- **Slepen en draaien** met muis of vinger; pallets klikken vast tegen de wand en tegen elkaar. Dubbelklik of R = draaien.
+- **Maten**: liniaal in meters, laadlengte en vrije ruimte tot de deur, en van de gekozen pallet de afstand tot de wand of de volgende pallet.
+- **Controle**: overlap, buiten de laadruimte, te hoog (binnenhoogte en deurhoogte, ook bij 2 of 3 hoog gestapeld), te zwaar; zwaartepunt.
+- **Vul zo vol mogelijk**: de beste indeling (deels in de lengte, deels in de breedte), bijv. 11 Europallets in een 20ft, 25 in een 40ft,
+  33 in een trailer met 1 cm speling. Met speling tussen de pallets voor wat ruimte.
+- **Laadplan als PDF**: tekening met nummers in laadvolgorde en een lijst met maten, gewicht en plek per pallet.
+- Zijaanzicht met de hoogte van de stapels, ongedaan maken (Ctrl+Z); het plan blijft bewaard in de browser.
+
 ## Hosten op Cloudflare
 
 **Pages (via GitHub):** Workers & Pages → Create → Pages → koppel deze repo.
@@ -97,3 +113,4 @@ Bibliotheken (in `public/vendor`): jsPDF, JsBarcode, qrcode-generator — alle M
 - `public/labels.js` — de engine: formaten, inhoud, locaties, tekenen naar PDF en SVG, borden.
 - `public/pictogrammen.js` — alle pictogrammen en pijlen als vectorvormen.
 - `public/editor.js` — het werkvlak, de eigenschappen, de voorbeelden en het venster "Bord maken".
+- `public/laadplanner.html` + `public/laadplanner.js` — de containerplanner.

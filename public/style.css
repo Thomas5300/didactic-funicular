@@ -188,3 +188,29 @@ dialog.venster::backdrop { background: rgba(24,24,27,.5); }
 [hidden] { display: none !important; }
 #zending-paneel textarea { font-family: inherit; font-size: .9rem; }
 #afdruk-rij:has(#afdruk-nrs[hidden]) { grid-template-columns: 1fr; }
+
+/* Containerplanner */
+a.knop { display: inline-flex; align-items: center; padding: .5rem .75rem; font-size: .88rem; font-weight: 600; border-radius: 8px;
+  border: 1px solid #d4d4d8; background: #fff; color: inherit; text-decoration: none; white-space: nowrap; }
+a.knop:hover { background: #f4f4f5; }
+.ruimtes { display: grid; grid-template-columns: repeat(2, 1fr); gap: .35rem; }
+.ruimtes button { padding: .5rem .4rem; }
+.ruimtes button.actief, .paltypes button.actief { border-color: var(--blauw); background: var(--blauw-bg); box-shadow: 0 0 0 1px var(--blauw) inset; }
+.paltypes { display: grid; grid-template-columns: repeat(2, 1fr); gap: .35rem; }
+.paltypes button { display: flex; align-items: center; gap: .45rem; text-align: left; padding: .4rem .45rem; white-space: normal; font-weight: 500; }
+.paltypes svg { width: 30px; height: 30px; flex: none; }
+.paltypes span { display: grid; line-height: 1.2; }
+.paltypes small { color: var(--zacht); font-size: .74rem; }
+.plan-kop { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: .92rem; }
+.status { font-size: .85rem; font-weight: 700; padding: .2rem .55rem; border-radius: 999px; background: #f4f4f5; color: var(--zacht); }
+.status.goed { background: #dcfce7; color: #166534; }
+.status.fout { background: var(--fout-bg); color: var(--fout); }
+.plan-vlak { background: #f4f4f5; border-radius: 8px; padding: 10px; }
+.plan-vlak svg { width: 100%; height: auto; display: block; touch-action: none; user-select: none; font-family: system-ui, sans-serif; }
+#boven .pallet { cursor: grab; }
+#boven .pallet:active { cursor: grabbing; }
+.ov-rij { display: flex; justify-content: space-between; gap: .6rem; font-size: .86rem; border-bottom: 1px solid #f4f4f5; padding-bottom: .3rem; }
+.ov-rij span { color: var(--zacht); }
+.ov-rij b { text-align: right; font-weight: 600; }
+em.rood { color: var(--fout); font-style: normal; }
+.melding.goed { background: #dcfce7; color: #166534; font-weight: 700; }

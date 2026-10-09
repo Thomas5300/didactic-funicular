@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Containerplanner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="kop">
+  <div class="titel">
+    <h1>Containerplanner</h1>
+    <span>Sleep pallets in een container of trailer en zie direct of alles past — met alle maten</span>
+  </div>
+  <div class="kop-acties">
+    <a class="knop" href="./">◂ Stickerbouwer</a>
+    <button type="button" class="primair" id="pdf">Download laadplan (PDF)</button>
+  </div>
+</header>
+
+<div class="app">
+  <!-- Links: laadruimte en pallets toevoegen -->
+  <aside class="kolom links kaart">
+    <details open>
+      <summary>Laadruimte</summary>
+      <div class="sectie">
+        <div class="ruimtes" id="ruimtes"></div>
+        <div id="eigen-ruimte" class="sectie plat" hidden>
+          <div class="rij3">
+            <label>Lengte (cm) <input data-eigen="l" type="number" min="100" step="1"></label>
+            <label>Breedte (cm) <input data-eigen="b" type="number" min="50" step="1"></label>
+            <label>Hoogte (cm) <input data-eigen="h" type="number" min="50" step="1"></label>
+          </div>
+          <div class="rij">
+            <label>Deurhoogte (cm) <input data-eigen="deurH" type="number" min="50" step="1"></label>
+            <label>Max. lading (kg) <input data-eigen="kg" type="number" min="0" step="100"></label>
+          </div>
+        </div>
+        <p class="hint" id="ruimte-info"></p>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Pallets toevoegen</summary>
+      <div class="sectie">
+        <div class="paltypes" id="paltypes"></div>
+        <div id="eigen-pallet" class="rij" hidden>
+          <label>Lengte (cm) <input id="n-l" type="number" min="10" step="1"></label>
+          <label>Breedte (cm) <input id="n-b" type="number" min="10" step="1"></label>
+        </div>
+        <span class="sublabel">Richting in de container</span>
+        <div class="seg" id="richting">
+          <button type="button" data-richting="lengte">⟷ In de lengte</button>
+          <button type="button" data-richting="breedte">↕ In de breedte</button>
+        </div>
+        <div class="rij3">
+          <label>Hoogte (cm) <input id="n-h" type="number" min="1" step="1"></label>
+          <label>Gewicht (kg) <input id="n-kg" type="number" min="0" step="1" placeholder="—"></label>
+          <label>Aantal <input id="n-aantal" type="number" min="1" max="200" step="1"></label>
+        </div>
+        <label>Speling tussen pallets (cm) <input id="n-speling" type="number" min="0" max="50" step="0.5" placeholder="0"></label>
+        <div class="knoprij">
+          <button type="button" class="primair" id="toevoegen">＋ Toevoegen</button>
+          <button type="button" id="vullen" title="Zoveel mogelijk van deze pallet in de vrije ruimte zetten">Vul zo vol mogelijk</button>
+        </div>
+        <p class="hint">Nieuwe pallets komen op de eerste vrije plek vanaf de kopse kant (achterwand). Past er geen meer in, dan komen ze rood naast de container te staan.</p>
+        <div class="knoprij">
+          <button type="button" id="ongedaan" title="Ongedaan maken (Ctrl+Z)">↶ Ongedaan</button>
+          <button type="button" id="wissen" class="gevaar">Alles wissen</button>
+        </div>
+      </div>
+    </details>
+  </aside>
+
+  <!-- Midden: plattegrond en zijaanzicht -->
+  <main class="kolom midden">
+    <div class="werkvlak kaart">
+      <div class="plan-kop"><b id="plan-titel"></b><span id="plan-status" class="status"></span></div>
+      <div class="plan-vlak"><svg id="boven" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bovenaanzicht van de laadruimte"></svg></div>
+      <span class="sublabel">Zijaanzicht — hoogte van de stapels</span>
+      <div class="plan-vlak zij"><svg id="zij" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zijaanzicht van de laadruimte"></svg></div>
+      <p class="hint">Sleep pallets met de muis of je vinger; ze klikken vast tegen de wand en tegen elkaar (Alt ingedrukt = vrij slepen).
+        Dubbelklik of <b>R</b> = draaien, <b>Delete</b> = verwijderen, pijltjes = 1 cm schuiven (Shift = 10 cm), Ctrl+D = dupliceren.
+        Maten zijn binnenmaten zoals ze meestal zijn; controleer bij twijfel de maat van je eigen container.</p>
+    </div>
+  </main>
+
+  <!-- Rechts: overzicht en gekozen pallet -->
+  <aside class="kolom rechts">
+    <section class="kaart">
+      <h2>Overzicht</h2>
+      <div id="overzicht" class="sectie"></div>
+    </section>
+    <section class="kaart">
+      <h2 id="sel-titel">Pallet</h2>
+      <div id="selectie" class="sectie"></div>
+    </section>
+  </aside>
+</div>
+
+<footer class="voet">
+  <p><strong>Containerplanner</strong> en <strong>Stickerbouwer</strong> zijn onderdeel van <strong>Thomas-IT</strong> en een gratis service.</p>
+  <p>Vragen of opmerkingen? Neem contact op via <a href="mailto:info@thomas-it.nl">info@thomas-it.nl</a>.</p>
+</footer>
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="laadplanner.js"></script>
+</body>
+</html>
